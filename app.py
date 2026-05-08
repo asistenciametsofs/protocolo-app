@@ -323,7 +323,10 @@ def descargar_reporte(tipo, id):
     conn = get_db()
     c = conn.cursor()
     tabla = 'armado_hb' if tipo == 'armado' else 'cambio_hb'
-    c.execute(f'SELECT * FROM {tabla} WHERE id = %s' if os.environ.get('DATABASE_URL') else f'SELECT * FROM {tabla} WHERE id = ?', (id,))
+    if os.environ.get('DATABASE_URL'):
+        c.execute(f'SELECT * FROM {tabla} WHERE id = %s', (id,))
+    else:
+        c.execute(f'SELECT * FROM {tabla} WHERE id = ?', (id,))
     registro = c.fetchone()
     conn.close()
     if not registro:
