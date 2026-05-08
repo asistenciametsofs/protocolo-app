@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias
 from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
@@ -47,7 +47,10 @@ def guardar_armado_route():
 
     correo_destino = request.form.get('correo_destino', '')
     if correo_destino:
-        enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
+        try:
+            enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
+        except:
+            pass
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('index'))
 
@@ -151,7 +154,10 @@ def guardar_cambio_route():
 
     correo_destino = request.form.get('correo_destino', '')
     if correo_destino:
-        enviar_correo(correo_destino, 'Protocolo Cambio H&B - ' + datos.get('chancadora',''), ruta_word)
+        try:
+            enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
+        except:
+            pass
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('index'))
 
@@ -310,6 +316,26 @@ def tendencias():
         gp1=gp1, gp2=gp2, gp3=gp3,
         gp4=gp4, gp5=gp5, gp6=gp6
     )
+@app.route('/descargar/<tipo>/<int:id>')
+def descargar_reporte(tipo, id):
+    from database import get_db
+    import io
+    conn = get_db()
+    c = conn.cursor()
+    tabla = 'armado_hb' if tipo == 'armado' else 'cambio_hb'
+    c.execute(f'SELECT * FROM {tabla} WHERE id = %s' if os.environ.get('DATABASE_URL') else f'SELECT * FROM {tabla} WHERE id = ?', (id,))
+    registro = c.fetchone()
+    conn.close()
+    if not registro:
+        return 'No encontrado', 404
+    datos = dict(registro)
+    if tipo == 'armado':
+        ruta = generar_word_armado(datos)
+        nombre = f"Armado_{datos.get('equipo','X')}.docx"
+    else:
+        ruta = generar_word_cambio(datos)
+        nombre = f"Cambio_{datos.get('chancadora','X')}.docx"
+    return send_file(ruta, as_attachment=True, download_name=nombre)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

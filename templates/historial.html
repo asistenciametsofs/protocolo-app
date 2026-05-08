@@ -24,6 +24,10 @@
         .badge-malo { background: #f8d7da; color: #842029; }
         .badge-si { background: #fff3cd; color: #664d03; }
         .empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+        .btn-descarga { display: block; width: 100%; margin-top: 12px; padding: 10px; background: #1a3a5c; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; }
+        .btn-descarga:hover { background: #0d2440; }
+        .btn-descarga-cambio { background: #0f5132; }
+        .btn-descarga-cambio:hover { background: #0a3d26; }
     </style>
 </head>
 <body>
@@ -37,9 +41,14 @@
             {% for r in registros %}
             <div class="card">
                 <div class="card-header">
+                    {% if tipo == 'armado' %}
                     <span class="card-title">⚙️ {{ r['equipo'] or 'Sin equipo' }}</span>
+                    {% else %}
+                    <span class="card-title">🔄 {{ r['chancadora'] or 'Sin chancadora' }}</span>
+                    {% endif %}
                     <span class="card-fecha">{{ r['fecha_registro'] }}</span>
                 </div>
+
                 {% if tipo == 'armado' %}
                 <div class="card-row">
                     <span class="card-key">Cliente</span>
@@ -54,55 +63,71 @@
                     <span class="card-val">{{ r['id_head'] or '-' }}</span>
                 </div>
                 <div class="card-row">
-                    <span class="card-key">Upper Bushing</span>
-                    <span class="card-val">
-                        <span class="badge {{ 'badge-bueno' if r['upper_bushing_estado'] == 'Bueno' else 'badge-malo' }}">
-                            {{ r['upper_bushing_estado'] or '-' }}
-                        </span>
-                    </span>
-                </div>
-                <div class="card-row">
-                    <span class="card-key">Lower Bushing</span>
-                    <span class="card-val">
-                        <span class="badge {{ 'badge-bueno' if r['lower_bushing_estado'] == 'Bueno' else 'badge-malo' }}">
-                            {{ r['lower_bushing_estado'] or '-' }}
-                        </span>
-                    </span>
+                    <span class="card-key">Supervisor METSO</span>
+                    <span class="card-val">{{ r['supervisor_metso'] or '-' }}</span>
                 </div>
                 <div class="card-row">
                     <span class="card-key">Fecha inicio</span>
                     <span class="card-val">{{ r['fecha_inicio'] or '-' }}</span>
                 </div>
+                <div class="card-row">
+                    <span class="card-key">Upper Bushing cambio</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-si' if r['upper_bushing_cambio'] == 'SI' else 'badge-bueno' }}">
+                            {{ r['upper_bushing_cambio'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Lower Bushing cambio</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-si' if r['lower_bushing_cambio'] == 'SI' else 'badge-bueno' }}">
+                            {{ r['lower_bushing_cambio'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <a href="/descargar/armado/{{ r['id'] }}" class="btn-descarga">
+                    📄 Descargar Reporte Word
+                </a>
+
                 {% else %}
                 <div class="card-row">
-                    <span class="card-key">Empresa</span>
-                    <span class="card-val">{{ r['empresa'] or '-' }}</span>
+                    <span class="card-key">Cliente</span>
+                    <span class="card-val">{{ r['cliente'] or '-' }}</span>
                 </div>
                 <div class="card-row">
-                    <span class="card-key">Bowl</span>
-                    <span class="card-val">{{ r['bowl'] or '-' }}</span>
-                </div>
-                <div class="card-row">
-                    <span class="card-key">Socket Liner</span>
-                    <span class="card-val">
-                        <span class="badge {{ 'badge-bueno' if r['socket_liner_estado'] == 'Bueno' else 'badge-malo' }}">
-                            {{ r['socket_liner_estado'] or '-' }}
-                        </span>
-                    </span>
-                </div>
-                <div class="card-row">
-                    <span class="card-key">MFL (mm)</span>
-                    <span class="card-val">{{ r['mfl_medida'] or '-' }}</span>
-                </div>
-                <div class="card-row">
-                    <span class="card-key">Fuga aceite</span>
-                    <span class="card-val">{{ r['fuga_aceite'] or '-' }}</span>
+                    <span class="card-key">Supervisor METSO</span>
+                    <span class="card-val">{{ r['supervisor_metso'] or '-' }}</span>
                 </div>
                 <div class="card-row">
                     <span class="card-key">Fecha inicio</span>
                     <span class="card-val">{{ r['fecha_inicio'] or '-' }}</span>
                 </div>
+                <div class="card-row">
+                    <span class="card-key">Socket Liner cambio</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-si' if r['sl_cambio_ahora'] == 'SI' else 'badge-bueno' }}">
+                            {{ r['sl_cambio_ahora'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Socket cambio</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-si' if r['socket_cambio_ahora'] == 'SI' else 'badge-bueno' }}">
+                            {{ r['socket_cambio_ahora'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">MFL medida (mm)</span>
+                    <span class="card-val">{{ r['mfl_medida'] or '-' }}</span>
+                </div>
+                <a href="/descargar/cambio/{{ r['id'] }}" class="btn-descarga btn-descarga-cambio">
+                    📄 Descargar Reporte Word
+                </a>
                 {% endif %}
+
             </div>
             {% endfor %}
         {% else %}
