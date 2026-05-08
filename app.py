@@ -318,17 +318,24 @@ def tendencias():
     )
 @app.route('/descargar/<tipo>/<int:id>')
 def descargar_reporte(tipo, id):
-    from database import get_db
-    import io
-    conn = get_db()
-    c = conn.cursor()
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    database_url = os.environ.get('DATABASE_URL')
     tabla = 'armado_hb' if tipo == 'armado' else 'cambio_hb'
-    if os.environ.get('DATABASE_URL'):
+    try:
+        conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+        c = conn.cursor()
         c.execute(f'SELECT * FROM {tabla} WHERE id = %s', (id,))
-    else:
+        registro = c.fetchone()
+        conn.close()
+    except Exception as e:
+        import sqlite3
+        conn = sqlite3.connect('protocolos.db')
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
         c.execute(f'SELECT * FROM {tabla} WHERE id = ?', (id,))
-    registro = c.fetchone()
-    conn.close()
+        registro = c.fetchone()
+        conn.close()
     if not registro:
         return 'No encontrado', 404
     datos = dict(registro)
@@ -339,6 +346,7 @@ def descargar_reporte(tipo, id):
         ruta = generar_word_cambio(datos)
         nombre = f"Cambio_{datos.get('chancadora','X')}.docx"
     return send_file(ruta, as_attachment=True, download_name=nombre)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
