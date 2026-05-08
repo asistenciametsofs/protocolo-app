@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tendencias</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #fd7e14; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #fd7e14; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+
+        /* Pestañas */
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab { flex: 1; padding: 12px; text-align: center; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+        .tab-armado { background: #1a3a5c; color: white; }
+        .tab-cambio { background: #0f5132; color: white; }
+        .tab-inactive { background: #ddd; color: #888; }
+
+        /* Filtros */
+        .filtro-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .filtro-card label { font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
+        .filtro-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+        .filtro-row select, .filtro-row input { padding: 9px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; background: #fafafa; flex: 1; min-width: 120px; }
+        .btn-filtrar { padding: 9px 20px; background: #fd7e14; color: white; border: none; border-radius: 7px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-filtrar:hover { background: #e96c00; }
+
+        /* Cards */
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 13px; color: #444; margin-bottom: 12px; font-weight: bold; }
+        .card-section { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-bottom: 8px; }
+        .badge-armado { background: #e8f0fe; color: #1a3a5c; }
+        .badge-cambio { background: #d1e7dd; color: #0f5132; }
+        .sin-datos { text-align: center; color: #bbb; font-size: 12px; padding: 16px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📈 Tendencias MP1250</h1>
+    </div>
+    <div class="container">
+        <a href="/" class="btn-back">← Volver al inicio</a>
+
+        <!-- PESTAÑAS -->
+        <div class="tabs">
+            <a href="/tendencias?tab=armado&tipo_filtro={{ tipo_filtro }}&codigo={{ codigo }}"
+               class="tab {% if tab == 'armado' %}tab-armado{% else %}tab-inactive{% endif %}">
+               ⚙️ Armado H&B
+            </a>
+            <a href="/tendencias?tab=cambio&tipo_filtro_cambio={{ tipo_filtro_cambio }}&codigo_cambio={{ codigo_cambio }}"
+               class="tab {% if tab == 'cambio' %}tab-cambio{% else %}tab-inactive{% endif %}">
+               🔄 Cambio H&B
+            </a>
+        </div>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- PESTAÑA ARMADO -->
+        <!-- ══════════════════════════════════════ -->
+        {% if tab == 'armado' %}
+        <div class="filtro-card">
+            <span class="badge badge-armado">Armado de Head y Bowl</span>
+            <form method="GET" action="/tendencias">
+                <input type="hidden" name="tab" value="armado">
+                <div class="filtro-row">
+                    <div style="flex:1">
+                        <label>Filtrar por</label>
+                        <select name="tipo_filtro">
+                            <option value="id_bowl" {% if tipo_filtro == 'id_bowl' %}selected{% endif %}>ID Bowl</option>
+                            <option value="id_head" {% if tipo_filtro == 'id_head' %}selected{% endif %}>ID Head</option>
+                        </select>
+                    </div>
+                    <div style="flex:1">
+                        <label>Código</label>
+                        <input type="text" name="codigo" value="{{ codigo }}" placeholder="Ej: B5, H1...">
+                    </div>
+                    <button type="submit" class="btn-filtrar">🔍 Ver</button>
+                </div>
+            </form>
+        </div>
+
+        {% if codigo %}
+            {% if upper %}
+            <!-- UPPER BUSHING -->
+            <div class="card">
+                <div class="card-section">Upper Bushing — {{ tipo_filtro|upper }}: {{ codigo }}</div>
+                <h2>A1 / B1 (mm)</h2>
+                <canvas id="chart_upper_A1B1"></canvas>
+            </div>
+            <div class="card">
+                <h2>A2 / B2 (mm)</h2>
+                <canvas id="chart_upper_A2B2"></canvas>
+            </div>
+            <div class="card">
+                <h2>A3 / B3 (mm)</h2>
+                <canvas id="chart_upper_A3B3"></canvas>
+            </div>
+
+            <!-- LOWER BUSHING -->
+            <div class="card">
+                <div class="card-section">Lower Bushing — {{ tipo_filtro|upper }}: {{ codigo }}</div>
+                <h2>A1 / B1 (mm)</h2>
+                <canvas id="chart_lower_A1B1"></canvas>
+            </div>
+            <div class="card">
+                <h2>A2 / B2 — A3 / B3 (mm)</h2>
+                <canvas id="chart_lower_A2B2"></canvas>
+            </div>
+            <div class="card">
+                <h2>A4 / B4 — A5 / B5 — A6 / B6 (mm)</h2>
+                <canvas id="chart_lower_A4B4"></canvas>
+            </div>
+
+            <!-- FEED PLATE -->
+            <div class="card">
+                <div class="card-section">Feed Plate — {{ tipo_filtro|upper }}: {{ codigo }}</div>
+                <h2>Medida Feed Plate (mm) — Mín: 50mm | Nominal: 124mm</h2>
+                <canvas id="chart_feed"></canvas>
+            </div>
+            {% else %}
+            <div class="empty">
+                <p>📭 No se encontraron registros para <strong>{{ codigo }}</strong></p>
+                <p style="margin-top:8px;font-size:12px">Verifica el código o registra protocolos con ese ID</p>
+            </div>
+            {% endif %}
+
+        {% else %}
+        <div class="empty">
+            <p>🔍 Selecciona un filtro y escribe un código para ver las tendencias</p>
+            <p style="margin-top:8px;font-size:12px">Ejemplo: ID Bowl = B5 o ID Head = H1</p>
+        </div>
+        {% endif %}
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- PESTAÑA CAMBIO -->
+        <!-- ══════════════════════════════════════ -->
+        {% elif tab == 'cambio' %}
+        <div class="filtro-card">
+            <span class="badge badge-cambio">Cambio de Head y Bowl</span>
+            <form method="GET" action="/tendencias">
+                <input type="hidden" name="tab" value="cambio">
+                <div class="filtro-row">
+                    <div style="flex:1">
+                        <label>Chancadora</label>
+                        <input type="text" name="codigo_cambio" value="{{ codigo_cambio }}" placeholder="Ej: CR011, CR012...">
+                    </div>
+                    <button type="submit" class="btn-filtrar">🔍 Ver</button>
+                </div>
+            </form>
+        </div>
+
+        {% if codigo_cambio %}
+            {% if cambio_data %}
+
+            <!-- SOCKET LINER METROLOGÍA -->
+            <div class="card">
+                <div class="card-section">Socket Liner — Chancadora: {{ codigo_cambio }}</div>
+                <h2>B1/A1 — B2/A2 (mm)</h2>
+                <canvas id="chart_sl_B1A1"></canvas>
+            </div>
+            <div class="card">
+                <h2>B3/A3 — B4/A4 (mm)</h2>
+                <canvas id="chart_sl_B3A3"></canvas>
+            </div>
+            <div class="card">
+                <h2>B5/A5 — B6/A6 (mm)</h2>
+                <canvas id="chart_sl_B5A5"></canvas>
+            </div>
+
+            <!-- GAP SOCKET LINER -->
+            <div class="card">
+                <div class="card-section">GAP Socket Liner — Chancadora: {{ codigo_cambio }}</div>
+                <h2>GAP Interior vs GAP Exterior (mm)</h2>
+                <canvas id="chart_gap_sl"></canvas>
+            </div>
+
+            <!-- GAP SOCKET MAINSHAFT -->
+            <div class="card">
+                <div class="card-section">GAP Socket-Mainshaft — Chancadora: {{ codigo_cambio }}</div>
+                <h2>0° / 90° / 180° / 270° (debe ser 0)</h2>
+                <canvas id="chart_gap_sk"></canvas>
+            </div>
+
+            <!-- MFL -->
+            <div class="card">
+                <div class="card-section">Main Frame Liners — Chancadora: {{ codigo_cambio }}</div>
+                <h2>Mediciones A/B/C/D/E/F/G (mm)</h2>
+                <canvas id="chart_mfl"></canvas>
+            </div>
+
+            <!-- GUARD PINS -->
+            <div class="card">
+                <div class="card-section">Guard Pins — Chancadora: {{ codigo_cambio }}</div>
+                <h2>Guard Pin 1 al 6</h2>
+                <canvas id="chart_gp"></canvas>
+            </div>
+
+            {% else %}
+            <div class="empty">
+                <p>📭 No se encontraron registros para <strong>{{ codigo_cambio }}</strong></p>
+                <p style="margin-top:8px;font-size:12px">Verifica el código de chancadora</p>
+            </div>
+            {% endif %}
+
+        {% else %}
+        <div class="empty">
+            <p>🔍 Escribe el código de chancadora para ver las tendencias</p>
+            <p style="margin-top:8px;font-size:12px">Ejemplo: CR011, CR012, CR013...</p>
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    <script>
+    function crearGrafica(id, labels, datasets) {
+        const ctx = document.getElementById(id);
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top' } },
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+
+    function ds(label, valores, color) {
+        return {
+            label: label,
+            data: valores,
+            borderColor: color,
+            backgroundColor: color + '22',
+            borderWidth: 2,
+            pointRadius: 4,
+            tension: 0.3,
+            fill: false
+        };
+    }
+
+    {% if tab == 'armado' and upper %}
+    const fechasA = {{ fechas_armado | tojson }};
+
+    // Upper Bushing
+    crearGrafica('chart_upper_A1B1', fechasA, [
+        ds('A1', {{ upper_A1 | tojson }}, '#1a3a5c'),
+        ds('B1', {{ upper_B1 | tojson }}, '#0d6efd')
+    ]);
+    crearGrafica('chart_upper_A2B2', fechasA, [
+        ds('A2', {{ upper_A2 | tojson }}, '#1a3a5c'),
+        ds('B2', {{ upper_B2 | tojson }}, '#0d6efd')
+    ]);
+    crearGrafica('chart_upper_A3B3', fechasA, [
+        ds('A3', {{ upper_A3 | tojson }}, '#1a3a5c'),
+        ds('B3', {{ upper_B3 | tojson }}, '#0d6efd')
+    ]);
+
+    // Lower Bushing
+    crearGrafica('chart_lower_A1B1', fechasA, [
+        ds('A1', {{ lower_A1 | tojson }}, '#fd7e14'),
+        ds('B1', {{ lower_B1 | tojson }}, '#dc3545')
+    ]);
+    crearGrafica('chart_lower_A2B2', fechasA, [
+        ds('A2', {{ lower_A2 | tojson }}, '#fd7e14'),
+        ds('B2', {{ lower_B2 | tojson }}, '#dc3545'),
+        ds('A3', {{ lower_A3 | tojson }}, '#6f42c1'),
+        ds('B3', {{ lower_B3 | tojson }}, '#d63384')
+    ]);
+    crearGrafica('chart_lower_A4B4', fechasA, [
+        ds('A4', {{ lower_A4 | tojson }}, '#fd7e14'),
+        ds('B4', {{ lower_B4 | tojson }}, '#dc3545'),
+        ds('A5', {{ lower_A5 | tojson }}, '#6f42c1'),
+        ds('B5', {{ lower_B5 | tojson }}, '#d63384'),
+        ds('A6', {{ lower_A6 | tojson }}, '#20c997'),
+        ds('B6', {{ lower_B6 | tojson }}, '#0dcaf0')
+    ]);
+
+    // Feed Plate
+    crearGrafica('chart_feed', fechasA, [
+        ds('Feed Plate (mm)', {{ feed_medida | tojson }}, '#28a745')
+    ]);
+    {% endif %}
+
+    {% if tab == 'cambio' and cambio_data %}
+    const fechasC = {{ fechas_cambio | tojson }};
+
+    // Socket Liner
+    crearGrafica('chart_sl_B1A1', fechasC, [
+        ds('B1', {{ sl_B1 | tojson }}, '#0f5132'),
+        ds('A1', {{ sl_A1 | tojson }}, '#28a745'),
+        ds('B2', {{ sl_B2 | tojson }}, '#146c43'),
+        ds('A2', {{ sl_A2 | tojson }}, '#20c997')
+    ]);
+    crearGrafica('chart_sl_B3A3', fechasC, [
+        ds('B3', {{ sl_B3 | tojson }}, '#0f5132'),
+        ds('A3', {{ sl_A3 | tojson }}, '#28a745'),
+        ds('B4', {{ sl_B4 | tojson }}, '#146c43'),
+        ds('A4', {{ sl_A4 | tojson }}, '#20c997')
+    ]);
+    crearGrafica('chart_sl_B5A5', fechasC, [
+        ds('B5', {{ sl_B5 | tojson }}, '#0f5132'),
+        ds('A5', {{ sl_A5 | tojson }}, '#28a745'),
+        ds('B6', {{ sl_B6 | tojson }}, '#146c43'),
+        ds('A6', {{ sl_A6 | tojson }}, '#20c997')
+    ]);
+
+    // GAP Socket Liner
+    crearGrafica('chart_gap_sl', fechasC, [
+        ds('GAP Interior (mm)', {{ gap_interior | tojson }}, '#fd7e14'),
+        ds('GAP Exterior (mm)', {{ gap_exterior | tojson }}, '#dc3545')
+    ]);
+
+    // GAP Socket-Mainshaft
+    crearGrafica('chart_gap_sk', fechasC, [
+        ds('0°', {{ gap_sk_0 | tojson }}, '#1a3a5c'),
+        ds('90°', {{ gap_sk_90 | tojson }}, '#0d6efd'),
+        ds('180°', {{ gap_sk_180 | tojson }}, '#6f42c1'),
+        ds('270°', {{ gap_sk_270 | tojson }}, '#d63384')
+    ]);
+
+    // MFL
+    crearGrafica('chart_mfl', fechasC, [
+        ds('A', {{ mfl_A | tojson }}, '#0f5132'),
+        ds('B', {{ mfl_B | tojson }}, '#28a745'),
+        ds('C', {{ mfl_C | tojson }}, '#20c997'),
+        ds('D', {{ mfl_D | tojson }}, '#fd7e14'),
+        ds('E', {{ mfl_E | tojson }}, '#dc3545'),
+        ds('F', {{ mfl_F | tojson }}, '#6f42c1'),
+        ds('G', {{ mfl_G | tojson }}, '#0dcaf0')
+    ]);
+
+    // Guard Pins
+    crearGrafica('chart_gp', fechasC, [
+        ds('GP1', {{ gp1 | tojson }}, '#1a3a5c'),
+        ds('GP2', {{ gp2 | tojson }}, '#0d6efd'),
+        ds('GP3', {{ gp3 | tojson }}, '#6f42c1'),
+        ds('GP4', {{ gp4 | tojson }}, '#fd7e14'),
+        ds('GP5', {{ gp5 | tojson }}, '#dc3545'),
+        ds('GP6', {{ gp6 | tojson }}, '#28a745')
+    ]);
+    {% endif %}
+    </script>
+</body>
+</html>

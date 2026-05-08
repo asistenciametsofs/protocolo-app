@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambio Head y Bowl</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #0f5132; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .header-left h1 { font-size: 16px; }
+        .header-left p { font-size: 11px; opacity: 0.8; }
+        .metso-logo { font-size: 22px; font-weight: bold; font-style: italic; color: #ff6600; }
+        .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 10px; color: #0f5132; text-decoration: none; font-size: 14px; margin-bottom: 12px; }
+        .seccion { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .seccion-titulo { font-size: 15px; font-weight: bold; color: #0f5132; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #d1e7dd; text-transform: uppercase; }
+        .subseccion-titulo { font-size: 13px; font-weight: bold; color: #0f5132; margin: 12px 0 8px; padding: 6px; background: #d1e7dd; border-radius: 6px; }
+        label { display: block; font-size: 12px; color: #555; margin-bottom: 3px; margin-top: 10px; }
+        input[type=text], input[type=email], input[type=date], input[type=number], select, textarea { width: 100%; padding: 9px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; background: #fafafa; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #0f5132; background: white; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+        .grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .hora-group { display: flex; gap: 6px; align-items: center; }
+        .hora-group select { width: auto; min-width: 65px; }
+        .hora-sep { font-size: 16px; font-weight: bold; color: #555; }
+        .tabla-pasos { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+        .tabla-pasos th { background: #0f5132; color: white; padding: 8px 6px; text-align: left; }
+        .tabla-pasos th:nth-child(2) { width: 90px; text-align: center; }
+        .tabla-pasos th:nth-child(3) { width: 160px; }
+        .tabla-pasos th:nth-child(4) { width: 80px; text-align: center; }
+        .tabla-pasos td { padding: 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .tabla-pasos tr:nth-child(even) { background: #f9f9f9; }
+        .paso-desc { font-size: 12px; color: #333; line-height: 1.4; }
+        .estado-select { padding: 5px; border: 1px solid #ddd; border-radius: 5px; font-size: 12px; width: 100%; background: white; }
+        .estado-bueno { border-color: #28a745; background: #f0fff4; }
+        .estado-malo { border-color: #dc3545; background: #fff5f5; }
+        .btn-foto { display: block; width: 100%; padding: 6px; background: #0d6efd; color: white; border: none; border-radius: 5px; font-size: 11px; cursor: pointer; text-align: center; }
+        .btn-foto:hover { background: #0b5ed7; }
+        .foto-preview { width: 100%; max-height: 80px; object-fit: cover; border-radius: 4px; margin-top: 4px; display: none; }
+        .img-tecnica { width: 100%; max-width: 350px; display: block; margin: 10px auto; border-radius: 6px; }
+        .metro-tabla { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .metro-tabla th { background: #d1e7dd; color: #0f5132; padding: 6px; font-size: 12px; text-align: center; border: 1px solid #ddd; }
+        .metro-tabla td { padding: 4px; border: 1px solid #ddd; text-align: center; }
+        .metro-tabla input { padding: 4px; font-size: 12px; text-align: center; border: none; background: transparent; width: 100%; }
+        .metro-label { font-size: 12px; font-weight: bold; color: #0f5132; }
+        .condicional { display: none; background: #fff8e1; border-left: 3px solid #ffc107; padding: 12px; border-radius: 0 8px 8px 0; margin-top: 10px; }
+        .condicional.activo { display: block; }
+        .banner-verde { background: #28a745; color: white; text-align: center; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin: 8px 0; }
+        .banner-amarillo { background: #ffc107; color: #333; text-align: center; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin: 8px 0; }
+        .obs-input { padding: 5px; border: 1px solid #ddd; border-radius: 5px; font-size: 11px; width: 100%; background: #fafafa; }
+        .obs-input::placeholder { color: #bbb; font-style: italic; }
+        .btn-submit { display: block; width: 100%; padding: 16px; background: #0f5132; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .foto-input-hidden { display: none; }
+        textarea.obs-grande { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; background: #fafafa; min-height: 80px; }
+        .medida-label { font-size: 11px; color: #888; text-align: center; margin-bottom: 2px; }
+        .cotas-tabla { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+        .cotas-tabla th { background: #0f5132; color: white; padding: 6px; text-align: center; border: 1px solid #ddd; }
+        .cotas-tabla td { padding: 4px; border: 1px solid #ddd; text-align: center; }
+        .cotas-tabla input { width: 100%; padding: 4px; font-size: 11px; border: none; background: transparent; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <h1>CAMBIO DE HEAD Y BOWL</h1>
+        <p id="folio-header">CHB-...</p>
+    </div>
+    <div class="metso-logo">Metso</div>
+</div>
+<div class="container">
+    <a href="/" class="btn-back">← Volver al inicio</a>
+    <form action="/cambio/guardar" method="POST" enctype="multipart/form-data">
+
+    <!-- 1. DATOS GENERALES -->
+    <div class="seccion">
+        <div class="seccion-titulo">1. Datos Generales</div>
+        <div class="grid2">
+            <div><label>Fecha inicio</label><input type="date" name="fecha_inicio" onchange="actualizarFolio()"></div>
+            <div><label>Fecha fin</label><input type="date" name="fecha_termino"></div>
+        </div>
+        <div class="grid2">
+            <div><label>Supervisor Cliente</label><input type="text" name="supervisor_cliente" placeholder="Nombre"></div>
+            <div><label>Supervisor METSO</label><input type="text" name="supervisor_metso" placeholder="Nombre"></div>
+        </div>
+        <div class="grid2">
+            <div>
+                <label>Cliente</label>
+                <select name="cliente">
+                    <option>SMCV</option><option>Antapaccay</option><option>Las Bambas</option><option>Otro</option>
+                </select>
+            </div>
+            <div><label>Chancadora</label><input type="text" name="chancadora" placeholder="CR011"></div>
+        </div>
+        <div class="grid2">
+            <div><label>Altura Bowl Saliente (pulgadas)</label><input type="number" step="0.01" name="altura_bowl_saliente" placeholder="pulgadas"></div>
+            <div>
+                <label>Hora Inicio</label>
+                <div class="hora-group">
+                    <select name="hora_inicio_h">
+                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>0</option>
+                    </select>
+                    <span class="hora-sep">:</span>
+                    <select name="hora_inicio_m"><option>00</option><option>15</option><option>30</option><option>45</option></select>
+                </div>
+            </div>
+        </div>
+        <label>Correo destino del reporte</label>
+        <input type="email" name="correo_destino" placeholder="supervisor@empresa.com">
+    </div>
+
+    <!-- 2. INSPECCIÓN DE ANILLO DE AJUSTE -->
+    <div class="seccion">
+        <div class="seccion-titulo">2. Inspección de Anillo de Ajuste</div>
+        <div class="subseccion-titulo">Inspección de Bowl y Aro de Ajuste</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr>
+                <td class="paso-desc">Inspeccionar roscas del anillo de fijación, aro de ajuste verificando suciedad, óxido y grasa</td>
+                <td><select name="anillo_roscas_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="anillo_roscas_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_anillo1')">📷 Foto</button><input type="file" name="foto_anillo1" id="foto_anillo1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_anillo1"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="subseccion-titulo">Inspección de Unidad de Ajuste Hidráulico</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr>
+                <td class="paso-desc">Inspeccionar nivel de engrase y aceite en reductor del engranaje</td>
+                <td><select name="hidraulico_nivel_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="hidraulico_nivel_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hid1')">📷 Foto</button><input type="file" name="foto_hid1" id="foto_hid1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hid1"></td>
+            </tr>
+            </tbody>
+        </table>
+        <label>Realizar medición de Gap entre Aro de transmisión y piñón (7-8 mm)</label>
+        <div class="grid3" style="margin-top:6px">
+            <div><div class="medida-label">Valor 1</div><input type="number" step="0.01" name="gap_aro_v1" placeholder="mm"></div>
+            <div><div class="medida-label">Valor 2</div><input type="number" step="0.01" name="gap_aro_v2" placeholder="mm"></div>
+            <div><div class="medida-label">Valor 3</div><input type="number" step="0.01" name="gap_aro_v3" placeholder="mm"></div>
+        </div>
+        <div class="subseccion-titulo">Inspección de Clamping Cylinders</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr>
+                <td class="paso-desc">¿Se detectan fugas de aceite por el extremo del Clamping Cylinder?</td>
+                <td><select name="clamping_fugas_estado" class="estado-select" onchange="colorEstado(this)"><option>No presenta</option><option>Presenta</option></select></td>
+                <td><input class="obs-input" name="clamping_fugas_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_clamp1')">📷 Foto</button><input type="file" name="foto_clamp1" id="foto_clamp1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_clamp1"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 3. INSPECCIÓN DE SOCKET LINER -->
+    <div class="seccion">
+        <div class="seccion-titulo">3. Inspección de Socket Liner</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr>
+                <td class="paso-desc">Inspección de ranuras de aceite del Socket Liner</td>
+                <td><select name="sl_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="sl_ranuras_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl1')">📷 Foto</button><input type="file" name="foto_sl1" id="foto_sl1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl1"></td>
+            </tr>
+            </tbody>
+        </table>
+        <img src="/static/imagenes/socket_liner.png" class="img-tecnica" alt="Socket Liner">
+        <div class="metro-label" style="margin-top:10px">Metrología Socket Liner</div>
+        <table class="metro-tabla">
+            <tr><th></th><th>0°-B</th><th>90°-A</th></tr>
+            <tr><td class="metro-label">B1/A1</td><td><input type="number" step="0.01" name="socket_B1"></td><td><input type="number" step="0.01" name="socket_A1"></td></tr>
+            <tr><td class="metro-label">B2/A2</td><td><input type="number" step="0.01" name="socket_B2"></td><td><input type="number" step="0.01" name="socket_A2"></td></tr>
+            <tr><td class="metro-label">B3/A3</td><td><input type="number" step="0.01" name="socket_B3"></td><td><input type="number" step="0.01" name="socket_A3"></td></tr>
+            <tr><td class="metro-label">B4/A4</td><td><input type="number" step="0.01" name="socket_B4"></td><td><input type="number" step="0.01" name="socket_A4"></td></tr>
+            <tr><td class="metro-label">B5/A5</td><td><input type="number" step="0.01" name="socket_B5"></td><td><input type="number" step="0.01" name="socket_A5"></td></tr>
+            <tr><td class="metro-label">B6/A6</td><td><input type="number" step="0.01" name="socket_B6"></td><td><input type="number" step="0.01" name="socket_A6"></td></tr>
+        </table>
+        <table class="tabla-pasos" style="margin-top:10px">
+            <thead><tr><th>Verificaciones</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr>
+                <td class="paso-desc">El asentamiento de la bola del Head en el socket liner es correcto</td>
+                <td><select name="sl_asentamiento_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="sl_asentamiento_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl2')">📷 Foto</button><input type="file" name="foto_sl2" id="foto_sl2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl2"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="grid2" style="margin-top:8px">
+            <div>
+                <label>Verificar GAP Interior entre Socket y Socket Liner (mm)</label>
+                <input type="number" step="0.01" name="sl_gap_interior" placeholder="Medida en mm">
+                <button type="button" class="btn-foto" onclick="tomarFoto('foto_gap_int')" style="margin-top:4px">📷 Foto</button>
+                <input type="file" name="foto_gap_int" id="foto_gap_int" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)">
+                <img class="foto-preview" id="prev_foto_gap_int">
+            </div>
+            <div>
+                <label>Verificar GAP Exterior entre Socket y Socket Liner (mm)</label>
+                <input type="number" step="0.01" name="sl_gap_exterior" placeholder="Medida en mm">
+                <button type="button" class="btn-foto" onclick="tomarFoto('foto_gap_ext')" style="margin-top:4px">📷 Foto</button>
+                <input type="file" name="foto_gap_ext" id="foto_gap_ext" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)">
+                <img class="foto-preview" id="prev_foto_gap_ext">
+            </div>
+        </div>
+        <img src="/static/imagenes/gap_socket_liner.png" class="img-tecnica" alt="GAP Socket Liner">
+        <table class="tabla-pasos" style="margin-top:10px">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Verificar presencia de fisuras en el socket liner</td><td><select name="sl_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_fisuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl3')">📷 Foto</button><input type="file" name="foto_sl3" id="foto_sl3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl3"></td></tr>
+            <tr><td class="paso-desc">Verificar presencia de deformaciones en el socket liner</td><td><select name="sl_deformaciones_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_deformaciones_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl4')">📷 Foto</button><input type="file" name="foto_sl4" id="foto_sl4" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl4"></td></tr>
+            <tr><td class="paso-desc">Verificar que los canales se encuentren libres sin obstrucción</td><td><select name="sl_canales_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_canales_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl5')">📷 Foto</button><input type="file" name="foto_sl5" id="foto_sl5" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl5"></td></tr>
+            </tbody>
+        </table>
+        <div class="grid2" style="margin-top:10px">
+            <div>
+                <label>¿Se cambiará en esta intervención el Socket Liner?</label>
+                <select name="sl_cambio_ahora" class="estado-select" onchange="toggleCondicional(this,'sl_cambio_sec')">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+            <div>
+                <label>¿Se requiere cambio en la siguiente intervención?</label>
+                <select name="sl_cambio_siguiente" class="estado-select">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. RETIRO DE SOCKET LINER (condicional) -->
+    <div class="condicional" id="sl_cambio_sec">
+        <div class="seccion" style="margin:0">
+            <div class="seccion-titulo">4. Retiro de Socket Liner</div>
+            <div class="banner-amarillo">SI REQUIERE CAMBIO DE SOCKET LINER</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Precalentar la parte superior del socket de ser necesario para que el socket liner salga libremente</td><td><select name="sl_ret_precalentar" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_ret_precalentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slr1')">📷 Foto</button><input type="file" name="foto_slr1" id="foto_slr1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slr1"></td></tr>
+                <tr><td class="paso-desc">Verificar la instalación los 4 tornillos extractores en los agujeros cónicos del revestimiento del socket liner</td><td><select name="sl_ret_tornillos" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_ret_tornillos_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slr2')">📷 Foto</button><input type="file" name="foto_slr2" id="foto_slr2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slr2"></td></tr>
+                </tbody>
+            </table>
+            <div class="seccion-titulo" style="margin-top:16px">5. Montaje de Socket Liner</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Precalentar la parte superior del socket de ser necesario para que el socket liner salga libremente</td><td><select name="sl_mont_precalentar" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_mont_precalentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slm1')">📷 Foto</button><input type="file" name="foto_slm1" id="foto_slm1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slm1"></td></tr>
+                <tr><td class="paso-desc">Verificar la instalación los 4 tornillos extractores en los agujeros cónicos del revestimiento del socket liner</td><td><select name="sl_mont_tornillos" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_mont_tornillos_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slm2')">📷 Foto</button><input type="file" name="foto_slm2" id="foto_slm2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slm2"></td></tr>
+                <tr><td class="paso-desc">Verificar enfriamiento del socket liner a menos 30°C debajo de la T. ambiente</td><td><select name="sl_mont_enfriamiento" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_mont_enfriamiento_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slm3')">📷 Foto</button><input type="file" name="foto_slm3" id="foto_slm3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slm3"></td></tr>
+                <tr><td class="paso-desc">Verificar asentamiento correcto del socket liner en los 4 puntos</td><td><select name="sl_mont_asentamiento" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_mont_asentamiento_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slm4')">📷 Foto</button><input type="file" name="foto_slm4" id="foto_slm4" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slm4"></td></tr>
+                </tbody>
+            </table>
+            <div class="grid2" style="margin-top:8px">
+                <div>
+                    <label>GAP Interno nuevo (mm)</label>
+                    <input type="number" step="0.01" name="sl_mont_gap_interno" placeholder="Medida en mm">
+                    <button type="button" class="btn-foto" onclick="tomarFoto('foto_gap_int_new')" style="margin-top:4px">📷 Foto</button>
+                    <input type="file" name="foto_gap_int_new" id="foto_gap_int_new" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)">
+                    <img class="foto-preview" id="prev_foto_gap_int_new">
+                </div>
+                <div>
+                    <label>GAP Externo nuevo (mm)</label>
+                    <input type="number" step="0.01" name="sl_mont_gap_externo" placeholder="Medida en mm">
+                    <button type="button" class="btn-foto" onclick="tomarFoto('foto_gap_ext_new')" style="margin-top:4px">📷 Foto</button>
+                    <input type="file" name="foto_gap_ext_new" id="foto_gap_ext_new" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)">
+                    <img class="foto-preview" id="prev_foto_gap_ext_new">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. INSPECCIÓN DE SOCKET -->
+    <div class="seccion">
+        <div class="seccion-titulo">6. Inspección de Socket</div>
+        <img src="/static/imagenes/InspeccionSocket.png" class="img-tecnica" alt="Inspección Socket">
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Inspeccionar estado de socket (fisuras)</td><td><select name="socket_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_fisuras_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk1')">📷 Foto</button><input type="file" name="foto_sk1" id="foto_sk1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk1"></td></tr>
+            <tr><td class="paso-desc">Inspeccionar los pernos del Socket</td><td><select name="socket_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_pernos_obs" placeholder="Cantidad: 04 pernos M36 x 110"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk2')">📷 Foto</button><input type="file" name="foto_sk2" id="foto_sk2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk2"></td></tr>
+            <tr><td class="paso-desc">Inspeccionar ranuras sin obstrucciones</td><td><select name="socket_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_ranuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk3')">📷 Foto</button><input type="file" name="foto_sk3" id="foto_sk3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk3"></td></tr>
+            <tr><td class="paso-desc">Inspeccionar si presenta deformaciones (zona de los pines)</td><td><select name="socket_deform_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_deform_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk4')">📷 Foto</button><input type="file" name="foto_sk4" id="foto_sk4" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk4"></td></tr>
+            <tr><td class="paso-desc">Inspeccionar si presenta rotura en los canales de lubricación (desprendimiento de material)</td><td><select name="socket_canales_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_canales_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk5')">📷 Foto</button><input type="file" name="foto_sk5" id="foto_sk5" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk5"></td></tr>
+            </tbody>
+        </table>
+        <img src="/static/imagenes/MedidaSocket.png" class="img-tecnica" alt="Medida Socket GAP">
+        <label style="margin-top:10px">Medición de GAP Socket - Mainshaft (debe ser 0)</label>
+        <div class="grid4">
+            <div><div class="medida-label">0°</div><input type="number" step="0.01" name="socket_gap_0" placeholder="mm"></div>
+            <div><div class="medida-label">90°</div><input type="number" step="0.01" name="socket_gap_90" placeholder="mm"></div>
+            <div><div class="medida-label">180°</div><input type="number" step="0.01" name="socket_gap_180" placeholder="mm"></div>
+            <div><div class="medida-label">270°</div><input type="number" step="0.01" name="socket_gap_270" placeholder="mm"></div>
+        </div>
+        <div class="grid2" style="margin-top:10px">
+            <div>
+                <label>¿Se cambiará en esta inspección el Socket?</label>
+                <select name="socket_cambio_ahora" class="estado-select" onchange="toggleCondicional(this,'socket_cambio_sec')">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+            <div>
+                <label>¿Se requiere cambio en la siguiente intervención?</label>
+                <select name="socket_cambio_siguiente" class="estado-select">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. RETIRO DE SOCKET (condicional) -->
+    <div class="condicional" id="socket_cambio_sec">
+        <div class="seccion" style="margin:0">
+            <div class="seccion-titulo">7. Retiro de Socket</div>
+            <div class="banner-amarillo">SI HAY CAMBIO DE SOCKET</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">1. Calentar el socket entre 120°C por encima de la temperatura ambiente</td><td><input class="obs-input" name="sk_ret_calentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skr1')">📷 Foto</button><input type="file" name="foto_skr1" id="foto_skr1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skr1"></td></tr>
+                <tr><td class="paso-desc">2. Toma de medidas de Socket saliente (Metrología)</td><td></td><td></td></tr>
+                </tbody>
+            </table>
+            <label style="margin-top:10px">Posición de Cotas — Socket Saliente</label>
+            <table class="cotas-tabla">
+                <thead><tr><th>COTA REAL</th><th>1 (0°)</th><th>2 (45°)</th><th>3 (90°)</th><th>4 (135°)</th></tr></thead>
+                <tbody>
+                <tr><td class="metro-label">A</td><td><input type="number" step="0.01" name="sk_sal_A1"></td><td><input type="number" step="0.01" name="sk_sal_A2"></td><td><input type="number" step="0.01" name="sk_sal_A3"></td><td><input type="number" step="0.01" name="sk_sal_A4"></td></tr>
+                <tr><td class="metro-label">B</td><td><input type="number" step="0.01" name="sk_sal_B1"></td><td><input type="number" step="0.01" name="sk_sal_B2"></td><td><input type="number" step="0.01" name="sk_sal_B3"></td><td><input type="number" step="0.01" name="sk_sal_B4"></td></tr>
+                <tr><td class="metro-label">C</td><td><input type="number" step="0.01" name="sk_sal_C1"></td><td><input type="number" step="0.01" name="sk_sal_C2"></td><td><input type="number" step="0.01" name="sk_sal_C3"></td><td><input type="number" step="0.01" name="sk_sal_C4"></td></tr>
+                <tr><td class="metro-label">D</td><td><input type="number" step="0.01" name="sk_sal_D1"></td><td><input type="number" step="0.01" name="sk_sal_D2"></td><td><input type="number" step="0.01" name="sk_sal_D3"></td><td><input type="number" step="0.01" name="sk_sal_D4"></td></tr>
+                </tbody>
+            </table>
+            <div class="seccion-titulo" style="margin-top:16px">8. Montaje de Socket</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">1. Calentar el socket entre 120°C por encima de la temperatura ambiente</td><td><input class="obs-input" name="sk_mont_calentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm1')">📷 Foto</button><input type="file" name="foto_skm1" id="foto_skm1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm1"></td></tr>
+                <tr><td class="paso-desc">2. Enfriar el socket a temperatura ambiente y volver a realizar el torque de los pernos a 2820 N.m</td><td><input class="obs-input" name="sk_mont_enfriar_obs" placeholder="Torqueo al 50% asentar, y luego al enfriar al 100%"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm2')">📷 Foto</button><input type="file" name="foto_skm2" id="foto_skm2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm2"></td></tr>
+                <tr><td class="paso-desc">3. GAP entre el socket y mainshaft (debe ser 0)</td><td><input class="obs-input" name="sk_mont_gap_obs" placeholder="medida (mm)"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm3')">📷 Foto</button><input type="file" name="foto_skm3" id="foto_skm3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm3"></td></tr>
+                <tr><td class="paso-desc">4. Tomar medidas de Socket nuevo (Metrología)</td><td></td><td></td></tr>
+                </tbody>
+            </table>
+            <label>Posición de Cotas — Socket Nuevo</label>
+            <table class="cotas-tabla">
+                <thead><tr><th>COTA REAL</th><th>1 (0°)</th><th>2 (45°)</th><th>3 (90°)</th><th>4 (135°)</th></tr></thead>
+                <tbody>
+                <tr><td class="metro-label">A</td><td><input type="number" step="0.01" name="sk_new_A1"></td><td><input type="number" step="0.01" name="sk_new_A2"></td><td><input type="number" step="0.01" name="sk_new_A3"></td><td><input type="number" step="0.01" name="sk_new_A4"></td></tr>
+                <tr><td class="metro-label">B</td><td><input type="number" step="0.01" name="sk_new_B1"></td><td><input type="number" step="0.01" name="sk_new_B2"></td><td><input type="number" step="0.01" name="sk_new_B3"></td><td><input type="number" step="0.01" name="sk_new_B4"></td></tr>
+                <tr><td class="metro-label">C</td><td><input type="number" step="0.01" name="sk_new_C1"></td><td><input type="number" step="0.01" name="sk_new_C2"></td><td><input type="number" step="0.01" name="sk_new_C3"></td><td><input type="number" step="0.01" name="sk_new_C4"></td></tr>
+                <tr><td class="metro-label">D</td><td><input type="number" step="0.01" name="sk_new_D1"></td><td><input type="number" step="0.01" name="sk_new_D2"></td><td><input type="number" step="0.01" name="sk_new_D3"></td><td><input type="number" step="0.01" name="sk_new_D4"></td></tr>
+                </tbody>
+            </table>
+            <div class="seccion-titulo" style="margin-top:16px">9. Inspección de Mainshaft <span style="font-size:10px;color:#856404;text-transform:none">(Solo si se cambia Socket)</span></div>
+            <img src="/static/imagenes/Mainshatins.png" class="img-tecnica" alt="Mainshaft">
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Inspección visual del Mainshaft</td><td><input class="obs-input" name="mainshaft_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ms1')">📷 Foto</button><input type="file" name="foto_ms1" id="foto_ms1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ms1"></td></tr>
+                </tbody>
+            </table>
+            <label>Verificación Dimensiones Mainshaft (mm)</label>
+            <table class="cotas-tabla">
+                <thead><tr><th>COTA REAL</th><th>1 (0°)</th><th>2 (45°)</th><th>3 (90°)</th><th>4 (135°)</th></tr></thead>
+                <tbody>
+                <tr><td class="metro-label">A</td><td><input type="number" step="0.01" name="ms_A1"></td><td><input type="number" step="0.01" name="ms_A2"></td><td><input type="number" step="0.01" name="ms_A3"></td><td><input type="number" step="0.01" name="ms_A4"></td></tr>
+                <tr><td class="metro-label">B</td><td><input type="number" step="0.01" name="ms_B1"></td><td><input type="number" step="0.01" name="ms_B2"></td><td><input type="number" step="0.01" name="ms_B3"></td><td><input type="number" step="0.01" name="ms_B4"></td></tr>
+                <tr><td class="metro-label">C</td><td><input type="number" step="0.01" name="ms_C1"></td><td><input type="number" step="0.01" name="ms_C2"></td><td><input type="number" step="0.01" name="ms_C3"></td><td><input type="number" step="0.01" name="ms_C4"></td></tr>
+                <tr><td class="metro-label">D</td><td><input type="number" step="0.01" name="ms_D1"></td><td><input type="number" step="0.01" name="ms_D2"></td><td><input type="number" step="0.01" name="ms_D3"></td><td><input type="number" step="0.01" name="ms_D4"></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 10. INSPECCIÓN DE MAIN FRAME LINERS -->
+    <div class="seccion">
+        <div class="seccion-titulo">10. Inspección de Main Frame Liners</div>
+        <img src="/static/imagenes/MFLIns.png" class="img-tecnica" alt="Main Frame Liners">
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m</td><td><select name="mfl_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="mfl_pernos_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mfl1')">📷 Foto</button><input type="file" name="foto_mfl1" id="foto_mfl1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mfl1"></td></tr>
+            <tr><td class="paso-desc">Medida de MFL promedio (Mínimo 9mm)</td><td></td><td><input class="obs-input" name="mfl_medida" placeholder="Medida en mm"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mfl2')">📷 Foto</button><input type="file" name="foto_mfl2" id="foto_mfl2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mfl2"></td></tr>
+            </tbody>
+        </table>
+        <label style="margin-top:10px">Medición de Main Frame Liners (mm)</label>
+        <div class="grid7">
+            <div><div class="medida-label">A</div><input type="number" step="0.01" name="mfl_med_A" placeholder="mm"></div>
+            <div><div class="medida-label">B</div><input type="number" step="0.01" name="mfl_med_B" placeholder="mm"></div>
+            <div><div class="medida-label">C</div><input type="number" step="0.01" name="mfl_med_C" placeholder="mm"></div>
+            <div><div class="medida-label">D</div><input type="number" step="0.01" name="mfl_med_D" placeholder="mm"></div>
+            <div><div class="medida-label">E</div><input type="number" step="0.01" name="mfl_med_E" placeholder="mm"></div>
+            <div><div class="medida-label">F</div><input type="number" step="0.01" name="mfl_med_F" placeholder="mm"></div>
+            <div><div class="medida-label">G</div><input type="number" step="0.01" name="mfl_med_G" placeholder="mm"></div>
+        </div>
+        <div class="grid2" style="margin-top:10px">
+            <div>
+                <label>¿Se cambiará en esta inspección los MFL?</label>
+                <select name="mfl_cambio_ahora" class="estado-select" onchange="toggleCondicional(this,'mfl_cambio_sec')">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+            <div>
+                <label>¿Se requiere cambio en la siguiente intervención?</label>
+                <select name="mfl_cambio_siguiente" class="estado-select">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+        </div>
+        <div class="condicional" id="mfl_cambio_sec">
+            <div class="banner-amarillo">SI REQUIERE CAMBIO DE MFL</div>
+            <div class="seccion-titulo" style="margin-top:8px">11. Montaje de Main Frame Liners</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m</td><td><select name="mfl_mont_pernos" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="mfl_mont_pernos_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mflm1')">📷 Foto</button><input type="file" name="foto_mflm1" id="foto_mflm1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mflm1"></td></tr>
+                </tbody>
+            </table>
+            <label>Medición de MFL Nuevos (mm)</label>
+            <div class="grid7" style="margin-top:6px">
+                <div><div class="medida-label">A</div><input type="number" step="0.01" name="mfl_new_A" placeholder="mm"></div>
+                <div><div class="medida-label">B</div><input type="number" step="0.01" name="mfl_new_B" placeholder="mm"></div>
+                <div><div class="medida-label">C</div><input type="number" step="0.01" name="mfl_new_C" placeholder="mm"></div>
+                <div><div class="medida-label">D</div><input type="number" step="0.01" name="mfl_new_D" placeholder="mm"></div>
+                <div><div class="medida-label">E</div><input type="number" step="0.01" name="mfl_new_E" placeholder="mm"></div>
+                <div><div class="medida-label">F</div><input type="number" step="0.01" name="mfl_new_F" placeholder="mm"></div>
+                <div><div class="medida-label">G</div><input type="number" step="0.01" name="mfl_new_G" placeholder="mm"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 12. INSPECCIÓN DE MONTURAS -->
+    <div class="seccion">
+        <div class="seccion-titulo">12. Inspección de Monturas</div>
+        <img src="/static/imagenes/MonturasIns.png" class="img-tecnica" alt="Monturas">
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Verificar estado de las barras de soporte de la montura del contraeje</td><td><select name="montura_barras_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_barras_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont1')">📷 Foto</button><input type="file" name="foto_mont1" id="foto_mont1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont1"></td></tr>
+            <tr><td class="paso-desc">Verificar que no se tenga acumulación en las monturas</td><td><select name="montura_acumulacion_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_acumulacion_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont2')">📷 Foto</button><input type="file" name="foto_mont2" id="foto_mont2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont2"></td></tr>
+            <tr><td class="paso-desc">Verificar si los chocky bar están en buen o realizar refuerzo</td><td><select name="montura_chocky_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_chocky_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont3')">📷 Foto</button><input type="file" name="foto_mont3" id="foto_mont3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont3"></td></tr>
+            </tbody>
+        </table>
+        <div class="grid2" style="margin-top:10px">
+            <div>
+                <label>¿Se cambiará en esta inspección las monturas?</label>
+                <select name="montura_cambio_ahora" class="estado-select">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+            <div>
+                <label>¿Se requiere cambio en la siguiente intervención?</label>
+                <select name="montura_cambio_siguiente" class="estado-select">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSPECCIÓN DE CONJUNTO DE EXCÉNTRICA -->
+    <div class="seccion">
+        <div class="seccion-titulo">Inspección de Conjunto de Excéntrica</div>
+        <div class="subseccion-titulo">13. Inspección de Guard Pin</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>¿Se cambió?</th><th>Medida</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 1</td><td><select name="gp1_cambio" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="gp1_medida" placeholder="Medida"></td><td><input class="obs-input" name="gp1_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp1')">📷 Foto</button><input type="file" name="foto_gp1" id="foto_gp1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp1"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 2</td><td><select name="gp2_cambio" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="gp2_medida" placeholder="Medida"></td><td><input class="obs-input" name="gp2_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp2')">📷 Foto</button><input type="file" name="foto_gp2" id="foto_gp2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp2"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 3</td><td><select name="gp3_cambio" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="gp3_medida" placeholder="Medida"></td><td><input class="obs-input" name="gp3_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp3')">📷 Foto</button><input type="file" name="foto_gp3" id="foto_gp3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp3"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 4</td><td><select name="gp4_cambio" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="gp4_medida" placeholder="Medida"></td><td><input class="obs-input" name="gp4_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp4')">📷 Foto</button><input type="file" name="foto_gp4" id="foto_gp4" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp4"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 5</td><td><select name="gp5_cambio" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="gp5_medida" placeholder="Medida"></td><td><input class="obs-input" name="gp5_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp5')">📷 Foto</button><input type="file" name="foto_gp5" id="foto_gp5" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp5"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 6</td><td><select name="gp6_cambio" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="gp6_medida" placeholder="Medida"></td><td><input class="obs-input" name="gp6_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp6')">📷 Foto</button><input type="file" name="foto_gp6" id="foto_gp6" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp6"></td></tr>
+            </tbody>
+        </table>
+        <div class="subseccion-titulo">14. Montaje de Protector Estático</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Realizar inspección de protector estático</td><td><select name="prot_estatico_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="prot_estatico_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_pe1')">📷 Foto</button><input type="file" name="foto_pe1" id="foto_pe1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_pe1"></td></tr>
+            </tbody>
+        </table>
+        <div class="subseccion-titulo">15. Montaje de Protector Dinámico</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Realizar inspección de protector dinámico</td><td><select name="prot_dinamico_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="prot_dinamico_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_pd1')">📷 Foto</button><input type="file" name="foto_pd1" id="foto_pd1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_pd1"></td></tr>
+            <tr><td class="paso-desc">¿Hay presencia de fuga de aceite?</td><td><select name="prot_din_fuga" class="estado-select" onchange="toggleCondicional(this,'contrapeso_sec')"><option value="NO">NO</option><option value="SI">SÍ</option></select></td><td><input class="obs-input" name="prot_din_fuga_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 16. INSPECCIÓN DE CONTRAPESO (condicional) -->
+    <div class="condicional" id="contrapeso_sec">
+        <div class="seccion" style="margin:0">
+            <div class="seccion-titulo">16. Inspección de Contrapeso</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Realizar inspección del contrapeso</td><td><select name="contrapeso_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="contrapeso_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_cp1')">📷 Foto</button><input type="file" name="foto_cp1" id="foto_cp1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_cp1"></td></tr>
+                <tr><td class="paso-desc">Realizar inspección de sellos U-T</td><td><select name="sello_ut_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sello_ut_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_cp2')">📷 Foto</button><input type="file" name="foto_cp2" id="foto_cp2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_cp2"></td></tr>
+                </tbody>
+            </table>
+            <label>Altura Bowl Entrante (pulgadas)</label>
+            <input type="number" step="0.01" name="altura_bowl_entrante" placeholder="pulgadas">
+        </div>
+    </div>
+
+    <!-- CIERRE -->
+    <div class="seccion">
+        <div class="seccion-titulo">Cierre del Protocolo</div>
+        <div class="grid2">
+            <div>
+                <label>Hora Fin</label>
+                <div class="hora-group">
+                    <select name="hora_fin_h">
+                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>0</option>
+                    </select>
+                    <span class="hora-sep">:</span>
+                    <select name="hora_fin_m"><option>00</option><option>15</option><option>30</option><option>45</option></select>
+                </div>
+            </div>
+        </div>
+        <label>Recomendaciones para la siguiente intervención</label>
+        <textarea class="obs-grande" name="recomendaciones" placeholder="Escribir observaciones y recomendaciones..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit">💾 Guardar protocolo y enviar reporte</button>
+    </form>
+    <br>
+</div>
+
+<script>
+function actualizarFolio() {
+    const fecha = document.querySelector('[name=fecha_inicio]').value;
+    if (fecha) {
+        const f = fecha.replace(/-/g,'');
+        document.getElementById('folio-header').textContent = 'CHB-' + f + Math.floor(Math.random()*100000);
+    }
+}
+function colorEstado(sel) {
+    sel.className = 'estado-select';
+    if (sel.value === 'Bueno') sel.classList.add('estado-bueno');
+    if (sel.value === 'Malo') sel.classList.add('estado-malo');
+}
+function toggleCondicional(sel, idSi) {
+    const divSi = document.getElementById(idSi);
+    if (!divSi) return;
+    if (sel.value === 'SI') {
+        divSi.classList.add('activo');
+    } else {
+        divSi.classList.remove('activo');
+    }
+}
+function tomarFoto(inputId) {
+    document.getElementById(inputId).click();
+}
+function previewFoto(input) {
+    const id = input.id;
+    const preview = document.getElementById('prev_' + id);
+    if (!preview) return;
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+</body>
+</html>

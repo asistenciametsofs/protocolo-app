@@ -1,0 +1,316 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias
+from word_generator import generar_word_armado, generar_word_cambio
+from email_sender import enviar_correo
+import os
+import uuid
+
+app = Flask(__name__)
+app.secret_key = 'metso1250secretkey'
+
+with app.app_context():
+    init_db()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/armado')
+def armado():
+    return render_template('armado.html')
+
+@app.route('/armado/guardar', methods=['POST'])
+def guardar_armado_route():
+    datos = {}
+    campos = ['equipo','cliente','id_bowl','id_head','supervisor_metso','supervisor_cliente','fecha_inicio','fecha_termino','hora_inicio_h','hora_inicio_m','hora_fin_h','hora_fin_m','ub_paso1_estado','ub_paso1_obs','ub_paso2_obs','ub_paso3_estado','ub_paso3_obs','ub_paso4_estado','ub_paso4_obs','ub_paso5_estado','ub_paso5_obs','upper_bushing_cambio','upper_A1','upper_B1','upper_A2','upper_B2','upper_A3','upper_B3','ub_paso7_obs','ub_paso8_obs','ub_paso9_obs','ub_paso10_obs','ub_paso11_obs','ub_paso12_obs','ub_paso13_obs','ub_paso14_obs','ub_paso15_obs','upper_nuevo_A1','upper_nuevo_B1','upper_nuevo_A2','upper_nuevo_B2','upper_nuevo_A3','upper_nuevo_B3','lb_paso16_estado','lb_paso16_obs','lb_paso161_obs','lb_paso17_estado','lb_paso17_obs','lower_bushing_cambio','lower_A1','lower_B1','lower_A2','lower_B2','lower_A3','lower_B3','lower_A4','lower_B4','lower_A5','lower_B5','lower_A6','lower_B6','lb_paso21_obs','lb_paso22_obs','lb_paso221_obs','lb_paso24_obs','lb_paso25_obs','lb_paso26_obs','lower_nuevo_A1','lower_nuevo_B1','lower_nuevo_A2','lower_nuevo_B2','lower_nuevo_A3','lower_nuevo_B3','lower_nuevo_A4','lower_nuevo_B4','lower_nuevo_A5','lower_nuevo_B5','lower_nuevo_A6','lower_nuevo_B6','hb_paso28_estado','hb_paso28_obs','hb_paso29_estado','hb_paso29_obs','head_ball_cambio','hb_paso31_real','hb_paso31_obs','hb_paso32_real','hb_paso32_obs','hb_paso33_real','hb_paso33_obs','carter_sup_estado','carter_sup_obs','carter_inf_estado','carter_inf_obs','feed_plate_estado','fp_paso36_obs','feed_plate_cambio','feed_plate_altura','feed_plate_desgaste','fp_paso38_estado','fp_paso38_obs','fp_paso39_estado','fp_paso39_obs','fp_paso40_obs','ln_paso41_estado','ln_paso41_obs','ln_diametro','ln_espaciamiento','ln_torque50','ln_torque75','ln_torque100','ln_serial_torq','ln_gap1','ln_gap2','epoxi_cantidad','epoxi_venc_catalizador','epoxi_venc_epoxico','epoxi_temp_sin_cat','epoxi_temp_con_cat','bowl_paso54_estado','bowl_paso54_obs','bowl_medida_hooper','bowl_paso56_estado','bowl_paso56_obs','bowl_paso57_estado','bowl_paso57_obs','bowl_paso58_estado','bowl_paso58_obs','bowl_medida_fisuras','bowl_paso582_obs','bowl_paso60_estado','bowl_paso60_obs','bowl_paso61_estado','bowl_paso61_obs','bowl_paso62_estado','bowl_paso62_obs','bowl_medida_fisura62','bowl_paso622_obs','hora_fin_h','hora_fin_m','recomendaciones','correo_destino']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            datos[campo] = float(valor) if '.' in str(valor) and valor else valor
+        except:
+            datos[campo] = valor
+
+    os.makedirs('static/fotos', exist_ok=True)
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            ext = foto.filename.rsplit('.', 1)[-1] if '.' in foto.filename else 'jpg'
+            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.{ext}"
+            foto.save(nombre_foto)
+            fotos_paths[f'foto_path_{key}'] = nombre_foto
+
+    guardar_armado(datos)
+    datos_word = dict(datos)
+    datos_word.update(fotos_paths)
+    ruta_word = generar_word_armado(datos_word)
+
+    correo_destino = request.form.get('correo_destino', '')
+    if correo_destino:
+        enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
+    flash('✅ Protocolo guardado y enviado por correo!')
+    return redirect(url_for('index'))
+
+@app.route('/cambio')
+def cambio():
+    return render_template('cambio.html')
+
+@app.route('/cambio/guardar', methods=['POST'])
+def guardar_cambio_route():
+    datos = {}
+    campos = ['fecha_inicio','fecha_termino','supervisor_cliente','supervisor_metso','cliente','chancadora',
+        'altura_bowl_saliente','hora_inicio_h','hora_inicio_m','correo_destino',
+        'anillo_roscas_estado','anillo_roscas_obs',
+        'hidraulico_nivel_estado','hidraulico_nivel_obs',
+        'gap_aro_v1','gap_aro_v2','gap_aro_v3',
+        'clamping_fugas_estado','clamping_fugas_obs',
+        'sl_ranuras_estado','sl_ranuras_obs',
+        'socket_B1','socket_A1','socket_B2','socket_A2',
+        'socket_B3','socket_A3','socket_B4','socket_A4',
+        'socket_B5','socket_A5','socket_B6','socket_A6',
+        'sl_asentamiento_estado','sl_asentamiento_obs',
+        'sl_gap_interior','sl_gap_exterior',
+        'sl_fisuras_estado','sl_fisuras_obs',
+        'sl_deformaciones_estado','sl_deformaciones_obs',
+        'sl_canales_estado','sl_canales_obs',
+        'sl_cambio_ahora','sl_cambio_siguiente',
+        'sl_ret_precalentar','sl_ret_precalentar_obs',
+        'sl_ret_tornillos','sl_ret_tornillos_obs',
+        'sl_mont_precalentar','sl_mont_precalentar_obs',
+        'sl_mont_tornillos','sl_mont_tornillos_obs',
+        'sl_mont_enfriamiento','sl_mont_enfriamiento_obs',
+        'sl_mont_asentamiento','sl_mont_asentamiento_obs',
+        'sl_mont_gap_interno','sl_mont_gap_externo',
+        'socket_fisuras_estado','socket_fisuras_obs',
+        'socket_pernos_estado','socket_pernos_obs',
+        'socket_ranuras_estado','socket_ranuras_obs',
+        'socket_deform_estado','socket_deform_obs',
+        'socket_canales_estado','socket_canales_obs',
+        'socket_gap_0','socket_gap_90','socket_gap_180','socket_gap_270',
+        'socket_cambio_ahora','socket_cambio_siguiente',
+        'sk_ret_calentar_obs',
+        'sk_sal_A1','sk_sal_A2','sk_sal_A3','sk_sal_A4',
+        'sk_sal_B1','sk_sal_B2','sk_sal_B3','sk_sal_B4',
+        'sk_sal_C1','sk_sal_C2','sk_sal_C3','sk_sal_C4',
+        'sk_sal_D1','sk_sal_D2','sk_sal_D3','sk_sal_D4',
+        'sk_mont_calentar_obs','sk_mont_enfriar_obs','sk_mont_gap_obs',
+        'sk_new_A1','sk_new_A2','sk_new_A3','sk_new_A4',
+        'sk_new_B1','sk_new_B2','sk_new_B3','sk_new_B4',
+        'sk_new_C1','sk_new_C2','sk_new_C3','sk_new_C4',
+        'sk_new_D1','sk_new_D2','sk_new_D3','sk_new_D4',
+        'mainshaft_obs',
+        'ms_A1','ms_A2','ms_A3','ms_A4',
+        'ms_B1','ms_B2','ms_B3','ms_B4',
+        'ms_C1','ms_C2','ms_C3','ms_C4',
+        'ms_D1','ms_D2','ms_D3','ms_D4',
+        'mfl_pernos_estado','mfl_pernos_obs','mfl_medida',
+        'mfl_med_A','mfl_med_B','mfl_med_C','mfl_med_D',
+        'mfl_med_E','mfl_med_F','mfl_med_G',
+        'mfl_cambio_ahora','mfl_cambio_siguiente',
+        'mfl_mont_pernos','mfl_mont_pernos_obs',
+        'mfl_new_A','mfl_new_B','mfl_new_C','mfl_new_D',
+        'mfl_new_E','mfl_new_F','mfl_new_G',
+        'montura_barras_estado','montura_barras_obs',
+        'montura_acumulacion_estado','montura_acumulacion_obs',
+        'montura_chocky_estado','montura_chocky_obs',
+        'montura_cambio_ahora','montura_cambio_siguiente',
+        'gp1_cambio','gp1_medida','gp1_obs',
+        'gp2_cambio','gp2_medida','gp2_obs',
+        'gp3_cambio','gp3_medida','gp3_obs',
+        'gp4_cambio','gp4_medida','gp4_obs',
+        'gp5_cambio','gp5_medida','gp5_obs',
+        'gp6_cambio','gp6_medida','gp6_obs',
+        'prot_estatico_estado','prot_estatico_obs',
+        'prot_dinamico_estado','prot_dinamico_obs',
+        'prot_din_fuga','prot_din_fuga_obs',
+        'contrapeso_estado','contrapeso_obs',
+        'sello_ut_estado','sello_ut_obs',
+        'altura_bowl_entrante',
+        'hora_fin_h','hora_fin_m','recomendaciones']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            datos[campo] = float(valor) if '.' in str(valor) and valor else valor
+        except:
+            datos[campo] = valor
+
+    os.makedirs('static/fotos', exist_ok=True)
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            ext = foto.filename.rsplit('.', 1)[-1] if '.' in foto.filename else 'jpg'
+            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.{ext}"
+            foto.save(nombre_foto)
+            fotos_paths[f'foto_path_{key}'] = nombre_foto
+
+    guardar_cambio(datos)
+    datos_word = dict(datos)
+    datos_word.update(fotos_paths)
+    ruta_word = generar_word_cambio(datos_word)
+
+    correo_destino = request.form.get('correo_destino', '')
+    if correo_destino:
+        enviar_correo(correo_destino, 'Protocolo Cambio H&B - ' + datos.get('chancadora',''), ruta_word)
+    flash('✅ Protocolo guardado y enviado por correo!')
+    return redirect(url_for('index'))
+
+@app.route('/historial/<tipo>')
+def historial(tipo):
+    registros = obtener_registros(tipo)
+    return render_template('historial.html', registros=registros, tipo=tipo)
+
+@app.route('/tendencias')
+def tendencias():
+    tab = request.args.get('tab', 'armado')
+
+    # ── ARMADO ──────────────────────────────────────────────
+    tipo_filtro = request.args.get('tipo_filtro', 'id_bowl')
+    codigo = request.args.get('codigo', '').strip()
+
+    upper = []
+    fechas_armado = []
+    upper_A1 = upper_B1 = upper_A2 = upper_B2 = upper_A3 = upper_B3 = []
+    lower_A1 = lower_B1 = lower_A2 = lower_B2 = lower_A3 = lower_B3 = []
+    lower_A4 = lower_B4 = lower_A5 = lower_B5 = lower_A6 = lower_B6 = []
+    feed_medida = []
+
+    if tab == 'armado' and codigo:
+        from database import get_db
+        conn = get_db()
+        c = conn.cursor()
+        campo_filtro = 'id_bowl' if tipo_filtro == 'id_bowl' else 'id_head'
+        c.execute(f'''SELECT fecha_registro,
+            upper_A1, upper_B1, upper_A2, upper_B2, upper_A3, upper_B3,
+            lower_A1, lower_B1, lower_A2, lower_B2, lower_A3, lower_B3,
+            lower_A4, lower_B4, lower_A5, lower_B5, lower_A6, lower_B6,
+            feed_plate_altura
+            FROM armado_hb
+            WHERE {campo_filtro} = ?
+            ORDER BY fecha_registro ASC''', (codigo,))
+        rows = c.fetchall()
+        conn.close()
+        upper = rows
+        fechas_armado = [r[0] for r in rows]
+        upper_A1 = [r[1] for r in rows]
+        upper_B1 = [r[2] for r in rows]
+        upper_A2 = [r[3] for r in rows]
+        upper_B2 = [r[4] for r in rows]
+        upper_A3 = [r[5] for r in rows]
+        upper_B3 = [r[6] for r in rows]
+        lower_A1 = [r[7] for r in rows]
+        lower_B1 = [r[8] for r in rows]
+        lower_A2 = [r[9] for r in rows]
+        lower_B2 = [r[10] for r in rows]
+        lower_A3 = [r[11] for r in rows]
+        lower_B3 = [r[12] for r in rows]
+        lower_A4 = [r[13] for r in rows]
+        lower_B4 = [r[14] for r in rows]
+        lower_A5 = [r[15] for r in rows]
+        lower_B5 = [r[16] for r in rows]
+        lower_A6 = [r[17] for r in rows]
+        lower_B6 = [r[18] for r in rows]
+        feed_medida = [r[19] for r in rows]
+
+    # ── CAMBIO ──────────────────────────────────────────────
+    codigo_cambio = request.args.get('codigo_cambio', '').strip()
+    cambio_data = []
+    fechas_cambio = []
+    sl_B1 = sl_A1 = sl_B2 = sl_A2 = sl_B3 = sl_A3 = []
+    sl_B4 = sl_A4 = sl_B5 = sl_A5 = sl_B6 = sl_A6 = []
+    gap_interior = gap_exterior = []
+    gap_sk_0 = gap_sk_90 = gap_sk_180 = gap_sk_270 = []
+    mfl_A = mfl_B = mfl_C = mfl_D = mfl_E = mfl_F = mfl_G = []
+    gp1 = gp2 = gp3 = gp4 = gp5 = gp6 = []
+
+    if tab == 'cambio' and codigo_cambio:
+        from database import get_db
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('''SELECT fecha_registro,
+            socket_B1, socket_A1, socket_B2, socket_A2,
+            socket_B3, socket_A3, socket_B4, socket_A4,
+            socket_B5, socket_A5, socket_B6, socket_A6,
+            sl_gap_interior, sl_gap_exterior,
+            socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
+            mfl_med_A, mfl_med_B, mfl_med_C, mfl_med_D,
+            mfl_med_E, mfl_med_F, mfl_med_G,
+            gp1_medida, gp2_medida, gp3_medida,
+            gp4_medida, gp5_medida, gp6_medida
+            FROM cambio_hb
+            WHERE chancadora = ?
+            ORDER BY fecha_registro ASC''', (codigo_cambio,))
+        rows = c.fetchall()
+        conn.close()
+        cambio_data = rows
+        fechas_cambio = [r[0] for r in rows]
+        sl_B1 = [r[1] for r in rows]
+        sl_A1 = [r[2] for r in rows]
+        sl_B2 = [r[3] for r in rows]
+        sl_A2 = [r[4] for r in rows]
+        sl_B3 = [r[5] for r in rows]
+        sl_A3 = [r[6] for r in rows]
+        sl_B4 = [r[7] for r in rows]
+        sl_A4 = [r[8] for r in rows]
+        sl_B5 = [r[9] for r in rows]
+        sl_A5 = [r[10] for r in rows]
+        sl_B6 = [r[11] for r in rows]
+        sl_A6 = [r[12] for r in rows]
+        gap_interior = [r[13] for r in rows]
+        gap_exterior = [r[14] for r in rows]
+        gap_sk_0 = [r[15] for r in rows]
+        gap_sk_90 = [r[16] for r in rows]
+        gap_sk_180 = [r[17] for r in rows]
+        gap_sk_270 = [r[18] for r in rows]
+        mfl_A = [r[19] for r in rows]
+        mfl_B = [r[20] for r in rows]
+        mfl_C = [r[21] for r in rows]
+        mfl_D = [r[22] for r in rows]
+        mfl_E = [r[23] for r in rows]
+        mfl_F = [r[24] for r in rows]
+        mfl_G = [r[25] for r in rows]
+        gp1 = [r[26] for r in rows]
+        gp2 = [r[27] for r in rows]
+        gp3 = [r[28] for r in rows]
+        gp4 = [r[29] for r in rows]
+        gp5 = [r[30] for r in rows]
+        gp6 = [r[31] for r in rows]
+
+    return render_template('tendencias.html',
+        tab=tab,
+        tipo_filtro=tipo_filtro,
+        codigo=codigo,
+        upper=upper,
+        fechas_armado=fechas_armado,
+        upper_A1=upper_A1, upper_B1=upper_B1,
+        upper_A2=upper_A2, upper_B2=upper_B2,
+        upper_A3=upper_A3, upper_B3=upper_B3,
+        lower_A1=lower_A1, lower_B1=lower_B1,
+        lower_A2=lower_A2, lower_B2=lower_B2,
+        lower_A3=lower_A3, lower_B3=lower_B3,
+        lower_A4=lower_A4, lower_B4=lower_B4,
+        lower_A5=lower_A5, lower_B5=lower_B5,
+        lower_A6=lower_A6, lower_B6=lower_B6,
+        feed_medida=feed_medida,
+        codigo_cambio=codigo_cambio,
+        cambio_data=cambio_data,
+        fechas_cambio=fechas_cambio,
+        sl_B1=sl_B1, sl_A1=sl_A1,
+        sl_B2=sl_B2, sl_A2=sl_A2,
+        sl_B3=sl_B3, sl_A3=sl_A3,
+        sl_B4=sl_B4, sl_A4=sl_A4,
+        sl_B5=sl_B5, sl_A5=sl_A5,
+        sl_B6=sl_B6, sl_A6=sl_A6,
+        gap_interior=gap_interior,
+        gap_exterior=gap_exterior,
+        gap_sk_0=gap_sk_0, gap_sk_90=gap_sk_90,
+        gap_sk_180=gap_sk_180, gap_sk_270=gap_sk_270,
+        mfl_A=mfl_A, mfl_B=mfl_B, mfl_C=mfl_C,
+        mfl_D=mfl_D, mfl_E=mfl_E, mfl_F=mfl_F, mfl_G=mfl_G,
+        gp1=gp1, gp2=gp2, gp3=gp3,
+        gp4=gp4, gp5=gp5, gp6=gp6
+    )
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

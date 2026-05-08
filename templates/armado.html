@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Armado Head y Bowl</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #1a3a5c; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .header-left h1 { font-size: 16px; }
+        .header-left p { font-size: 11px; opacity: 0.8; }
+        .metso-logo { font-size: 22px; font-weight: bold; font-style: italic; color: #ff6600; }
+        .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 10px; color: #1a3a5c; text-decoration: none; font-size: 14px; margin-bottom: 12px; }
+        .seccion { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .seccion-titulo { font-size: 15px; font-weight: bold; color: #1a3a5c; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e8f0fe; text-transform: uppercase; }
+        label { display: block; font-size: 12px; color: #555; margin-bottom: 3px; margin-top: 10px; }
+        input[type=text], input[type=email], input[type=date], input[type=number], select, textarea { width: 100%; padding: 9px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; background: #fafafa; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #1a3a5c; background: white; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+        .hora-group { display: flex; gap: 6px; align-items: center; }
+        .hora-group select { width: auto; min-width: 65px; }
+        .hora-sep { font-size: 16px; font-weight: bold; color: #555; }
+        .tabla-pasos { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+        .tabla-pasos th { background: #1a3a5c; color: white; padding: 8px 6px; text-align: left; }
+        .tabla-pasos th:nth-child(2) { width: 90px; text-align: center; }
+        .tabla-pasos th:nth-child(3) { width: 160px; }
+        .tabla-pasos th:nth-child(4) { width: 80px; text-align: center; }
+        .tabla-pasos td { padding: 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .tabla-pasos tr:nth-child(even) { background: #f9f9f9; }
+        .paso-desc { font-size: 12px; color: #333; line-height: 1.4; }
+        .paso-num { font-weight: bold; color: #1a3a5c; }
+        .estado-select { padding: 5px; border: 1px solid #ddd; border-radius: 5px; font-size: 12px; width: 100%; background: white; }
+        .estado-bueno { border-color: #28a745; background: #f0fff4; }
+        .estado-malo { border-color: #dc3545; background: #fff5f5; }
+        .btn-foto { display: block; width: 100%; padding: 6px; background: #0d6efd; color: white; border: none; border-radius: 5px; font-size: 11px; cursor: pointer; text-align: center; }
+        .btn-foto:hover { background: #0b5ed7; }
+        .foto-preview { width: 100%; max-height: 80px; object-fit: cover; border-radius: 4px; margin-top: 4px; display: none; }
+        .img-tecnica { width: 100%; max-width: 350px; display: block; margin: 10px auto; border-radius: 6px; }
+        .metro-tabla { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .metro-tabla th { background: #e8f0fe; color: #1a3a5c; padding: 6px; font-size: 12px; text-align: center; border: 1px solid #ddd; }
+        .metro-tabla td { padding: 4px; border: 1px solid #ddd; text-align: center; }
+        .metro-tabla input { padding: 4px; font-size: 12px; text-align: center; border: none; background: transparent; }
+        .metro-label { font-size: 12px; font-weight: bold; color: #1a3a5c; }
+        .condicional { display: none; background: #fff8e1; border-left: 3px solid #ffc107; padding: 12px; border-radius: 0 8px 8px 0; margin-top: 10px; }
+        .condicional.activo { display: block; }
+        .banner-verde { background: #28a745; color: white; text-align: center; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin: 8px 0; }
+        .banner-amarillo { background: #ffc107; color: #333; text-align: center; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin: 8px 0; }
+        .obs-input { padding: 5px; border: 1px solid #ddd; border-radius: 5px; font-size: 11px; width: 100%; background: #fafafa; }
+        .obs-input::placeholder { color: #bbb; font-style: italic; }
+        .btn-submit { display: block; width: 100%; padding: 16px; background: #1a3a5c; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .foto-input-hidden { display: none; }
+        textarea.obs-grande { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; background: #fafafa; min-height: 80px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <h1>ARMADO DE HEAD Y BOWL</h1>
+        <p id="folio-header">HB-...</p>
+    </div>
+    <div class="metso-logo">Metso</div>
+</div>
+<div class="container">
+    <a href="/" class="btn-back">← Volver al inicio</a>
+    <form action="/armado/guardar" method="POST" enctype="multipart/form-data" id="form-armado">
+
+    <!-- 1. DATOS GENERALES -->
+    <div class="seccion">
+        <div class="seccion-titulo">1. Datos Generales</div>
+        <div class="grid2">
+            <div>
+                <label>Fecha inicio</label>
+                <input type="date" name="fecha_inicio" onchange="actualizarFolio()">
+            </div>
+            <div>
+                <label>Fecha fin</label>
+                <input type="date" name="fecha_termino">
+            </div>
+        </div>
+        <div class="grid2">
+            <div>
+                <label>Hora inicio</label>
+                <div class="hora-group">
+                    <select name="hora_inicio_h">
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                        <option>13</option><option>14</option><option>15</option><option>16</option>
+                        <option>17</option><option>18</option><option>19</option><option>20</option>
+                        <option>21</option><option>22</option><option>23</option><option>0</option>
+                    </select>
+                    <span class="hora-sep">:</span>
+                    <select name="hora_inicio_m">
+                        <option>00</option><option>15</option><option>30</option><option>45</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label>Cliente</label>
+                <select name="cliente">
+                    <option>SMCV</option>
+                    <option>Antapaccay</option>
+                    <option>Las Bambas</option>
+                    <option>Otro</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid2">
+            <div><label>Supervisor Cliente</label><input type="text" name="supervisor_cliente" placeholder="Nombre"></div>
+            <div><label>Supervisor METSO</label><input type="text" name="supervisor_metso" placeholder="Nombre"></div>
+        </div>
+        <div class="grid2">
+            <div><label>Equipo</label><input type="text" name="equipo" placeholder="MP1250"></div>
+            <div><label>ID Bowl</label><input type="text" name="id_bowl"></div>
+        </div>
+        <div class="grid2">
+            <div><label>ID Head</label><input type="text" name="id_head"></div>
+        </div>
+        <label>Correo destino del reporte</label>
+        <input type="email" name="correo_destino" placeholder="supervisor@empresa.com">
+    </div>
+
+    <!-- 2. UPPER BUSHING -->
+    <div class="seccion">
+        <div class="seccion-titulo">2. Inspección de Upper Bushing</div>
+        <img src="/static/imagenes/upper_bushing.png" class="img-tecnica" alt="Upper Bushing">
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr>
+                <td class="paso-desc"><span class="paso-num">1-</span> Realizar inspección visual de la superficie del upper bushing (golpes, rayones, huellas, etc.)</td>
+                <td><select name="ub_paso1_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="ub_paso1_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub1')">📷 Foto</button><input type="file" name="foto_ub1" id="foto_ub1" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub1"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc"><span class="paso-num">2-</span> De encontrar desprendimiento de material, fisuras u otro similar aplicar NDT y evidenciar mediante imágenes con registro de dimensiones (ancho, largo, profundidad)</td>
+                <td></td>
+                <td><input class="obs-input" name="ub_paso2_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub2')">📷 Foto</button><input type="file" name="foto_ub2" id="foto_ub2" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub2"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc"><span class="paso-num">3-</span> Inspeccionar estado de las 4 chavetas y los 6 pernos M16 de fijación de cada una, alambre y amarre</td>
+                <td><select name="ub_paso3_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="ub_paso3_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub3')">📷 Foto</button><input type="file" name="foto_ub3" id="foto_ub3" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub3"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc"><span class="paso-num">4-</span> Verificar el Torque de los pernos a 260 N.m (192 Lb.ft) y evidenciar con serial de la herramienta</td>
+                <td><select name="ub_paso4_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="ub_paso4_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub4')">📷 Foto</button><input type="file" name="foto_ub4" id="foto_ub4" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub4"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc"><span class="paso-num">5-</span> Verificar el estado del seguro alambre de los pernos</td>
+                <td><select name="ub_paso5_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="ub_paso5_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub5')">📷 Foto</button><input type="file" name="foto_ub5" id="foto_ub5" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub5"></td>
+            </tr>
+            </tbody>
+        </table>
+        <label>6- ¿Requiere cambio de Upper Bushing?</label>
+        <select name="upper_bushing_cambio" class="estado-select" onchange="toggleCondicional(this,'ub_cambio','ub_no_cambio')">
+            <option value="NO">NO</option><option value="SI">SÍ</option>
+        </select>
+        <div class="banner-verde" id="ub_no_cambio">NO REQUIERE CAMBIO (REALIZAR METROLOGÍA)</div>
+        <div style="margin-top:10px">
+            <div class="metro-label">Metrología Upper Bushing</div>
+            <table class="metro-tabla">
+                <tr><th></th><th>A (0°)</th><th>B (90°)</th></tr>
+                <tr><td class="metro-label">A1/B1</td><td><input type="number" step="0.01" name="upper_A1"></td><td><input type="number" step="0.01" name="upper_B1"></td></tr>
+                <tr><td class="metro-label">A2/B2</td><td><input type="number" step="0.01" name="upper_A2"></td><td><input type="number" step="0.01" name="upper_B2"></td></tr>
+                <tr><td class="metro-label">A3/B3</td><td><input type="number" step="0.01" name="upper_A3"></td><td><input type="number" step="0.01" name="upper_B3"></td></tr>
+            </table>
+        </div>
+        <div class="condicional" id="ub_cambio">
+            <div class="banner-amarillo">SI REQUIERE CAMBIO (REALIZAR MONTAJE Y METROLOGÍA)</div>
+            <img src="/static/imagenes/chavetas.png" class="img-tecnica" alt="Chavetas">
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc"><span class="paso-num">7-</span> Indicar si durante el retiro de la bocina se encontraron pernos cizallados u otro de enfriamiento</td><td><input class="obs-input" name="ub_paso7_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub7')">📷 Foto</button><input type="file" name="foto_ub7" id="foto_ub7" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub7"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">8-</span> Inspección visual del estado de la superficie del alojamiento upper hd bsh (golpes, rayones, huellas, etc.)</td><td><input class="obs-input" name="ub_paso8_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub8')">📷 Foto</button><input type="file" name="foto_ub8" id="foto_ub8" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub8"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">9-</span> De encontrar anomalías como rajaduras o similares aplicar NDT - líquidos penetrantes y evidenciar</td><td><input class="obs-input" name="ub_paso9_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub9')">📷 Foto</button><input type="file" name="foto_ub9" id="foto_ub9" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub9"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">10-</span> Control dimensional del alojamiento del upper bushing</td><td><input class="obs-input" name="ub_paso10_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">11-</span> Enfriar la bocina al menos 20°C debajo de la T. ambiente</td><td><input class="obs-input" name="ub_paso11_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub11')">📷 Foto</button><input type="file" name="foto_ub11" id="foto_ub11" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub11"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">12-</span> Realizar el centrado de las 04 chavetas tipo L durante el montaje del Upper Bushing</td><td><input class="obs-input" name="ub_paso12_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub12')">📷 Foto</button><input type="file" name="foto_ub12" id="foto_ub12" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub12"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">13-</span> Ajustar 06 pernos M16x60 (Torque 260 N.m / 192 Lb.ft) en cada chaveta tipo L</td><td><input class="obs-input" name="ub_paso13_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub13')">📷 Foto</button><input type="file" name="foto_ub13" id="foto_ub13" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub13"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">14-</span> Asegurar los pernos ajustados con el alambre de ajuste</td><td><input class="obs-input" name="ub_paso14_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ub14')">📷 Foto</button><input type="file" name="foto_ub14" id="foto_ub14" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ub14"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">15-</span> Control dimensional del upper bushing nuevo instalado</td><td><input class="obs-input" name="ub_paso15_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                </tbody>
+            </table>
+            <div class="metro-label" style="margin-top:8px">Metrología Upper Bushing Nuevo</div>
+            <table class="metro-tabla">
+                <tr><th></th><th>A (0°)</th><th>B (90°)</th></tr>
+                <tr><td class="metro-label">A1/B1</td><td><input type="number" step="0.01" name="upper_nuevo_A1"></td><td><input type="number" step="0.01" name="upper_nuevo_B1"></td></tr>
+                <tr><td class="metro-label">A2/B2</td><td><input type="number" step="0.01" name="upper_nuevo_A2"></td><td><input type="number" step="0.01" name="upper_nuevo_B2"></td></tr>
+                <tr><td class="metro-label">A3/B3</td><td><input type="number" step="0.01" name="upper_nuevo_A3"></td><td><input type="number" step="0.01" name="upper_nuevo_B3"></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. LOWER BUSHING -->
+    <div class="seccion">
+        <div class="seccion-titulo">3. Lower Bushing</div>
+        <img src="/static/imagenes/lower_bushing.png" class="img-tecnica" alt="Lower Bushing">
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">16-</span> Realizar inspección visual de la superficie del lower bushing (golpes, rayones, huellas, etc.)</td><td><select name="lb_paso16_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="lb_paso16_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb16')">📷 Foto</button><input type="file" name="foto_lb16" id="foto_lb16" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb16"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">16.1-</span> De encontrar desprendimiento de material, fisuras u otro similar aplicar NDT y evidenciar</td><td></td><td><input class="obs-input" name="lb_paso161_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb161')">📷 Foto</button><input type="file" name="foto_lb161" id="foto_lb161" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb161"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">17-</span> Inspeccionar el estado de los 16 pernos de fijación M20 x 70? 325 N.m (240 Lb.ft)</td><td><select name="lb_paso17_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="lb_paso17_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb17')">📷 Foto</button><input type="file" name="foto_lb17" id="foto_lb17" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb17"></td></tr>
+            </tbody>
+        </table>
+        <label>18- ¿Requiere cambio de Lower Bushing?</label>
+        <select name="lower_bushing_cambio" class="estado-select" onchange="toggleCondicional(this,'lb_cambio','lb_no_cambio')">
+            <option value="NO">NO</option><option value="SI">SÍ</option>
+        </select>
+        <div class="banner-verde" id="lb_no_cambio">NO REQUIERE CAMBIO (REALIZAR METROLOGÍA)</div>
+        <div style="margin-top:10px">
+            <div class="metro-label">Control de Mediciones Bocina de la Excéntrica</div>
+            <table class="metro-tabla">
+                <tr><th></th><th>A (0°)</th><th>B (90°)</th></tr>
+                <tr><td class="metro-label">A1/B1</td><td><input type="number" step="0.01" name="lower_A1"></td><td><input type="number" step="0.01" name="lower_B1"></td></tr>
+                <tr><td class="metro-label">A2/B2</td><td><input type="number" step="0.01" name="lower_A2"></td><td><input type="number" step="0.01" name="lower_B2"></td></tr>
+                <tr><td class="metro-label">A3/B3</td><td><input type="number" step="0.01" name="lower_A3"></td><td><input type="number" step="0.01" name="lower_B3"></td></tr>
+                <tr><td class="metro-label">A4/B4</td><td><input type="number" step="0.01" name="lower_A4"></td><td><input type="number" step="0.01" name="lower_B4"></td></tr>
+                <tr><td class="metro-label">A5/B5</td><td><input type="number" step="0.01" name="lower_A5"></td><td><input type="number" step="0.01" name="lower_B5"></td></tr>
+                <tr><td class="metro-label">A6/B6</td><td><input type="number" step="0.01" name="lower_A6"></td><td><input type="number" step="0.01" name="lower_B6"></td></tr>
+            </table>
+        </div>
+        <div class="condicional" id="lb_cambio">
+            <div class="banner-amarillo">SI REQUIERE CAMBIO (REALIZAR MONTAJE Y METROLOGÍA)</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc"><span class="paso-num">21-</span> Realizar el corte de la bocina durante su desmontaje</td><td><input class="obs-input" name="lb_paso21_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb21')">📷 Foto</button><input type="file" name="foto_lb21" id="foto_lb21" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb21"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">22-</span> Inspección visual del estado de la superficie del alojamiento de la bocina (golpes, rayones, huellas, etc.)</td><td><input class="obs-input" name="lb_paso22_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb22')">📷 Foto</button><input type="file" name="foto_lb22" id="foto_lb22" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb22"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">22.1-</span> De encontrar anomalías como rajaduras aplicar NDT - líquidos penetrantes y evidenciar</td><td><input class="obs-input" name="lb_paso221_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb221')">📷 Foto</button><input type="file" name="foto_lb221" id="foto_lb221" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb221"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">24-</span> Enfriar la bocina al menos 18°C debajo de la T. ambiente</td><td><input class="obs-input" name="lb_paso24_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb24')">📷 Foto</button><input type="file" name="foto_lb24" id="foto_lb24" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb24"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">25-</span> Cambiar pernos y arandelas a instalar</td><td><input class="obs-input" name="lb_paso25_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb25')">📷 Foto</button><input type="file" name="foto_lb25" id="foto_lb25" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb25"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">26-</span> Reemplazar los 16 pernos M20x70 con sus arandelas y Loctite Threadlocker 325 N.m (240 Lb.ft)</td><td><input class="obs-input" name="lb_paso26_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lb26')">📷 Foto</button><input type="file" name="foto_lb26" id="foto_lb26" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lb26"></td></tr>
+                </tbody>
+            </table>
+            <div class="metro-label" style="margin-top:8px">Metrología Lower Bushing Nuevo</div>
+            <table class="metro-tabla">
+                <tr><th></th><th>A (0°)</th><th>B (90°)</th></tr>
+                <tr><td class="metro-label">A1/B1</td><td><input type="number" step="0.01" name="lower_nuevo_A1"></td><td><input type="number" step="0.01" name="lower_nuevo_B1"></td></tr>
+                <tr><td class="metro-label">A2/B2</td><td><input type="number" step="0.01" name="lower_nuevo_A2"></td><td><input type="number" step="0.01" name="lower_nuevo_B2"></td></tr>
+                <tr><td class="metro-label">A3/B3</td><td><input type="number" step="0.01" name="lower_nuevo_A3"></td><td><input type="number" step="0.01" name="lower_nuevo_B3"></td></tr>
+                <tr><td class="metro-label">A4/B4</td><td><input type="number" step="0.01" name="lower_nuevo_A4"></td><td><input type="number" step="0.01" name="lower_nuevo_B4"></td></tr>
+                <tr><td class="metro-label">A5/B5</td><td><input type="number" step="0.01" name="lower_nuevo_A5"></td><td><input type="number" step="0.01" name="lower_nuevo_B5"></td></tr>
+                <tr><td class="metro-label">A6/B6</td><td><input type="number" step="0.01" name="lower_nuevo_A6"></td><td><input type="number" step="0.01" name="lower_nuevo_B6"></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4. HEAD BALL -->
+    <div class="seccion">
+        <div class="seccion-titulo">4. Head Ball</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">28-</span> Inspección visual de la superficie del Head Ball (golpes, rayones, huellas, etc.)</td><td><select name="hb_paso28_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="hb_paso28_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hb28')">📷 Foto</button><input type="file" name="foto_hb28" id="foto_hb28" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hb28"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">29-</span> Inspeccionar estado de la cabeza de pernos de sujeción cuando el Head esté desarmado</td><td><select name="hb_paso29_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="hb_paso29_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hb29')">📷 Foto</button><input type="file" name="foto_hb29" id="foto_hb29" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hb29"></td></tr>
+            </tbody>
+        </table>
+        <label>30- ¿Requiere cambio de Head Ball?</label>
+        <select name="head_ball_cambio" class="estado-select" onchange="toggleCondicional(this,'hb_cambio','hb_no_cambio')">
+            <option value="NO">NO</option><option value="SI">SÍ</option>
+        </select>
+        <div class="banner-verde" id="hb_no_cambio">NO REQUIERE CAMBIO</div>
+        <div class="condicional" id="hb_cambio">
+            <div class="banner-amarillo">SI REQUIERE CAMBIO (REALIZAR SIGUIENTES PASOS)</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Realizado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc"><span class="paso-num">31-</span> Enfriar Head Ball hasta diferencia de 47°C con el Head</td><td><select name="hb_paso31_real" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="hb_paso31_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hb31')">📷 Foto</button><input type="file" name="foto_hb31" id="foto_hb31" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hb31"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">32-</span> Ajuste de los 04 pernos M20 x 200 a 170 N.m (125 Lb.ft)</td><td><select name="hb_paso32_real" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="hb_paso32_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hb32')">📷 Foto</button><input type="file" name="foto_hb32" id="foto_hb32" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hb32"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">33-</span> Aplicar Silastic - Dow Corning 732 en el conjunto perno arandela</td><td><select name="hb_paso33_real" class="estado-select"><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="hb_paso33_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hb33')">📷 Foto</button><input type="file" name="foto_hb33" id="foto_hb33" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hb33"></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. CARTER -->
+    <div class="seccion">
+        <div class="seccion-titulo">5. Carter</div>
+        <img src="/static/imagenes/carter.png" class="img-tecnica" alt="Carter">
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">34-</span> Realizar inspección del carter superior (que no presente fisuras en su superficie)</td><td><select name="carter_sup_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="carter_sup_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_cs')">📷 Foto</button><input type="file" name="foto_cs" id="foto_cs" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_cs"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">35-</span> Realizar inspección del carter inferior (que no presente fisuras en su superficie)</td><td><select name="carter_inf_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="carter_inf_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ci')">📷 Foto</button><input type="file" name="foto_ci" id="foto_ci" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ci"></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 6. FEED PLATE -->
+    <div class="seccion">
+        <div class="seccion-titulo">6. Feed Plate</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">36-</span> Inspeccionar el estado del feed plate</td><td><select name="feed_plate_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso36_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp36')">📷 Foto</button><input type="file" name="foto_fp36" id="foto_fp36" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp36"></td></tr>
+            </tbody>
+        </table>
+        <label>37- ¿Requiere cambio Feed Plate?</label>
+        <div class="grid3" style="margin-top:6px;align-items:end">
+            <div><select name="feed_plate_cambio" class="estado-select" onchange="toggleCondicional(this,'fp_cambio','fp_no_cambio')"><option value="NO">NO</option><option value="SI">SÍ</option></select></div>
+            <div><label>Medida Feed Plate (mm)</label><input type="number" step="0.1" name="feed_plate_altura" placeholder="mm"></div>
+            <div><label>% Desgaste</label><input type="number" step="0.1" name="feed_plate_desgaste" placeholder="%"></div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:4px">Mínimo: 50mm | Nominal: 124mm</div>
+        <div class="banner-verde" id="fp_no_cambio">NO REQUIERE CAMBIO</div>
+        <div class="condicional" id="fp_cambio"><div class="banner-amarillo">REQUIERE CAMBIO</div></div>
+        <table class="tabla-pasos" style="margin-top:10px">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">38-</span> Verificar el estado de los asientos de los pernos cortados salientes del Feed Plate</td><td><select name="fp_paso38_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso38_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp38')">📷 Foto</button><input type="file" name="foto_fp38" id="foto_fp38" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp38"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">39-</span> Realizar limpieza de la superficie del Head (amoladora)</td><td><select name="fp_paso39_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso39_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp39')">📷 Foto</button><input type="file" name="foto_fp39" id="foto_fp39" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp39"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">40-</span> Aplicar una capa de aceite la parte superior del Head</td><td></td><td><input class="obs-input" name="fp_paso40_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp40')">📷 Foto</button><input type="file" name="foto_fp40" id="foto_fp40" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp40"></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 7. LOCKING NUT -->
+    <div class="seccion">
+        <div class="seccion-titulo">7. Locking Nut</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">41-</span> Inspeccionar el estado del Locking Nut</td><td><select name="ln_paso41_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="ln_paso41_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln41')">📷 Foto</button><input type="file" name="foto_ln41" id="foto_ln41" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln41"></td></tr>
+            </tbody>
+        </table>
+        <table class="tabla-pasos" style="margin-top:6px">
+            <thead><tr><th>Descripción</th><th>Medida (mm)</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">42-</span> Diámetro del Locking Nut</td><td><input class="obs-input" name="ln_diametro" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln42')">📷 Foto</button><input type="file" name="foto_ln42" id="foto_ln42" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln42"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">43-</span> Verificar espaciamiento homogéneo entre Torch Ring y Locking Nut</td><td><input class="obs-input" name="ln_espaciamiento" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln43')">📷 Foto</button><input type="file" name="foto_ln43" id="foto_ln43" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln43"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">44-</span> Indicar medida de Torque Inicial al 50%</td><td><input class="obs-input" name="ln_torque50" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln44')">📷 Foto</button><input type="file" name="foto_ln44" id="foto_ln44" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln44"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">45-</span> Indicar medida de Torque Inicial al 75%</td><td><input class="obs-input" name="ln_torque75" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln45')">📷 Foto</button><input type="file" name="foto_ln45" id="foto_ln45" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln45"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">46-</span> Indicar medida de Torque Inicial al 100%</td><td><input class="obs-input" name="ln_torque100" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln46')">📷 Foto</button><input type="file" name="foto_ln46" id="foto_ln46" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln46"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">46.1-</span> Indicar número de serie del torquímetro y evidenciar el torque aplicado</td><td><input class="obs-input" name="ln_serial_torq" placeholder="Número de serie torquímetro"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln461')">📷 Foto</button><input type="file" name="foto_ln461" id="foto_ln461" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln461"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">47-</span> GAP Final: de 1.0 mm a 1.5 mm (Locking Nut - Torch Ring)</td><td><input class="obs-input" name="ln_gap1" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln47')">📷 Foto</button><input type="file" name="foto_ln47" id="foto_ln47" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln47"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">48-</span> GAP Final: de 0 a 0.25 mm (Manto Inferior y Head)</td><td><input class="obs-input" name="ln_gap2" placeholder="Indicar medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ln48')">📷 Foto</button><input type="file" name="foto_ln48" id="foto_ln48" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ln48"></td></tr>
+            </tbody>
+        </table>
+        <img src="/static/imagenes/locking_nut.png" class="img-tecnica" alt="Locking Nut GAP">
+    </div>
+
+    <!-- 8. EPÓXICO Y BACKING -->
+    <div class="seccion">
+        <div class="seccion-titulo">8. Epóxico y Backing</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado / Valor</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">49-</span> Cantidad requerida de epóxico</td><td><input class="obs-input" name="epoxi_cantidad" placeholder="Indicar cantidad"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ep49')">📷 Foto</button><input type="file" name="foto_ep49" id="foto_ep49" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ep49"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">50-</span> Fecha Vencimiento Catalizador</td><td><input type="date" name="epoxi_venc_catalizador"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ep50')">📷 Foto</button><input type="file" name="foto_ep50" id="foto_ep50" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ep50"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">51-</span> Fecha Vencimiento Epóxico</td><td><input type="date" name="epoxi_venc_epoxico"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ep51')">📷 Foto</button><input type="file" name="foto_ep51" id="foto_ep51" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ep51"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">52-</span> T° del batido sin catalizador para homogenizar (15°C - 20°C)</td><td><input class="obs-input" name="epoxi_temp_sin_cat" placeholder="°C"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ep52')">📷 Foto</button><input type="file" name="foto_ep52" id="foto_ep52" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ep52"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">53-</span> T° del batido con catalizador (24°C-28°C)</td><td><input class="obs-input" name="epoxi_temp_con_cat" placeholder="°C"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_ep53')">📷 Foto</button><input type="file" name="foto_ep53" id="foto_ep53" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_ep53"></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 9. INSPECCIÓN DE BOWL -->
+    <div class="seccion">
+        <div class="seccion-titulo">9. Inspección de Bowl</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">54-</span> Inspeccionar el estado del Hooper</td><td><select name="bowl_paso54_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso54_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw54')">📷 Foto</button><input type="file" name="foto_bw54" id="foto_bw54" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw54"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">55-</span> Medida tomada al Hooper (mm)</td><td><input class="obs-input" name="bowl_medida_hooper" placeholder="Medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw55')">📷 Foto</button><input type="file" name="foto_bw55" id="foto_bw55" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw55"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">56-</span> Verificar estado de las roscas con peineta</td><td><select name="bowl_paso56_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso56_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw56')">📷 Foto</button><input type="file" name="foto_bw56" id="foto_bw56" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw56"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">57-</span> Inspeccionar el estado de los conjuntos cuñas, tuercas esféricas y placas de bloqueo</td><td><select name="bowl_paso57_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso57_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw57')">📷 Foto</button><input type="file" name="foto_bw57" id="foto_bw57" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw57"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">58-</span> Verificar estado del asiento del Bowl - Bowl Liner (fisuras)</td><td><select name="bowl_paso58_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso58_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw58')">📷 Foto</button><input type="file" name="foto_bw58" id="foto_bw58" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw58"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">58.1-</span> Indicar medida de fisuras</td><td><input class="obs-input" name="bowl_medida_fisuras" placeholder="Medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw581')">📷 Foto</button><input type="file" name="foto_bw581" id="foto_bw581" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw581"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">58.2-</span> Realizar prueba NDT e indicar observaciones encontradas</td><td></td><td><input class="obs-input" name="bowl_paso582_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw582')">📷 Foto</button><input type="file" name="foto_bw582" id="foto_bw582" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw582"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">60-</span> Verificar estado de anillo adaptador</td><td><select name="bowl_paso60_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso60_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw60')">📷 Foto</button><input type="file" name="foto_bw60" id="foto_bw60" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw60"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">61-</span> Verificar el ajuste de las tuercas esféricas de los pernos cuña</td><td><select name="bowl_paso61_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso61_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw61')">📷 Foto</button><input type="file" name="foto_bw61" id="foto_bw61" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw61"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">62-</span> Verificar estado de los hilos del Bowl (fisuras)</td><td><select name="bowl_paso62_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="bowl_paso62_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw62')">📷 Foto</button><input type="file" name="foto_bw62" id="foto_bw62" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw62"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">62.1-</span> Medida de fisura</td><td><input class="obs-input" name="bowl_medida_fisura62" placeholder="Medida"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw621')">📷 Foto</button><input type="file" name="foto_bw621" id="foto_bw621" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw621"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">62.2-</span> Realizar NDT e indicar observaciones encontradas</td><td></td><td><input class="obs-input" name="bowl_paso622_obs" placeholder="Escribir observaciones"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_bw622')">📷 Foto</button><input type="file" name="foto_bw622" id="foto_bw622" class="foto-input-hidden" accept="image/*" capture="environment" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_bw622"></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 10. CIERRE -->
+    <div class="seccion">
+        <div class="seccion-titulo">10. Cierre del Protocolo</div>
+        <div class="grid2">
+            <div>
+                <label>Hora Fin de Armado de Head y Bowl</label>
+                <div class="hora-group">
+                    <select name="hora_fin_h">
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                        <option>13</option><option>14</option><option>15</option><option>16</option>
+                        <option>17</option><option>18</option><option>19</option><option>20</option>
+                        <option>21</option><option>22</option><option>23</option><option>0</option>
+                    </select>
+                    <span class="hora-sep">:</span>
+                    <select name="hora_fin_m">
+                        <option>00</option><option>15</option><option>30</option><option>45</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <label>Recomendaciones para la siguiente intervención</label>
+        <textarea class="obs-grande" name="recomendaciones" placeholder="Escribir observaciones y recomendaciones para la próxima intervención..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit">💾 Guardar protocolo y enviar reporte</button>
+    </form>
+    <br>
+</div>
+
+<script>
+function actualizarFolio() {
+    const fecha = document.querySelector('[name=fecha_inicio]').value;
+    if (fecha) {
+        const f = fecha.replace(/-/g,'');
+        document.getElementById('folio-header').textContent = 'HB-' + f + Math.floor(Math.random()*100000);
+    }
+}
+function colorEstado(sel) {
+    sel.className = 'estado-select';
+    if (sel.value === 'Bueno') sel.classList.add('estado-bueno');
+    if (sel.value === 'Malo') sel.classList.add('estado-malo');
+}
+function toggleCondicional(sel, idSi, idNo) {
+    const divSi = document.getElementById(idSi);
+    const divNo = document.getElementById(idNo);
+    if (sel.value === 'SI') {
+        divSi.classList.add('activo');
+        if (divNo) divNo.style.display = 'none';
+    } else {
+        divSi.classList.remove('activo');
+        if (divNo) divNo.style.display = 'block';
+    }
+}
+function tomarFoto(inputId) {
+    document.getElementById(inputId).click();
+}
+function previewFoto(input) {
+    const id = input.id;
+    const preview = document.getElementById('prev_' + id);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #1a3a5c; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #1a3a5c; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-title { font-size: 15px; font-weight: bold; color: #1a3a5c; }
+        .card-fecha { font-size: 11px; color: #999; }
+        .card-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .card-row:last-child { border-bottom: none; }
+        .card-key { color: #666; }
+        .card-val { color: #333; font-weight: 500; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .badge-bueno { background: #d1e7dd; color: #0f5132; }
+        .badge-malo { background: #f8d7da; color: #842029; }
+        .badge-si { background: #fff3cd; color: #664d03; }
+        .empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📂 Historial — {{ 'Armado' if tipo == 'armado' else 'Cambio' }}</h1>
+    </div>
+    <div class="container">
+        <a href="/" class="btn-back">← Volver al inicio</a>
+
+        {% if registros %}
+            {% for r in registros %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">⚙️ {{ r['equipo'] or 'Sin equipo' }}</span>
+                    <span class="card-fecha">{{ r['fecha_registro'] }}</span>
+                </div>
+                {% if tipo == 'armado' %}
+                <div class="card-row">
+                    <span class="card-key">Cliente</span>
+                    <span class="card-val">{{ r['cliente'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">ID Bowl</span>
+                    <span class="card-val">{{ r['id_bowl'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">ID Head</span>
+                    <span class="card-val">{{ r['id_head'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Upper Bushing</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-bueno' if r['upper_bushing_estado'] == 'Bueno' else 'badge-malo' }}">
+                            {{ r['upper_bushing_estado'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Lower Bushing</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-bueno' if r['lower_bushing_estado'] == 'Bueno' else 'badge-malo' }}">
+                            {{ r['lower_bushing_estado'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Fecha inicio</span>
+                    <span class="card-val">{{ r['fecha_inicio'] or '-' }}</span>
+                </div>
+                {% else %}
+                <div class="card-row">
+                    <span class="card-key">Empresa</span>
+                    <span class="card-val">{{ r['empresa'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Bowl</span>
+                    <span class="card-val">{{ r['bowl'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Socket Liner</span>
+                    <span class="card-val">
+                        <span class="badge {{ 'badge-bueno' if r['socket_liner_estado'] == 'Bueno' else 'badge-malo' }}">
+                            {{ r['socket_liner_estado'] or '-' }}
+                        </span>
+                    </span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">MFL (mm)</span>
+                    <span class="card-val">{{ r['mfl_medida'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Fuga aceite</span>
+                    <span class="card-val">{{ r['fuga_aceite'] or '-' }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-key">Fecha inicio</span>
+                    <span class="card-val">{{ r['fecha_inicio'] or '-' }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <p>📭 No hay registros aún</p>
+                <p style="margin-top:8px">Los protocolos guardados aparecerán aquí</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
