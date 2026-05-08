@@ -4,6 +4,7 @@ from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
 import os
 import uuid
+import threading
 
 app = Flask(__name__)
 app.secret_key = 'metso1250secretkey'
@@ -47,10 +48,12 @@ def guardar_armado_route():
 
     correo_destino = request.form.get('correo_destino', '')
     if correo_destino:
-        try:
-            enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
-        except:
-            pass
+        def enviar_en_segundo_plano():
+            try:
+                enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
+            except:
+                pass
+        threading.Thread(target=enviar_en_segundo_plano).start()
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('index'))
 
@@ -151,13 +154,15 @@ def guardar_cambio_route():
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
     ruta_word = generar_word_cambio(datos_word)
-
+    
     correo_destino = request.form.get('correo_destino', '')
     if correo_destino:
-        try:
-            enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
-        except:
-            pass
+        def enviar_en_segundo_plano():
+            try:
+                enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
+            except:
+                pass
+        threading.Thread(target=enviar_en_segundo_plano).start()
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('index'))
 

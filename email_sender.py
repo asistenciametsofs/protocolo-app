@@ -43,7 +43,7 @@ Sistema de Protocolos METSO MP1250
                 msg.attach(parte)
 
         # Enviar via Outlook/Hotmail
-        servidor = smtplib.SMTP('smtp.office365.com', 587)
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
         servidor.starttls()
         servidor.login(remitente, password)
         servidor.sendmail(remitente, destinatario, msg.as_string())
