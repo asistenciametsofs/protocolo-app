@@ -1,4 +1,6 @@
 flask
 python-docx
 gunicorn
-psycopg2-binary
+psycopg2-
+Pillow
+sendgrid
