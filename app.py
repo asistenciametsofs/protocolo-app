@@ -48,12 +48,15 @@ def guardar_armado_route():
 
     correo_destino = request.form.get('correo_destino', '')
     if correo_destino:
-        def enviar_en_segundo_plano():
-            try:
-                enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
-            except:
-                pass
-        threading.Thread(target=enviar_en_segundo_plano).start()
+        datos_copia = dict(datos_word)
+        correo_copia = correo_destino
+        equipo_copia = datos.get('equipo','')
+
+        try:
+            ruta_correo = generar_word_armado(datos_word)
+            enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_correo)
+        except Exception as e:
+            print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('index'))
 
@@ -154,15 +157,18 @@ def guardar_cambio_route():
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
     ruta_word = generar_word_cambio(datos_word)
-    
+
     correo_destino = request.form.get('correo_destino', '')
     if correo_destino:
-        def enviar_en_segundo_plano():
-            try:
-                enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_word)
-            except:
-                pass
-        threading.Thread(target=enviar_en_segundo_plano).start()
+        datos_copia = dict(datos_word)
+        correo_copia = correo_destino
+        chancadora_copia = datos.get('chancadora','')
+
+        try:
+            ruta_correo = generar_word_cambio(datos_word)
+            enviar_correo(correo_destino, 'Protocolo Cambio H&B - ' + datos.get('chancadora',''), ruta_correo)
+        except Exception as e:
+            print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('index'))
 
