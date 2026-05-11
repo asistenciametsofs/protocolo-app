@@ -1,17 +1,25 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
 def get_db():
-    conn = sqlite3.connect('protocolos.db')
-    conn.row_factory = sqlite3.Row
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+    else:
+        import sqlite3
+        conn = sqlite3.connect('protocolos.db')
+        conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
     conn = get_db()
     c = conn.cursor()
+    tipo_id = 'SERIAL PRIMARY KEY' if os.environ.get('DATABASE_URL') else 'INTEGER PRIMARY KEY AUTOINCREMENT'
     
-    c.execute('''CREATE TABLE IF NOT EXISTS armado_hb (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute(f'''CREATE TABLE IF NOT EXISTS armado_hb (
+        id {tipo_id},
         fecha_registro TEXT,
         equipo TEXT, cliente TEXT, id_bowl TEXT, id_head TEXT,
         supervisor_metso TEXT, supervisor_cliente TEXT,
@@ -78,8 +86,8 @@ def init_db():
         recomendaciones TEXT, correo_destino TEXT
     )''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS cambio_hb (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute(f'''CREATE TABLE IF NOT EXISTS cambio_hb (
+        id {tipo_id},
         fecha_registro TEXT,
         fecha_inicio TEXT, fecha_termino TEXT,
         supervisor_cliente TEXT, supervisor_metso TEXT,
@@ -167,7 +175,8 @@ def guardar_armado(datos):
     c = conn.cursor()
     datos['fecha_registro'] = datetime.now().strftime('%Y-%m-%d %H:%M')
     columnas = ', '.join(datos.keys())
-    placeholders = ', '.join(['?' for _ in datos])
+    ph = '%s' if os.environ.get('DATABASE_URL') else '?'
+    placeholders = ', '.join([ph for _ in datos])
     c.execute(f'INSERT INTO armado_hb ({columnas}) VALUES ({placeholders})',
               list(datos.values()))
     conn.commit()
@@ -178,7 +187,8 @@ def guardar_cambio(datos):
     c = conn.cursor()
     datos['fecha_registro'] = datetime.now().strftime('%Y-%m-%d %H:%M')
     columnas = ', '.join(datos.keys())
-    placeholders = ', '.join(['?' for _ in datos])
+    ph = '%s' if os.environ.get('DATABASE_URL') else '?'
+    placeholders = ', '.join([ph for _ in datos])
     c.execute(f'INSERT INTO cambio_hb ({columnas}) VALUES ({placeholders})',
               list(datos.values()))
     conn.commit()
