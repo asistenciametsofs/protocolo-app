@@ -14,12 +14,19 @@ def enviar_correo(destinatario, asunto, ruta_archivo):
 
     try:
         adjunto = None
-        if ruta_archivo and os.path.exists(ruta_archivo):
-            with open(ruta_archivo, 'rb') as f:
-                adjunto = base64.b64encode(f.read()).decode()
+        try:
+            if ruta_archivo and os.path.exists(ruta_archivo):
+                with open(ruta_archivo, 'rb') as f:
+                    adjunto = base64.b64encode(f.read()).decode()
+                print(f'📎 Archivo encontrado: {ruta_archivo}')
+            else:
+                print(f'⚠️ Archivo NO encontrado: {ruta_archivo}')
+        except Exception as ex:
+            print(f'⚠️ Error leyendo archivo: {ex}')
 
+        destinatarios = [{"email": c.strip()} for c in destinatario.split(',') if c.strip()]
         data = {
-            "personalizations": [{"to": [{"email": destinatario}]}],
+            "personalizations": [{"to": destinatarios}],
             "from": {"email": remitente},
             "subject": asunto,
             "content": [{"type": "text/plain", "value": f"Adjunto el {asunto} generado desde la app de protocolos MP1250."}]
