@@ -27,7 +27,15 @@ def guardar_armado_route():
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
-            datos[campo] = float(valor) if '.' in str(valor) and valor else valor
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
         except:
             datos[campo] = valor
 
@@ -139,7 +147,15 @@ def guardar_cambio_route():
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
-            datos[campo] = float(valor) if '.' in str(valor) and valor else valor
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
         except:
             datos[campo] = valor
 
