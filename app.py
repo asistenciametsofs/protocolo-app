@@ -54,12 +54,18 @@ def guardar_armado_route():
     datos_word.update(fotos_paths)
     ruta_word = generar_word_armado(datos_word)
 
-    correo_destino = request.form.get('correo_destino', '')
-    if correo_destino:
-        datos_copia = dict(datos_word)
-        correo_copia = correo_destino
-        equipo_copia = datos.get('equipo','')
+    # Recopilar correos seleccionados
+    correos = []
+    for key in ['correo_raul', 'correo_jason', 'correo_joselyn', 'correo_mauricio', 'correo_miguel', 'correo_francisco', 'correo_edgar', 'correo_juan', 'correo_marco', 'correo_luis', 'correo_jorge', 'correo_richard', 'correo_jaime', 'correo_elvis', 'correo_gabriel']:
+        val = request.form.get(key, '')
+        if val:
+            correos.append(val)
+    correo_extra = request.form.get('correo_destino', '').strip()
+    if correo_extra:
+        correos.append(correo_extra)
+    correo_destino = ', '.join(correos)
 
+    if correo_destino:
         try:
             ruta_correo = generar_word_armado(datos_word)
             asunto = f"Protocolo Armado H&B | {str(datos.get('fecha_termino') or '')} | {str(datos.get('equipo') or '')} | {str(datos.get('supervisor_metso') or '')}"
@@ -175,16 +181,22 @@ def guardar_cambio_route():
     datos_word.update(fotos_paths)
     ruta_word = generar_word_cambio(datos_word)
 
-    correo_destino = request.form.get('correo_destino', '')
-    if correo_destino:
-        datos_copia = dict(datos_word)
-        correo_copia = correo_destino
-        chancadora_copia = datos.get('chancadora','')
+    # Recopilar correos seleccionados
+    correos = []
+    for key in ['correo_raul', 'correo_jason', 'correo_joselyn', 'correo_mauricio', 'correo_miguel', 'correo_francisco', 'correo_edgar', 'correo_juan', 'correo_marco', 'correo_luis', 'correo_jorge', 'correo_richard', 'correo_jaime', 'correo_elvis', 'correo_gabriel']:
+        val = request.form.get(key, '')
+        if val:
+            correos.append(val)
+    correo_extra = request.form.get('correo_destino', '').strip()
+    if correo_extra:
+        correos.append(correo_extra)
+    correo_destino = ', '.join(correos)
 
+    if correo_destino:
         try:
             ruta_correo = generar_word_cambio(datos_word)
-            asunto_cambio = f"Protocolo Cambio H&B | {str(datos.get('fecha_termino') or '')} | {str(chancadora_copia or '')} | {str(datos.get('supervisor_metso') or '')}"
-            enviar_correo(correo_copia, asunto_cambio, ruta)
+            asunto_cambio = f"Protocolo Cambio H&B | {str(datos.get('fecha_termino') or '')} | {str(datos.get('chancadora') or '')} | {str(datos.get('supervisor_metso') or '')}"
+            enviar_correo(correo_destino, asunto_cambio, ruta_correo)
         except Exception as e:
             print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
