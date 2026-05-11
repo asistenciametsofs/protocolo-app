@@ -62,7 +62,8 @@ def guardar_armado_route():
 
         try:
             ruta_correo = generar_word_armado(datos_word)
-            enviar_correo(correo_destino, 'Protocolo Armado H&B - ' + datos.get('equipo',''), ruta_correo)
+            asunto = f"Protocolo Armado H&B | {str(datos.get('fecha_termino') or '')} | {str(datos.get('equipo') or '')} | {str(datos.get('supervisor_metso') or '')}"
+            enviar_correo(correo_destino, asunto, ruta_correo)
         except Exception as e:
             print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
@@ -182,7 +183,8 @@ def guardar_cambio_route():
 
         try:
             ruta_correo = generar_word_cambio(datos_word)
-            enviar_correo(correo_destino, 'Protocolo Cambio H&B - ' + datos.get('chancadora',''), ruta_correo)
+            asunto_cambio = f"Protocolo Cambio H&B | {str(datos.get('fecha_termino') or '')} | {str(chancadora_copia or '')} | {str(datos.get('supervisor_metso') or '')}"
+            enviar_correo(correo_copia, asunto_cambio, ruta)
         except Exception as e:
             print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
