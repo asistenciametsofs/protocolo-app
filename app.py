@@ -83,7 +83,7 @@ def cambio():
 def guardar_cambio_route():
     datos = {}
     campos = ['fecha_inicio','fecha_termino','supervisor_cliente','supervisor_metso','cliente','chancadora',
-        'altura_bowl_saliente','hora_inicio_h','hora_inicio_m','correo_destino',
+        'head_saliente','bowl_saliente','altura_bowl_saliente','hora_inicio_h','hora_inicio_m','correo_destino',
         'anillo_roscas_estado','anillo_roscas_obs',
         'hidraulico_nivel_estado','hidraulico_nivel_obs',
         'gap_aro_v1','gap_aro_v2','gap_aro_v3',
@@ -149,7 +149,7 @@ def guardar_cambio_route():
         'prot_din_fuga','prot_din_fuga_obs',
         'contrapeso_estado','contrapeso_obs',
         'sello_ut_estado','sello_ut_obs',
-        'altura_bowl_entrante',
+        'head_entrante','bowl_entrante','altura_bowl_entrante',
         'hora_fin_h','hora_fin_m','recomendaciones']
     for campo in campos:
         valor = request.form.get(campo, '')
