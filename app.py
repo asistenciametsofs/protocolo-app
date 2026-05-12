@@ -371,6 +371,40 @@ def descargar_reporte(tipo, id):
         nombre = f"Cambio_{datos.get('chancadora','X')}.docx"
     return send_file(ruta, as_attachment=True, download_name=nombre)
 
+@app.route('/dashboard')
+def dashboard():
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    c.execute("SELECT COUNT(*) FROM armado_hb")
+    total_armado = c.fetchone()[0]
+    
+    c.execute("SELECT COUNT(*) FROM cambio_hb")
+    total_cambio = c.fetchone()[0]
+    
+    c.execute("SELECT COUNT(*) FROM armado_hb WHERE upper_bushing_cambio = 'SI'")
+    ub_cambio = c.fetchone()[0]
+    
+    c.execute("SELECT COUNT(*) FROM cambio_hb WHERE sl_cambio_ahora = 'SI'")
+    sl_cambio = c.fetchone()[0]
+    
+    c.execute("SELECT cliente, COUNT(*) as total FROM armado_hb GROUP BY cliente ORDER BY total DESC")
+    clientes = c.fetchall()
+    
+    c.execute("SELECT chancadora, COUNT(*) as total FROM cambio_hb GROUP BY chancadora ORDER BY total DESC")
+    chancadoras = c.fetchall()
+    
+    conn.close()
+    
+    return render_template('dashboard.html',
+        total_armado=total_armado,
+        total_cambio=total_cambio,
+        ub_cambio=ub_cambio,
+        sl_cambio=sl_cambio,
+        clientes=clientes,
+        chancadoras=chancadoras
+    )
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
