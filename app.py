@@ -223,18 +223,12 @@ def tendencias():
     feed_medida = []
 
     if tab == 'armado' and codigo:
-        from database import get_db
-        conn = get_db()
+        import psycopg2
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
         c = conn.cursor()
-        campo_filtro = 'id_bowl' if tipo_filtro == 'id_bowl' else 'id_head'
-        c.execute(f'''SELECT fecha_registro,
-            upper_A1, upper_B1, upper_A2, upper_B2, upper_A3, upper_B3,
-            lower_A1, lower_B1, lower_A2, lower_B2, lower_A3, lower_B3,
-            lower_A4, lower_B4, lower_A5, lower_B5, lower_A6, lower_B6,
-            feed_plate_altura
-            FROM armado_hb
-            WHERE {campo_filtro} = ?
-            ORDER BY fecha_registro ASC''', (codigo,))
+        campo_filtro = 'id_bowl' if tipo_filtro == 'id_bowl' else 'id_head'        
+        query_armado = "SELECT fecha_registro, upper_A1, upper_B1, upper_A2, upper_B2, upper_A3, upper_B3, lower_A1, lower_B1, lower_A2, lower_B2, lower_A3, lower_B3, lower_A4, lower_B4, lower_A5, lower_B5, lower_A6, lower_B6, feed_plate_altura FROM armado_hb WHERE " + campo_filtro + " = %s ORDER BY fecha_registro ASC"
+        c.execute(query_armado, (codigo,))
         rows = c.fetchall()
         conn.close()
         upper = rows
@@ -271,22 +265,11 @@ def tendencias():
     gp1 = gp2 = gp3 = gp4 = gp5 = gp6 = []
 
     if tab == 'cambio' and codigo_cambio:
-        from database import get_db
-        conn = get_db()
+        import psycopg2
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
         c = conn.cursor()
-        c.execute('''SELECT fecha_registro,
-            socket_B1, socket_A1, socket_B2, socket_A2,
-            socket_B3, socket_A3, socket_B4, socket_A4,
-            socket_B5, socket_A5, socket_B6, socket_A6,
-            sl_gap_interior, sl_gap_exterior,
-            socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
-            mfl_med_A, mfl_med_B, mfl_med_C, mfl_med_D,
-            mfl_med_E, mfl_med_F, mfl_med_G,
-            gp1_medida, gp2_medida, gp3_medida,
-            gp4_medida, gp5_medida, gp6_medida
-            FROM cambio_hb
-            WHERE chancadora = ?
-            ORDER BY fecha_registro ASC''', (codigo_cambio,))
+        query_cambio = "SELECT fecha_registro, socket_B1, socket_A1, socket_B2, socket_A2, socket_B3, socket_A3, socket_B4, socket_A4, socket_B5, socket_A5, socket_B6, socket_A6, sl_gap_interior, sl_gap_exterior, socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270, mfl_med_A, mfl_med_B, mfl_med_C, mfl_med_D, mfl_med_E, mfl_med_F, mfl_med_G, gp1_medida, gp2_medida, gp3_medida, gp4_medida, gp5_medida, gp6_medida FROM cambio_hb WHERE chancadora = %s ORDER BY fecha_registro ASC"
+        c.execute(query_cambio, (codigo_cambio,))
         rows = c.fetchall()
         conn.close()
         cambio_data = rows
