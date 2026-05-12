@@ -147,7 +147,13 @@
                 <div class="filtro-row">
                     <div style="flex:1">
                         <label>Chancadora</label>
-                        <input type="text" name="codigo_cambio" value="{{ codigo_cambio }}" placeholder="Ej: CR011, CR012...">
+                        <select name="codigo_cambio">
+                            <option value="">Seleccionar...</option>
+                            <option value="CR011" {{ 'selected' if codigo_cambio == 'CR011' }}>CR011</option>
+                            <option value="CR012" {{ 'selected' if codigo_cambio == 'CR012' }}>CR012</option>
+                            <option value="CR013" {{ 'selected' if codigo_cambio == 'CR013' }}>CR013</option>
+                            <option value="CR024" {{ 'selected' if codigo_cambio == 'CR024' }}>CR024</option>
+                        </select>
                     </div>
                     <button type="submit" class="btn-filtrar">🔍 Ver</button>
                 </div>
