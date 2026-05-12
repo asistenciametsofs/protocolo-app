@@ -125,8 +125,8 @@ def add_metro_tabla(doc, titulo, mediciones, header_color='E8F0FE', label_color=
     for punto, a, b in mediciones:
         row = tabla.add_row()
         normal_cell(row.cells[0], punto, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
-        normal_cell(row.cells[1], str(a) if a else '-', align=WD_ALIGN_PARAGRAPH.CENTER)
-        normal_cell(row.cells[2], str(b) if b else '-', align=WD_ALIGN_PARAGRAPH.CENTER)
+        normal_cell(row.cells[1], str(a) if a is not None else '-', align=WD_ALIGN_PARAGRAPH.CENTER)
+        normal_cell(row.cells[2], str(b) if b is not None else '-', align=WD_ALIGN_PARAGRAPH.CENTER)
     doc.add_paragraph()
 
 def add_cotas_tabla(doc, titulo, datos, prefijo):
@@ -150,13 +150,19 @@ def add_cotas_tabla(doc, titulo, datos, prefijo):
 def add_imagen(doc, ruta):
     if os.path.exists(ruta):
         try:
+            from PIL import Image
+            import io
+            img = Image.open(ruta)
+            img.thumbnail((600, 400))
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG', optimize=True, quality=50)
+            buffer.seek(0)
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run()
-            run.add_picture(ruta, width=Cm(8))
+            run.add_picture(buffer, width=Cm(8))
         except:
             pass
-
 # ══════════════════════════════════════════════════════════════
 # GENERADOR ARMADO
 # ══════════════════════════════════════════════════════════════
