@@ -363,6 +363,12 @@ def descargar_reporte(tipo, id):
     if not registro:
         return 'No encontrado', 404
     datos = dict(registro)
+    # Normalizar claves para compatibilidad PostgreSQL
+    datos_norm = {}
+    for k, v in datos.items():
+        datos_norm[k] = v
+        datos_norm[k.lower()] = v
+    datos = datos_norm
     if tipo == 'armado':
         ruta = generar_word_armado(datos)
         nombre = f"Armado_{datos.get('equipo','X')}.docx"
