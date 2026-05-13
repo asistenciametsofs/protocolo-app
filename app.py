@@ -363,6 +363,7 @@ def descargar_reporte(tipo, id):
     if not registro:
         return 'No encontrado', 404
     datos = dict(registro)
+    print(f'DEBUG socket_B1: {datos.get("socket_b1")} tipo: {type(datos.get("socket_b1"))}')
     # Normalizar claves para compatibilidad PostgreSQL
     datos_norm = {}
     for k, v in datos.items():
