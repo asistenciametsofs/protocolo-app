@@ -369,6 +369,10 @@ def descargar_reporte(tipo, id):
     for k, v in datos.items():
         datos_norm[k] = v
         datos_norm[k.lower()] = v
+        # Reconstruir con mayúsculas para word_generator
+        partes = k.split('_')
+        clave_mixed = partes[0] + '_' + '_'.join(p[0].upper() + p[1:] if len(p) > 1 else p.upper() for p in partes[1:]) if len(partes) > 1 else k
+        datos_norm[clave_mixed] = v    
     datos = datos_norm
     if tipo == 'armado':
         ruta = generar_word_armado(datos)
