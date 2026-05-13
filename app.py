@@ -38,15 +38,21 @@ def guardar_armado_route():
                     datos[campo] = valor
         except:
             datos[campo] = valor
-
+    
     os.makedirs('static/fotos', exist_ok=True)
     fotos_paths = {}
     for key in request.files:
         foto = request.files[key]
         if foto and foto.filename:
-            ext = foto.filename.rsplit('.', 1)[-1] if '.' in foto.filename else 'jpg'
-            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.{ext}"
-            foto.save(nombre_foto)
+            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.jpg"
+            try:
+                from PIL import Image
+                import io
+                img = Image.open(foto)
+                img.thumbnail((800, 600))
+                img.save(nombre_foto, 'JPEG', quality=50, optimize=True)
+            except:
+                foto.save(nombre_foto)
             fotos_paths[f'foto_path_{key}'] = nombre_foto
 
     guardar_armado(datos)
@@ -171,9 +177,15 @@ def guardar_cambio_route():
     for key in request.files:
         foto = request.files[key]
         if foto and foto.filename:
-            ext = foto.filename.rsplit('.', 1)[-1] if '.' in foto.filename else 'jpg'
-            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.{ext}"
-            foto.save(nombre_foto)
+            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.jpg"
+            try:
+                from PIL import Image
+                import io
+                img = Image.open(foto)
+                img.thumbnail((800, 600))
+                img.save(nombre_foto, 'JPEG', quality=50, optimize=True)
+            except:
+                foto.save(nombre_foto)
             fotos_paths[f'foto_path_{key}'] = nombre_foto
 
     guardar_cambio(datos)
