@@ -615,12 +615,28 @@ function tomarFoto(inputId) {
 function previewFoto(input) {
     const id = input.id;
     const preview = document.getElementById('prev_' + id);
-    if (!preview) return;
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = e => {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const max = 600;
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > max) { h = h * max / w; w = max; } }
+                else { if (h > max) { w = w * max / h; h = max; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                canvas.toBlob(blob => {
+                    const file = new File([blob], 'foto.jpg', {type: 'image/jpeg'});
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                }, 'image/jpeg', 0.4);
+                preview.src = canvas.toDataURL('image/jpeg', 0.4);
+                preview.style.display = 'block';
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
     }
