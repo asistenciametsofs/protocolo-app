@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente IA — Metso MP1250</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
+
+        .header { background: white; color: black; padding: 16px 20px; text-align: center; border-bottom: 4px solid black; }
+        .header .metso-brand { font-weight: 900; color: black; font-size: 22px; letter-spacing: 2px; }
+        .header h1 { font-size: 16px; color: #333; margin-top: 4px; }
+        .header a { font-size: 13px; color: #1a3a5c; text-decoration: none; display: inline-block; margin-top: 6px; }
+
+        .flash { background: #d4edda; color: #155724; padding: 10px 16px; font-size: 13px; text-align: center; }
+        .flash.error { background: #f8d7da; color: #721c24; }
+
+        .main { display: flex; flex: 1; max-width: 1100px; margin: 20px auto; width: 100%; padding: 0 16px; gap: 20px; }
+
+        /* ── Panel izquierdo: documentos ── */
+        .panel-docs { width: 300px; min-width: 300px; display: flex; flex-direction: column; gap: 16px; }
+
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 15px; color: #1a3a5c; margin-bottom: 12px; }
+        .card p  { font-size: 13px; color: #666; margin-bottom: 12px; }
+
+        .upload-form label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; font-weight: bold; }
+        .upload-form input[type="text"],
+        .upload-form input[type="file"] {
+            width: 100%; padding: 8px 10px; border: 1px solid #ddd;
+            border-radius: 6px; font-size: 13px; margin-bottom: 10px;
+        }
+        .btn-upload { width: 100%; padding: 10px; background: #1a3a5c; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .btn-upload:hover { background: #0f2540; }
+
+        .doc-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .doc-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .doc-info { flex: 1; min-width: 0; }
+        .doc-name { font-size: 13px; font-weight: bold; color: #1a3a5c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .doc-meta { font-size: 11px; color: #999; margin-top: 2px; }
+        .btn-delete { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 16px; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; }
+        .btn-delete:hover { background: #fee2e2; }
+        .no-docs { font-size: 13px; color: #999; text-align: center; padding: 12px 0; }
+
+        /* ── Panel derecho: chat ── */
+        .panel-chat { flex: 1; display: flex; flex-direction: column; }
+        .chat-box { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 600px; }
+        .chat-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #28a745; flex-shrink: 0; }
+        .status-dot.off { background: #ccc; }
+        .chat-header-text { font-size: 14px; font-weight: bold; color: #1a3a5c; flex: 1; }
+        .doc-count-badge { font-size: 11px; background: #e8f0fe; color: #1a3a5c; padding: 3px 8px; border-radius: 10px; }
+
+        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+        .welcome { text-align: center; padding: 40px 20px; color: #999; }
+        .welcome .icon { font-size: 40px; display: block; margin-bottom: 12px; }
+        .welcome p { font-size: 14px; line-height: 1.6; }
+
+        .msg { display: flex; gap: 10px; max-width: 88%; }
+        .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+        .msg-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+        .msg.bot  .msg-avatar { background: #1a3a5c; color: white; }
+        .msg.user .msg-avatar { background: #e8f0fe; color: #1a3a5c; }
+        .msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.6; border: 1px solid #eee; white-space: pre-wrap; word-break: break-word; }
+        .msg.bot  .msg-bubble { background: white; }
+        .msg.user .msg-bubble { background: #e8f0fe; border-color: #c5d8f5; }
+        .msg-bubble.loading { color: #999; font-style: italic; }
+
+        .suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 12px; }
+        .chip { padding: 5px 12px; font-size: 12px; border: 1px solid #ddd; border-radius: 20px; background: white; color: #555; cursor: pointer; font-family: Arial, sans-serif; transition: background 0.15s; }
+        .chip:hover { background: #f0f0f0; }
+
+        .input-row { padding: 14px 20px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; align-items: flex-end; }
+        .input-row textarea { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; resize: none; min-height: 42px; max-height: 120px; outline: none; }
+        .input-row textarea:focus { border-color: #1a3a5c; }
+        .btn-send { width: 42px; height: 42px; background: #1a3a5c; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .btn-send:hover:not(:disabled) { background: #0f2540; }
+        .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+
+        @media (max-width: 700px) {
+            .main { flex-direction: column; }
+            .panel-docs { width: 100%; min-width: unset; }
+            .chat-box { height: 480px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span class="metso-brand">METSO</span>
+    <h1>🤖 Asistente IA — Protocolos MP1250</h1>
+    <a href="/">← Volver al inicio</a>
+</div>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="flash {% if '❌' in msg %}error{% endif %}">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="main">
+
+    <!-- ── Panel documentos ── -->
+    <div class="panel-docs">
+
+        <div class="card">
+            <h2>📄 Subir documento</h2>
+            <p>Sube PDFs o TXTs con procedimientos. Quedan guardados para todos.</p>
+            <form class="upload-form" method="POST" action="/chat/subir" enctype="multipart/form-data">
+                <label>Tu nombre (opcional)</label>
+                <input type="text" name="subido_por" placeholder="Ej: Jason" maxlength="50">
+                <label>Archivo (PDF, TXT, MD, CSV)</label>
+                <input type="file" name="documento" accept=".pdf,.txt,.md,.csv,.docx" required>
+                <button type="submit" class="btn-upload">⬆️ Subir documento</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>📚 Documentos disponibles ({{ documentos|length }})</h2>
+            {% if documentos %}
+                <ul class="doc-list">
+                {% for doc in documentos %}
+                    <li class="doc-item">
+                        <div class="doc-info">
+                            <div class="doc-name" title="{{ doc[1] }}">
+                                {% if doc[2] == 'pdf' %}📕{% else %}📄{% endif %}
+                                {{ doc[1] }}
+                            </div>
+                            <div class="doc-meta">Subido por {{ doc[3] }} · {{ doc[4].strftime('%d/%m/%Y') if doc[4] else '' }}</div>
+                        </div>
+                        <form method="POST" action="/chat/eliminar/{{ doc[0] }}" onsubmit="return confirm('¿Eliminar este documento?')">
+                            <button type="submit" class="btn-delete" title="Eliminar">🗑️</button>
+                        </form>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-docs">Aún no hay documentos.<br>Sube el primero arriba.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- ── Panel chat ── -->
+    <div class="panel-chat">
+        <div class="chat-box">
+            <div class="chat-header">
+                <div class="status-dot {% if not documentos %}off{% endif %}" id="status-dot"></div>
+                <span class="chat-header-text">Asistente de procedimientos</span>
+                <span class="doc-count-badge" id="doc-badge">
+                    {% if documentos %}{{ documentos|length }} doc{% if documentos|length != 1 %}s{% endif %}{% else %}Sin documentos{% endif %}
+                </span>
+            </div>
+
+            <div class="messages" id="messages">
+                {% if not documentos %}
+                <div class="welcome">
+                    <span class="icon">📂</span>
+                    <p>Aún no hay documentos cargados.<br>Sube un procedimiento en el panel izquierdo para empezar.</p>
+                </div>
+                {% else %}
+                <div class="welcome">
+                    <span class="icon">🤖</span>
+                    <p>Hola, soy el Asistente IA de Metso.<br>Tengo acceso a <strong>{{ documentos|length }} documento{% if documentos|length != 1 %}s{% endif %}</strong>. ¿En qué te ayudo?</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if documentos %}
+            <div class="suggestions">
+                <button class="chip" onclick="setQ('¿Cuáles son los pasos principales del procedimiento?')">Pasos principales</button>
+                <button class="chip" onclick="setQ('¿Qué medidas de seguridad se deben tomar?')">Seguridad</button>
+                <button class="chip" onclick="setQ('¿Cuáles son los torques recomendados?')">Torques</button>
+                <button class="chip" onclick="setQ('Haz un resumen del documento')">Resumen</button>
+            </div>
+            {% endif %}
+
+            <div class="input-row">
+                <textarea id="pregunta" placeholder="{% if documentos %}Escribe tu pregunta sobre los procedimientos...{% else %}Sube un documento primero...{% endif %}"
+                    {% if not documentos %}disabled{% endif %}
+                    rows="1"></textarea>
+                <button class="btn-send" id="btn-send" onclick="enviar()" disabled title="Enviar">➤</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const preguntaEl = document.getElementById('pregunta');
+const btnSend    = document.getElementById('btn-send');
+const messagesEl = document.getElementById('messages');
+const tienesDocs = {{ 'true' if documentos else 'false' }};
+let historial = [];
+let cargando  = false;
+
+preguntaEl.addEventListener('input', () => {
+    preguntaEl.style.height = 'auto';
+    preguntaEl.style.height = Math.min(preguntaEl.scrollHeight, 120) + 'px';
+    btnSend.disabled = !preguntaEl.value.trim() || cargando || !tienesDocs;
+});
+
+preguntaEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!btnSend.disabled) enviar(); }
+});
+
+function setQ(txt) {
+    preguntaEl.value = txt;
+    preguntaEl.dispatchEvent(new Event('input'));
+    preguntaEl.focus();
+}
+
+function agregarMensaje(rol, texto, loading=false) {
+    // Quitar welcome si existe
+    const welcome = messagesEl.querySelector('.welcome');
+    if (welcome) welcome.remove();
+
+    const id = 'msg-' + Date.now();
+    const div = document.createElement('div');
+    div.className = 'msg ' + rol;
+    div.id = id;
+    const avatar = rol === 'user' ? 'Tú' : 'AI';
+    div.innerHTML = `
+        <div class="msg-avatar">${avatar}</div>
+        <div class="msg-bubble${loading ? ' loading' : ''}">${loading ? 'Consultando documentos...' : escHtml(texto)}</div>
+    `;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return id;
+}
+
+function actualizarMensaje(id, texto) {
+    const el = document.getElementById(id);
+    if (el) {
+        const b = el.querySelector('.msg-bubble');
+        b.classList.remove('loading');
+        b.textContent = texto;
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function escHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function enviar() {
+    const pregunta = preguntaEl.value.trim();
+    if (!pregunta || cargando) return;
+
+    cargando = true;
+    btnSend.disabled = true;
+    preguntaEl.value = '';
+    preguntaEl.style.height = 'auto';
+
+    historial.push({ role: 'user', content: pregunta });
+    agregarMensaje('user', pregunta);
+    const loadId = agregarMensaje('bot', '', true);
+
+    try {
+        const resp = await fetch('/chat/preguntar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pregunta, historial: historial.slice(0, -1) })
+        });
+        const data = await resp.json();
+
+        if (data.error) {
+            actualizarMensaje(loadId, '❌ ' + data.error);
+        } else {
+            actualizarMensaje(loadId, data.respuesta);
+            historial.push({ role: 'assistant', content: data.respuesta });
+        }
+    } catch(e) {
+        actualizarMensaje(loadId, '❌ Error de conexión. Intenta de nuevo.');
+    }
+
+    cargando = false;
+    btnSend.disabled = !preguntaEl.value.trim();
+}
+</script>
+
+</body>
+</html>

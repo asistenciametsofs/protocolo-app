@@ -436,6 +436,194 @@ def dashboard():
         chancadoras=chancadoras
     )
 
+# ============================================================
+# CHATBOT IA — pegar ANTES de la línea: if __name__ == '__main__':
+# ============================================================
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import requests as http_requests
+
+# ── Crear tabla de documentos si no existe ──────────────────
+def init_chat_db():
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS chat_documentos (
+                id SERIAL PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                contenido TEXT NOT NULL,
+                tipo TEXT DEFAULT 'texto',
+                subido_por TEXT DEFAULT 'admin',
+                fecha_subida TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        print('✅ Tabla chat_documentos lista')
+    except Exception as e:
+        print(f'❌ Error init_chat_db: {e}')
+
+with app.app_context():
+    init_chat_db()
+
+# ── Página principal del chat ───────────────────────────────
+@app.route('/chat')
+def chat():
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('SELECT id, nombre, tipo, subido_por, fecha_subida FROM chat_documentos ORDER BY fecha_subida DESC')
+        docs = c.fetchall()
+        conn.close()
+    except Exception as e:
+        print(f'Error cargando docs: {e}')
+        docs = []
+    return render_template('chat.html', documentos=docs)
+
+# ── Subir documento ─────────────────────────────────────────
+@app.route('/chat/subir', methods=['POST'])
+def chat_subir():
+    archivo = request.files.get('documento')
+    subido_por = request.form.get('subido_por', 'admin').strip() or 'admin'
+
+    if not archivo or not archivo.filename:
+        flash('❌ No se seleccionó ningún archivo')
+        return redirect(url_for('chat'))
+
+    nombre = archivo.filename
+    ext = nombre.rsplit('.', 1)[-1].lower() if '.' in nombre else ''
+
+    try:
+        if ext == 'pdf':
+            # Leer PDF con pdfplumber
+            import pdfplumber, io
+            contenido_bytes = archivo.read()
+            texto = ''
+            with pdfplumber.open(io.BytesIO(contenido_bytes)) as pdf:
+                for page in pdf.pages:
+                    t = page.extract_text()
+                    if t:
+                        texto += t + '\n'
+            if not texto.strip():
+                texto = '[PDF sin texto extraíble — puede ser imagen escaneada]'
+            tipo = 'pdf'
+        else:
+            # TXT, MD, CSV, DOCX básico
+            contenido_bytes = archivo.read()
+            try:
+                texto = contenido_bytes.decode('utf-8')
+            except:
+                texto = contenido_bytes.decode('latin-1', errors='ignore')
+            tipo = ext or 'texto'
+
+        # Truncar a 50.000 caracteres para no explotar la BD
+        texto = texto[:50000]
+
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute(
+            'INSERT INTO chat_documentos (nombre, contenido, tipo, subido_por) VALUES (%s, %s, %s, %s)',
+            (nombre, texto, tipo, subido_por)
+        )
+        conn.commit()
+        conn.close()
+        flash(f'✅ Documento "{nombre}" subido correctamente')
+    except Exception as e:
+        print(f'❌ Error subiendo doc: {e}')
+        flash(f'❌ Error al procesar el archivo: {str(e)}')
+
+    return redirect(url_for('chat'))
+
+# ── Eliminar documento ──────────────────────────────────────
+@app.route('/chat/eliminar/<int:doc_id>', methods=['POST'])
+def chat_eliminar(doc_id):
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('DELETE FROM chat_documentos WHERE id = %s', (doc_id,))
+        conn.commit()
+        conn.close()
+        flash('🗑️ Documento eliminado')
+    except Exception as e:
+        flash(f'❌ Error: {e}')
+    return redirect(url_for('chat'))
+
+# ── Endpoint AJAX para el chat ──────────────────────────────
+@app.route('/chat/preguntar', methods=['POST'])
+def chat_preguntar():
+    data = request.get_json()
+    pregunta = (data.get('pregunta') or '').strip()
+    historial = data.get('historial', [])   # lista de {role, content}
+
+    if not pregunta:
+        return {'error': 'Pregunta vacía'}, 400
+
+    # Cargar todos los documentos de la BD
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('SELECT nombre, contenido FROM chat_documentos ORDER BY fecha_subida DESC')
+        docs = c.fetchall()
+        conn.close()
+    except Exception as e:
+        return {'error': f'Error BD: {e}'}, 500
+
+    if not docs:
+        return {'respuesta': '⚠️ No hay documentos cargados aún. Ve a la sección de Asistente IA y sube los procedimientos primero.'}, 200
+
+    # Armar contexto con los documentos
+    contexto = ''
+    for nombre, contenido in docs:
+        contexto += f'\n\n=== DOCUMENTO: {nombre} ===\n{contenido}\n=== FIN {nombre} ===\n'
+
+    system_prompt = f"""Eres el Asistente IA de Metso para protocolos de chancadoras MP1250.
+Tienes acceso a los siguientes documentos de procedimientos de trabajo:
+{contexto}
+
+INSTRUCCIONES:
+- Responde SIEMPRE basándote en el contenido de los documentos.
+- Si la respuesta está en los documentos, cítala con claridad.
+- Si no está en los documentos, dilo explícitamente.
+- Responde en español, de forma clara y estructurada.
+- Si hay pasos numerados, mantenlos así.
+- Sé conciso pero completo."""
+
+    # Armar mensajes con historial
+    messages = []
+    for msg in historial[-10:]:   # últimos 10 mensajes para no pasar el límite
+        if msg.get('role') in ('user', 'assistant') and msg.get('content'):
+            messages.append({'role': msg['role'], 'content': msg['content']})
+    messages.append({'role': 'user', 'content': pregunta})
+
+    # Llamar a la API de Anthropic
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        return {'error': 'Falta configurar ANTHROPIC_API_KEY en las variables de entorno de Render'}, 500
+
+    try:
+        resp = http_requests.post(
+            'https://api.anthropic.com/v1/messages',
+            headers={
+                'x-api-key': api_key,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json'
+            },
+            json={
+                'model': 'claude-sonnet-4-20250514',
+                'max_tokens': 1500,
+                'system': system_prompt,
+                'messages': messages
+            },
+            timeout=30
+        )
+        resultado = resp.json()
+        respuesta = resultado['content'][0]['text']
+        return {'respuesta': respuesta}
+    except Exception as e:
+        print(f'❌ Error API Claude: {e}')
+        return {'error': f'Error al contactar la IA: {str(e)}'}, 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
