@@ -618,6 +618,7 @@ INSTRUCCIONES:
             timeout=30
         )
         resultado = resp.json()
+        print(f'🔍 Respuesta API: {resultado}')
         respuesta = resultado['content'][0]['text']
         return {'respuesta': respuesta}
     except Exception as e:
