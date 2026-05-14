@@ -52,14 +52,16 @@ def guardar_armado_route():
         foto = request.files[key]
         if foto and foto.filename:
             try:
+                print(f'📸 Subiendo foto {key} a Cloudinary...')
                 resultado = cloudinary.uploader.upload(
                     foto,
                     folder='protocolos',
                     transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
                 )
                 fotos_paths[f'foto_path_{key}'] = resultado['secure_url']
+                print(f'✅ Foto subida: {resultado["secure_url"]}')
             except Exception as e:
-                print(f'Error subiendo foto {key}: {e}')
+                print(f'❌ Error subiendo foto {key}: {e}')
 
     guardar_armado(datos)
     datos_word = dict(datos)
