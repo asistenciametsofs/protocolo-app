@@ -6,3 +6,4 @@ Pillow
 gevent
 cloudinary
 pdfplumber
+requests
