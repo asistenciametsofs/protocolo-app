@@ -58,7 +58,7 @@ def guardar_armado_route():
                     folder='protocolos',
                     transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
                 )
-                fotos_paths[f'foto_path_{key}'] = resultado['secure_url']
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
                 print(f'✅ Foto subida: {resultado["secure_url"]}')
             except Exception as e:
                 print(f'❌ Error subiendo foto {key}: {e}')
@@ -191,7 +191,7 @@ def guardar_cambio_route():
                     folder='protocolos',
                     transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
                 )
-                fotos_paths[f'foto_path_{key}'] = resultado['secure_url']
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
             except Exception as e:
                 print(f'Error subiendo foto {key}: {e}')
 
