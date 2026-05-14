@@ -624,6 +624,181 @@ INSTRUCCIONES:
     except Exception as e:
         print(f'❌ Error API Claude: {e}')
         return {'error': f'Error al contactar la IA: {str(e)}'}, 500
+@app.route('/informe')
+def informe():
+    return render_template('informe.html')
+
+@app.route('/informe/descargar/<chancadora>')
+def descargar_informe(chancadora):
+    import psycopg2
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.units import cm
+    import io
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('''SELECT * FROM cambio_hb WHERE chancadora = %s 
+                 ORDER BY fecha_registro DESC LIMIT 1''', (chancadora,))
+    cols = [desc[0] for desc in c.description]
+    row = c.fetchone()
+    conn.close()
+
+    if not row:
+        return f'No hay registros para {chancadora}', 404
+
+    d = dict(zip(cols, row))
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                           leftMargin=2*cm, rightMargin=2*cm,
+                           topMargin=2*cm, bottomMargin=2*cm)
+
+    styles = getSampleStyleSheet()
+    titulo_style = ParagraphStyle('titulo', parent=styles['Heading1'],
+                                  fontSize=16, fontName='Helvetica-Bold',
+                                  textColor=colors.black, spaceAfter=6)
+    subtitulo_style = ParagraphStyle('subtitulo', parent=styles['Heading2'],
+                                     fontSize=12, fontName='Helvetica-Bold',
+                                     textColor=colors.HexColor('#0f5132'),
+                                     spaceBefore=12, spaceAfter=6)
+    normal_style = ParagraphStyle('normal', parent=styles['Normal'],
+                                  fontSize=10, spaceAfter=4)
+
+    story = []
+
+    # Encabezado
+    story.append(Paragraph('METSO', ParagraphStyle('metso', parent=styles['Normal'],
+                            fontSize=20, fontName='Helvetica-Bold', spaceAfter=4)))
+    story.append(Paragraph(f'Informe Estado Chancadora {chancadora}', titulo_style))
+    story.append(Paragraph(f'Última intervención: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")}', normal_style))
+    story.append(Spacer(1, 0.5*cm))
+
+    def fila_estado(nombre, valor):
+        color = colors.HexColor('#d1e7dd') if str(valor).upper() in ['BUENO', 'NO'] else colors.HexColor('#f8d7da')
+        return [nombre, str(valor or '-')]
+
+    def tabla_simple(datos_tabla):
+        t = Table(datos_tabla, colWidths=[10*cm, 7*cm])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
+            ('PADDING', (0,0), (-1,-1), 6),
+        ]))
+        return t
+
+    # 1. Socket Liner
+    story.append(Paragraph('1. Estado de Socket Liner', subtitulo_style))
+    sl_data = [['Punto', 'B (0°)', 'A (90°)']]
+    for i in range(1, 7):
+        sl_data.append([f'B{i}/A{i}', str(d.get(f'socket_b{i}') or '-'), str(d.get(f'socket_a{i}') or '-')])
+    t = Table(sl_data, colWidths=[6*cm, 5.5*cm, 5.5*cm])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.3*cm))
+    story.append(tabla_simple([
+        ['¿Se cambió?', str(d.get('sl_cambio_ahora') or '-')],
+        ['¿Se recomienda cambio?', str(d.get('sl_cambio_siguiente') or '-')],
+    ]))
+
+    # 2. Socket
+    story.append(Paragraph('2. Estado de Socket', subtitulo_style))
+    story.append(tabla_simple([
+        ['Fisuras', str(d.get('socket_fisuras_estado') or '-')],
+        ['GAP 0°', str(d.get('socket_gap_0') or '-') + ' mm'],
+        ['GAP 90°', str(d.get('socket_gap_90') or '-') + ' mm'],
+        ['GAP 180°', str(d.get('socket_gap_180') or '-') + ' mm'],
+        ['GAP 270°', str(d.get('socket_gap_270') or '-') + ' mm'],
+        ['¿Se cambió?', str(d.get('socket_cambio_ahora') or '-')],
+        ['¿Se recomienda cambio?', str(d.get('socket_cambio_siguiente') or '-')],
+    ]))
+
+    # 3. MFL
+    story.append(Paragraph('3. Main Frame Liners', subtitulo_style))
+    mfl_data = [['A', 'B', 'C', 'D', 'E', 'F', 'G']]
+    mfl_data.append([str(d.get(f'mfl_med_{x}') or '-') for x in ['a','b','c','d','e','f','g']])
+    t = Table(mfl_data, colWidths=[2.4*cm]*7)
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.3*cm))
+    story.append(tabla_simple([
+        ['Medida promedio', str(d.get('mfl_medida') or '-') + ' mm'],
+        ['¿Se cambió?', str(d.get('mfl_cambio_ahora') or '-')],
+        ['¿Se recomienda cambio?', str(d.get('mfl_cambio_siguiente') or '-')],
+    ]))
+
+    # 4. Monturas
+    story.append(Paragraph('4. Monturas', subtitulo_style))
+    story.append(tabla_simple([
+        ['Barras de soporte', str(d.get('montura_barras_estado') or '-')],
+        ['Chocky bar', str(d.get('montura_chocky_estado') or '-')],
+        ['¿Se cambió?', str(d.get('montura_cambio_ahora') or '-')],
+        ['¿Se recomienda cambio?', str(d.get('montura_cambio_siguiente') or '-')],
+    ]))
+
+    # 5. Guard Pins
+    story.append(Paragraph('5. Guard Pins', subtitulo_style))
+    gp_data = [['Guard Pin', 'Medida', '¿Se cambió?']]
+    for i in range(1, 7):
+        gp_data.append([f'GP {i}', str(d.get(f'gp{i}_medida') or '-'), str(d.get(f'gp{i}_cambio') or '-')])
+    t = Table(gp_data, colWidths=[5.5*cm, 5.5*cm, 6*cm])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t)
+
+    # 6. Protector Estático
+    story.append(Paragraph('6. Protector Estático', subtitulo_style))
+    story.append(tabla_simple([
+        ['Inspección', str(d.get('prot_estatico_estado') or '-')],
+        ['Observaciones', str(d.get('prot_estatico_obs') or '-')],
+    ]))
+
+    # 7. Protector Dinámico
+    story.append(Paragraph('7. Protector Dinámico', subtitulo_style))
+    story.append(tabla_simple([
+        ['Inspección', str(d.get('prot_dinamico_estado') or '-')],
+        ['¿Fuga de aceite?', str(d.get('prot_din_fuga') or '-')],
+        ['Observaciones', str(d.get('prot_dinamico_obs') or '-')],
+    ]))
+
+    # 8. Recomendaciones
+    story.append(Paragraph('8. Recomendaciones para la siguiente intervención', subtitulo_style))
+    story.append(Paragraph(str(d.get('recomendaciones') or 'Sin recomendaciones.'), normal_style))
+
+    doc.build(story)
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True,
+                    download_name=f'Informe_{chancadora}_{d.get("fecha_registro","")}.pdf',
+                    mimetype='application/pdf')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
