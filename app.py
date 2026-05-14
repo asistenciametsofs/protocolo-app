@@ -597,34 +597,36 @@ INSTRUCCIONES:
             messages.append({'role': msg['role'], 'content': msg['content']})
     messages.append({'role': 'user', 'content': pregunta})
 
-    # Llamar a la API de Anthropic
-    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    # Llamar a la API de Gemini
+    api_key = os.environ.get('GEMINI_API_KEY')
     if not api_key:
-        return {'error': 'Falta configurar ANTHROPIC_API_KEY en las variables de entorno de Render'}, 500
+        return {'error': 'Falta configurar GEMINI_API_KEY en Render'}, 500
 
     try:
         resp = http_requests.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={
-                'x-api-key': api_key,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json'
-            },
+            f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}',
+            headers={'Content-Type': 'application/json'},
             json={
-                'model': 'claude-sonnet-4-5',
-                'max_tokens': 1500,
-                'system': system_prompt,
-                'messages': messages
+                'contents': [
+                    {
+                        'parts': [{'text': system_prompt + '\n\nPREGUNTA: ' + pregunta}],
+                        'role': 'user'
+                    }
+                ],
+                'generationConfig': {
+                    'temperature': 0.3,
+                    'maxOutputTokens': 1500
+                }
             },
             timeout=30
         )
         resultado = resp.json()
-        print(f'🔍 Respuesta API: {resultado}')
-        respuesta = resultado['content'][0]['text']
+        print(f'🔍 Gemini response: {resultado}')
+        respuesta = resultado['candidates'][0]['content']['parts'][0]['text']
         return {'respuesta': respuesta}
     except Exception as e:
-        print(f'❌ Error API Claude: {e}')
-        return {'error': f'Error al contactar la IA: {str(e)}'}, 500
+        print(f'❌ Error Gemini: {e}')
+        return {'error': f'Error al contactar Gemini: {str(e)}'}, 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
