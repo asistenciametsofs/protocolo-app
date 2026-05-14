@@ -149,21 +149,32 @@ def add_cotas_tabla(doc, titulo, datos, prefijo):
     doc.add_paragraph()
 
 def add_imagen(doc, ruta):
-    if os.path.exists(ruta):
-        try:
-            from PIL import Image
-            import io
+    if not ruta:
+        return
+    try:
+        import io
+        from PIL import Image
+        if str(ruta).startswith('http'):
+            import urllib.request
+            with urllib.request.urlopen(ruta) as response:
+                img_data = io.BytesIO(response.read())
+            img = Image.open(img_data)
+        elif os.path.exists(str(ruta)):
             img = Image.open(ruta)
-            img.thumbnail((600, 400))
-            buffer = io.BytesIO()
-            img.save(buffer, format='PNG', optimize=True, quality=50)
-            buffer.seek(0)
-            p = doc.add_paragraph()
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run = p.add_run()
-            run.add_picture(buffer, width=Cm(8))
-        except:
-            pass
+        else:
+            return
+        img.thumbnail((600, 400))
+        buffer = io.BytesIO()
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+        img.save(buffer, format='JPEG', quality=60)
+        buffer.seek(0)
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run()
+        run.add_picture(buffer, width=Cm(8))
+    except Exception as e:
+        print(f'Error imagen {ruta}: {e}')
 # ══════════════════════════════════════════════════════════════
 # GENERADOR ARMADO
 # ══════════════════════════════════════════════════════════════
