@@ -48,7 +48,8 @@ def normal_cell(cell, text, size=9, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT, b
     p.alignment = align
     run = p.add_run(str(text) if text else '')
     run.font.size = Pt(size)
-    run.bold = bold
+    if bold:
+      run.bold = True
     if bg:
         set_cell_bg(cell, bg)
     set_cell_borders(cell)
