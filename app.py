@@ -5,6 +5,14 @@ from email_sender import enviar_correo
 import os
 import uuid
 import threading
+import cloudinary
+import cloudinary.uploader
+
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+)
 
 app = Flask(__name__)
 app.secret_key = 'metso1250secretkey'
@@ -38,24 +46,20 @@ def guardar_armado_route():
                     datos[campo] = valor
         except:
             datos[campo] = valor
-    
-    os.makedirs('static/fotos', exist_ok=True)
+        
     fotos_paths = {}
     for key in request.files:
         foto = request.files[key]
         if foto and foto.filename:
-            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.jpg"
             try:
-                from PIL import Image
-                import io
-                img = Image.open(foto)
-                img.thumbnail((400, 300))
-                if img.mode in ('RGBA', 'P'):
-                    img = img.convert('RGB')
-                img.save(nombre_foto, 'JPEG', quality=30, optimize=True)
-            except:
-                foto.save(nombre_foto)
-            fotos_paths[f'foto_path_{key}'] = nombre_foto
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
 
     guardar_armado(datos)
     datos_word = dict(datos)
@@ -173,24 +177,20 @@ def guardar_cambio_route():
                     datos[campo] = valor
         except:
             datos[campo] = valor
-
-    os.makedirs('static/fotos', exist_ok=True)
+    
     fotos_paths = {}
     for key in request.files:
         foto = request.files[key]
         if foto and foto.filename:
-            nombre_foto = f"static/fotos/{key}_{uuid.uuid4().hex[:8]}.jpg"
             try:
-                from PIL import Image
-                import io
-                img = Image.open(foto)
-                img.thumbnail((400, 300))
-                if img.mode in ('RGBA', 'P'):
-                    img = img.convert('RGB')
-                img.save(nombre_foto, 'JPEG', quality=30, optimize=True)
-            except:
-                foto.save(nombre_foto)
-            fotos_paths[f'foto_path_{key}'] = nombre_foto
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
 
     guardar_cambio(datos)
     datos_word = dict(datos)
