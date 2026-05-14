@@ -66,6 +66,7 @@ def guardar_armado_route():
     guardar_armado(datos)
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
+    print(f'FOTOS: {list(fotos_paths.keys())}')
     ruta_word = generar_word_armado(datos_word)
 
     # Recopilar correos seleccionados
