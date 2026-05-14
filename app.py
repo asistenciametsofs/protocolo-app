@@ -49,8 +49,10 @@ def guardar_armado_route():
                 from PIL import Image
                 import io
                 img = Image.open(foto)
-                img.thumbnail((800, 600))
-                img.save(nombre_foto, 'JPEG', quality=50, optimize=True)
+                img.thumbnail((400, 300))
+                if img.mode in ('RGBA', 'P'):
+                    img = img.convert('RGB')
+                img.save(nombre_foto, 'JPEG', quality=30, optimize=True)
             except:
                 foto.save(nombre_foto)
             fotos_paths[f'foto_path_{key}'] = nombre_foto
