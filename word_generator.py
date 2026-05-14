@@ -372,7 +372,7 @@ def generar_word_armado(datos):
         add_section_title(doc, 'REGISTRO FOTOGRÁFICO')
         for foto_key in fotos:
             ruta_foto = datos[foto_key]
-            if ruta_foto and os.path.exists(ruta_foto):
+            if ruta_foto:
                 nombre = foto_key.replace('foto_path_','').replace('_',' ').upper()
                 doc.add_paragraph(nombre)
                 add_imagen(doc, ruta_foto)
@@ -629,7 +629,7 @@ def generar_word_cambio(datos):
         add_section_title_green(doc, 'REGISTRO FOTOGRÁFICO')
         for foto_key in fotos:
             ruta_foto = datos[foto_key]
-            if ruta_foto and os.path.exists(ruta_foto):
+            if ruta_foto:
                 nombre = foto_key.replace('foto_path_','').replace('_',' ').upper()
                 doc.add_paragraph(nombre)
                 add_imagen(doc, ruta_foto)
