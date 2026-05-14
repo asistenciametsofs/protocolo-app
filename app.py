@@ -508,6 +508,7 @@ def chat_subir():
             if not texto.strip():
                 texto = '[PDF sin texto extraíble — puede ser imagen escaneada]'
             tipo = 'pdf'
+            print(f'📄 Texto extraído: {len(texto)} caracteres, páginas procesadas')
         else:
             # TXT, MD, CSV, DOCX básico
             contenido_bytes = archivo.read()
