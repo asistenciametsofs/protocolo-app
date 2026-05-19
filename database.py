@@ -21,7 +21,9 @@ def init_db():
     c.execute(f'''CREATE TABLE IF NOT EXISTS armado_hb (
         id {tipo_id},
         fecha_registro TEXT,
-        equipo TEXT, cliente TEXT, id_bowl TEXT, id_head TEXT,
+        equipo TEXT, cliente TEXT, 
+        id_bowl TEXT, id_bowl_turno TEXT, id_bowl_forro TEXT,
+        id_head TEXT, id_head_turno TEXT, id_head_forro TEXT,
         supervisor_metso TEXT, supervisor_cliente TEXT,
         fecha_inicio TEXT, fecha_termino TEXT,
         hora_inicio_h TEXT, hora_inicio_m TEXT,
@@ -140,7 +142,7 @@ def init_db():
         ms_B1 REAL, ms_B2 REAL, ms_B3 REAL, ms_B4 REAL,
         ms_C1 REAL, ms_C2 REAL, ms_C3 REAL, ms_C4 REAL,
         ms_D1 REAL, ms_D2 REAL, ms_D3 REAL, ms_D4 REAL,
-        mfl_pernos_estado TEXT, mfl_pernos_obs TEXT,
+        mfl_tipo_material TEXT, mfl_pernos_estado TEXT, mfl_pernos_obs TEXT,
         mfl_medida TEXT,
         mfl_med_A REAL, mfl_med_B REAL, mfl_med_C REAL, mfl_med_D REAL,
         mfl_med_E REAL, mfl_med_F REAL, mfl_med_G REAL,
@@ -194,7 +196,7 @@ def guardar_cambio(datos):
               list(datos.values()))
     conn.commit()
     conn.close()
-    
+
 def obtener_registros(tipo, filtros=None):
     conn = get_db()
     c = conn.cursor()

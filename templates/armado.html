@@ -137,10 +137,42 @@
         </div>
         <div class="grid2">
             <div><label>Equipo</label><input type="text" name="equipo" placeholder="MP1250"></div>
-            <div><label>ID Bowl</label><input type="text" name="id_bowl"></div>
+            <div>
+                <label>ID Bowl</label>
+                <input type="text" name="id_bowl" placeholder="Ej: B5">
+                <label style="margin-top:6px;">¿Se culminó en el turno?</label>
+                <select name="id_bowl_turno">
+                    <option value="">-</option>
+                    <option>SI</option>
+                    <option>NO</option>
+                </select>
+                <label style="margin-top:6px;">Tipo de forro Bowl</label>
+                <select name="id_bowl_forro">
+                    <option value="">-</option>
+                    <option>METSO</option>
+                    <option>MX2</option>
+                    <option>Otro</option>
+                </select>
+            </div>
         </div>
         <div class="grid2">
-            <div><label>ID Head</label><input type="text" name="id_head"></div>
+            <div>
+                <label>ID Head</label>
+                <input type="text" name="id_head" placeholder="Ej: H1">
+                <label style="margin-top:6px;">¿Se culminó en el turno?</label>
+                <select name="id_head_turno">
+                    <option value="">-</option>
+                    <option>SI</option>
+                    <option>NO</option>
+                </select>
+                <label style="margin-top:6px;">Tipo de forro Head</label>
+                <select name="id_head_forro">
+                    <option value="">-</option>
+                    <option>METSO</option>
+                    <option>MX2</option>
+                    <option>Otro</option>
+                </select>
+            </div>
         </div>
         <label>Correos destino del reporte</label>
         <div class="checkbox-group">
