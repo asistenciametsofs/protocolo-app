@@ -92,6 +92,7 @@ def init_db():
         fecha_inicio TEXT, fecha_termino TEXT,
         supervisor_cliente TEXT, supervisor_metso TEXT,
         cliente TEXT, chancadora TEXT,
+        head_saliente TEXT, bowl_saliente TEXT,
         altura_bowl_saliente REAL,
         hora_inicio_h TEXT, hora_inicio_m TEXT,
         correo_destino TEXT,
@@ -162,8 +163,8 @@ def init_db():
         prot_din_fuga TEXT, prot_din_fuga_obs TEXT,
         contrapeso_estado TEXT, contrapeso_obs TEXT,
         sello_ut_estado TEXT, sello_ut_obs TEXT,
-        altura_bowl_entrante REAL,
-        hora_fin_h TEXT, hora_fin_m TEXT,
+        head_entrante TEXT, bowl_entrante TEXT,
+        altura_bowl_entrante REAL, altura_final_bowl REAL, hora_fin_h TEXT, hora_fin_m TEXT,
         recomendaciones TEXT
     )''')
 

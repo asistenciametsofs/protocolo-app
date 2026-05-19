@@ -164,7 +164,7 @@ def guardar_cambio_route():
         'prot_din_fuga','prot_din_fuga_obs',
         'contrapeso_estado','contrapeso_obs',
         'sello_ut_estado','sello_ut_obs',
-        'head_entrante','bowl_entrante','altura_bowl_entrante',
+        'head_entrante','bowl_entrante','altura_bowl_entrante','altura_final_bowl',
         'hora_fin_h','hora_fin_m','recomendaciones']
     for campo in campos:
         valor = request.form.get(campo, '')
