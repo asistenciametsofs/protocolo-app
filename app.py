@@ -142,7 +142,7 @@ def guardar_cambio_route():
         'ms_B1','ms_B2','ms_B3','ms_B4',
         'ms_C1','ms_C2','ms_C3','ms_C4',
         'ms_D1','ms_D2','ms_D3','ms_D4',
-        'mfl_tipo_material','mfl_pernos_estado','mfl_pernos_obs','mfl_medida',
+        'mfl_pernos_estado','mfl_pernos_obs','mfl_medida',
         'mfl_med_A','mfl_med_B','mfl_med_C','mfl_med_D',
         'mfl_med_E','mfl_med_F','mfl_med_G',
         'mfl_cambio_ahora','mfl_cambio_siguiente',
@@ -910,7 +910,13 @@ def descargar_informe(chancadora):
     # Gráfico historial Guard Pins
     if len(historial) > 1:
         for gp_idx in range(1, 7):
-            gp_vals_hist = [float(h[25+gp_idx]) if h[25+gp_idx] is not None else 0 for h in historial]
+            def safe_float(v):
+                try:
+                    return float(str(v).replace('mm','').replace('cm','').strip())
+                except:
+                    return 0
+            gp_vals_hist = [safe_float(h[25+gp_idx]) if h[25+gp_idx] is not None else 0 for h in historial] 
+
             if any(v > 0 for v in gp_vals_hist):
                 g = grafico_barras(gp_vals_hist, fechas, f'GP{gp_idx}')
                 if g:
