@@ -813,7 +813,7 @@ def descargar_informe(chancadora):
         for h in historial:
             vals = [float(h[i+1]) for i in range(12) if h[i+1] is not None]
             promedios_sl.append(round(sum(vals)/len(vals), 2) if vals else 0)
-        cambios_sl = [str(h[0])[:7] for h in historial if h[35] == 'SI']
+        cambios_sl = [str(h[0])[:7] for h in historial if len(h) > 35 and h[35] == 'SI']
         texto_sl = f'Cambios: {", ".join(cambios_sl)}' if cambios_sl else 'Sin cambios registrados'
         g = grafico_barras(promedios_sl, fechas, 'Promedio Socket Liner')
         if g:
@@ -844,7 +844,7 @@ def descargar_informe(chancadora):
         for h in historial:
             gv = [float(h[i]) for i in [15,16,17,18] if h[i] is not None]
             gaps_prom.append(round(sum(gv)/len(gv), 2) if gv else 0)
-        cambios_socket = [str(h[0])[:7] for h in historial if h[36] == 'SI']
+        cambios_socket = [str(h[0])[:7] for h in historial if len(h) > 36 and h[36] == 'SI']
         texto_socket = f'Cambios: {", ".join(cambios_socket)}' if cambios_socket else 'Sin cambios registrados'
         g = grafico_barras(gaps_prom, fechas, 'GAP Socket Mainshaft')
         if g:
@@ -883,7 +883,7 @@ def descargar_informe(chancadora):
         for h in historial:
             mv = [float(h[i+19]) for i in range(7) if h[i+19] is not None]
             promedios_mfl.append(round(sum(mv)/len(mv), 2) if mv else 0)
-        cambios_mfl = [str(h[0])[:7] for h in historial if h[37] == 'SI']
+        cambios_mfl = [str(h[0])[:7] for h in historial if len(h) > 37 and h[37] == 'SI']
         texto_mfl = f'Cambios: {", ".join(cambios_mfl)}' if cambios_mfl else 'Sin cambios registrados'
         g = grafico_barras(promedios_mfl, fechas, 'Promedio MFL')
         if g:
@@ -893,7 +893,7 @@ def descargar_informe(chancadora):
 
     # 4. Monturas
     story.append(Paragraph('4. Monturas', subtitulo_style))
-    cambios_montura = [str(h[0])[:7] for h in historial if h[38] == 'SI']
+    cambios_montura = [str(h[0])[:7] for h in historial if len(h) > 38 and h[38] == 'SI']
     texto_montura = f'Cambios realizados: {", ".join(cambios_montura)}' if cambios_montura else 'Sin cambios registrados'
     story.append(Paragraph(texto_montura, ParagraphStyle('cambio_montura', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
     story.append(tabla_datos([
