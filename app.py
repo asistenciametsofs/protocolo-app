@@ -634,7 +634,7 @@ def descargar_informe(chancadora):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Drawing
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
     from reportlab.graphics.shapes import Drawing as RLDrawing, Rect, String, Line
     from reportlab.graphics.charts.barcharts import VerticalBarChart
     from reportlab.graphics.charts.lineplots import LinePlot
