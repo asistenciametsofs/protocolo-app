@@ -634,22 +634,43 @@ def descargar_informe(chancadora):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Drawing
+    from reportlab.graphics.shapes import Drawing as RLDrawing, Rect, String, Line
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics.charts.lineplots import LinePlot
+    from reportlab.graphics import renderPDF
     from reportlab.lib.units import cm
     import io
 
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
+    
+    # Último registro
     c.execute('''SELECT * FROM cambio_hb WHERE chancadora = %s 
                  ORDER BY fecha_registro DESC LIMIT 1''', (chancadora,))
     cols = [desc[0] for desc in c.description]
     row = c.fetchone()
+    
+    # Historial completo para gráficos
+    c.execute('''SELECT fecha_registro, 
+                 socket_b1, socket_a1, socket_b2, socket_a2,
+                 socket_b3, socket_a3, socket_b4, socket_a4,
+                 socket_b5, socket_a5, socket_b6, socket_a6,
+                 sl_gap_interior, sl_gap_exterior,
+                 socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
+                 mfl_med_a, mfl_med_b, mfl_med_c, mfl_med_d, mfl_med_e, mfl_med_f, mfl_med_g,
+                 gp1_medida, gp2_medida, gp3_medida, gp4_medida, gp5_medida, gp6_medida,
+                 altura_bowl_saliente, altura_bowl_entrante, altura_final_bowl
+                 FROM cambio_hb WHERE chancadora = %s 
+                 ORDER BY fecha_registro ASC''', (chancadora,))
+    historial = c.fetchall()
     conn.close()
 
     if not row:
         return f'No hay registros para {chancadora}', 404
 
     d = dict(zip(cols, row))
+    fechas = [str(h[0])[:10] for h in historial]
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4,
@@ -667,19 +688,6 @@ def descargar_informe(chancadora):
     normal_style = ParagraphStyle('normal', parent=styles['Normal'],
                                   fontSize=10, spaceAfter=4)
 
-    story = []
-
-    # Encabezado
-    story.append(Paragraph('METSO', ParagraphStyle('metso', parent=styles['Normal'],
-                            fontSize=20, fontName='Helvetica-Bold', spaceAfter=4)))
-    story.append(Paragraph(f'Informe Estado Chancadora {chancadora}', titulo_style))
-    story.append(Paragraph(f'Última intervención: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")}', normal_style))
-    story.append(Spacer(1, 0.5*cm))
-
-    def fila_estado(nombre, valor):
-        color = colors.HexColor('#d1e7dd') if str(valor).upper() in ['BUENO', 'NO'] else colors.HexColor('#f8d7da')
-        return [nombre, str(valor or '-')]
-
     def tabla_simple(datos_tabla):
         t = Table(datos_tabla, colWidths=[10*cm, 7*cm])
         t.setStyle(TableStyle([
@@ -693,11 +701,63 @@ def descargar_informe(chancadora):
         ]))
         return t
 
+    def grafico_barras(valores, etiquetas, titulo, ancho=15*cm, alto=6*cm):
+        try:
+            from reportlab.graphics.shapes import Drawing
+            from reportlab.graphics.charts.barcharts import VerticalBarChart
+            d_graf = Drawing(ancho, alto)
+            bc = VerticalBarChart()
+            bc.x = 30
+            bc.y = 20
+            bc.width = ancho - 50
+            bc.height = alto - 40
+            vals_limpios = [float(v) if v is not None else 0 for v in valores]
+            bc.data = [vals_limpios]
+            bc.categoryAxis.categoryNames = [str(e)[:8] for e in etiquetas]
+            bc.bars[0].fillColor = colors.HexColor('#0f5132')
+            bc.valueAxis.valueMin = min(vals_limpios) * 0.95 if vals_limpios else 0
+            bc.valueAxis.valueMax = max(vals_limpios) * 1.05 if vals_limpios else 1
+            d_graf.add(bc)
+            return d_graf
+        except:
+            return None
+
+    story = []
+
+    # Encabezado
+    story.append(Paragraph('METSO', ParagraphStyle('metso', parent=styles['Normal'],
+                            fontSize=20, fontName='Helvetica-Bold', spaceAfter=4)))
+    story.append(Paragraph(f'Informe Estado Chancadora {chancadora}', titulo_style))
+    story.append(Paragraph(f'Última intervención: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")} | Cliente: {d.get("cliente", "-")}', normal_style))
+    story.append(tabla_simple([
+        ['Altura Bowl Saliente', str(d.get('altura_bowl_saliente') or '-') + ' pulg'],
+        ['Altura Bowl Entrante', str(d.get('altura_bowl_entrante') or '-') + ' pulg'],
+        ['Altura Final Bowl', str(d.get('altura_final_bowl') or '-') + ' pulg'],
+    ]))
+    story.append(Spacer(1, 0.5*cm))
+
+    # 0. Anillo de ajuste
+    story.append(Paragraph('0. Inspección Anillo de Ajuste', subtitulo_style))
+    story.append(tabla_simple([
+        ['Roscas anillo de fijación', str(d.get('anillo_roscas_estado') or '-')],
+        ['Observaciones', str(d.get('anillo_roscas_obs') or '-')],
+    ]))
+
     # 1. Socket Liner
     story.append(Paragraph('1. Estado de Socket Liner', subtitulo_style))
+    
+    # Metrología
     sl_data = [['Punto', 'B (0°)', 'A (90°)']]
+    vals_sl = []
     for i in range(1, 7):
-        sl_data.append([f'B{i}/A{i}', str(d.get(f'socket_b{i}') or '-'), str(d.get(f'socket_a{i}') or '-')])
+        b = d.get(f'socket_b{i}')
+        a = d.get(f'socket_a{i}')
+        sl_data.append([f'B{i}/A{i}', str(b or '-'), str(a or '-')])
+        if b: vals_sl.append(float(b))
+        if a: vals_sl.append(float(a))
+    
+    promedio_sl = round(sum(vals_sl)/len(vals_sl), 2) if vals_sl else '-'
+    
     t = Table(sl_data, colWidths=[6*cm, 5.5*cm, 5.5*cm])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
@@ -711,59 +771,110 @@ def descargar_informe(chancadora):
     story.append(t)
     story.append(Spacer(1, 0.3*cm))
     story.append(tabla_simple([
+        ['Promedio metrología', str(promedio_sl) + ' mm'],
+        ['GAP Interior', str(d.get('sl_gap_interior') or '-') + ' mm'],
+        ['GAP Exterior', str(d.get('sl_gap_exterior') or '-') + ' mm'],
+        ['Fisuras', str(d.get('sl_fisuras_estado') or '-')],
+        ['Observaciones fisuras', str(d.get('sl_fisuras_obs') or '-')],
         ['¿Se cambió?', str(d.get('sl_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('sl_cambio_siguiente') or '-')],
     ]))
 
+    # Gráfico historial promedio SL
+    if len(historial) > 1:
+        promedios_sl = []
+        for h in historial:
+            vals = [float(h[i+1]) for i in range(12) if h[i+1] is not None]
+            promedios_sl.append(round(sum(vals)/len(vals), 2) if vals else 0)
+        g = grafico_barras(promedios_sl, fechas, 'Promedio Socket Liner')
+        if g:
+            story.append(Paragraph('Historial promedio metrología Socket Liner', normal_style))
+            story.append(g)
+
     # 2. Socket
     story.append(Paragraph('2. Estado de Socket', subtitulo_style))
+    gap_vals = [d.get('socket_gap_0'), d.get('socket_gap_90'), d.get('socket_gap_180'), d.get('socket_gap_270')]
+    gap_nums = [float(v) for v in gap_vals if v is not None]
+    promedio_gap = round(sum(gap_nums)/len(gap_nums), 2) if gap_nums else '-'
+    
     story.append(tabla_simple([
         ['Fisuras', str(d.get('socket_fisuras_estado') or '-')],
+        ['Observaciones fisuras', str(d.get('socket_fisuras_obs') or '-')],
         ['GAP 0°', str(d.get('socket_gap_0') or '-') + ' mm'],
         ['GAP 90°', str(d.get('socket_gap_90') or '-') + ' mm'],
         ['GAP 180°', str(d.get('socket_gap_180') or '-') + ' mm'],
         ['GAP 270°', str(d.get('socket_gap_270') or '-') + ' mm'],
+        ['Promedio GAP', str(promedio_gap) + ' mm'],
         ['¿Se cambió?', str(d.get('socket_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('socket_cambio_siguiente') or '-')],
     ]))
 
+    # Gráfico GAP Socket
+    if len(historial) > 1:
+        gaps_prom = []
+        for h in historial:
+            gv = [float(h[i]) for i in [15,16,17,18] if h[i] is not None]
+            gaps_prom.append(round(sum(gv)/len(gv), 2) if gv else 0)
+        g = grafico_barras(gaps_prom, fechas, 'GAP Socket Mainshaft')
+        if g:
+            story.append(Paragraph('Historial promedio GAP Socket-Mainshaft', normal_style))
+            story.append(g)
+
     # 3. MFL
     story.append(Paragraph('3. Main Frame Liners', subtitulo_style))
-    mfl_data = [['A', 'B', 'C', 'D', 'E', 'F', 'G']]
-    mfl_data.append([str(d.get(f'mfl_med_{x}') or '-') for x in ['a','b','c','d','e','f','g']])
-    t = Table(mfl_data, colWidths=[2.4*cm]*7)
+    mfl_vals = [d.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g']]
+    mfl_nums = [float(v) for v in mfl_vals if v is not None]
+    promedio_mfl = round(sum(mfl_nums)/len(mfl_nums), 2) if mfl_nums else '-'
+    
+    mfl_data = [['A', 'B', 'C', 'D', 'E', 'F', 'G', 'Promedio']]
+    mfl_data.append([str(d.get(f'mfl_med_{x}') or '-') for x in ['a','b','c','d','e','f','g']] + [str(promedio_mfl)])
+    t = Table(mfl_data, colWidths=[2*cm]*7 + [2.8*cm])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('FONTSIZE', (0,0), (-1,-1), 8),
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
         ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('PADDING', (0,0), (-1,-1), 6),
+        ('PADDING', (0,0), (-1,-1), 5),
     ]))
     story.append(t)
     story.append(Spacer(1, 0.3*cm))
     story.append(tabla_simple([
-        ['Medida promedio', str(d.get('mfl_medida') or '-') + ' mm'],
         ['¿Se cambió?', str(d.get('mfl_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('mfl_cambio_siguiente') or '-')],
     ]))
+
+    # Gráfico historial MFL
+    if len(historial) > 1:
+        promedios_mfl = []
+        for h in historial:
+            mv = [float(h[i+19]) for i in range(7) if h[i+19] is not None]
+            promedios_mfl.append(round(sum(mv)/len(mv), 2) if mv else 0)
+        g = grafico_barras(promedios_mfl, fechas, 'Promedio MFL')
+        if g:
+            story.append(Paragraph('Historial promedio MFL', normal_style))
+            story.append(g)
 
     # 4. Monturas
     story.append(Paragraph('4. Monturas', subtitulo_style))
     story.append(tabla_simple([
         ['Barras de soporte', str(d.get('montura_barras_estado') or '-')],
+        ['Observaciones', str(d.get('montura_barras_obs') or '-')],
         ['Chocky bar', str(d.get('montura_chocky_estado') or '-')],
+        ['Observaciones', str(d.get('montura_chocky_obs') or '-')],
         ['¿Se cambió?', str(d.get('montura_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('montura_cambio_siguiente') or '-')],
     ]))
 
     # 5. Guard Pins
     story.append(Paragraph('5. Guard Pins', subtitulo_style))
-    gp_data = [['Guard Pin', 'Medida', '¿Se cambió?']]
+    gp_data = [['Guard Pin', 'Medida', '¿Se cambió?', 'Observaciones']]
     for i in range(1, 7):
-        gp_data.append([f'GP {i}', str(d.get(f'gp{i}_medida') or '-'), str(d.get(f'gp{i}_cambio') or '-')])
-    t = Table(gp_data, colWidths=[5.5*cm, 5.5*cm, 6*cm])
+        gp_data.append([f'GP {i}', str(d.get(f'gp{i}_medida') or '-'), 
+                        str(d.get(f'gp{i}_cambio') or '-'),
+                        str(d.get(f'gp{i}_obs') or '-')])
+    t = Table(gp_data, colWidths=[3*cm, 3.5*cm, 3.5*cm, 7*cm])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
@@ -774,6 +885,16 @@ def descargar_informe(chancadora):
         ('PADDING', (0,0), (-1,-1), 6),
     ]))
     story.append(t)
+
+    # Gráfico historial Guard Pins
+    if len(historial) > 1:
+        for gp_idx in range(1, 7):
+            gp_vals_hist = [float(h[25+gp_idx]) if h[25+gp_idx] is not None else 0 for h in historial]
+            if any(v > 0 for v in gp_vals_hist):
+                g = grafico_barras(gp_vals_hist, fechas, f'GP{gp_idx}')
+                if g:
+                    story.append(Paragraph(f'Historial Guard Pin {gp_idx}', normal_style))
+                    story.append(g)
 
     # 6. Protector Estático
     story.append(Paragraph('6. Protector Estático', subtitulo_style))
@@ -797,8 +918,9 @@ def descargar_informe(chancadora):
     doc.build(story)
     buffer.seek(0)
     return send_file(buffer, as_attachment=True,
-                    download_name=f'Informe_{chancadora}_{d.get("fecha_registro","")}.pdf',
+                    download_name=f'Informe_{chancadora}_{str(d.get("fecha_registro",""))[:10]}.pdf',
                     mimetype='application/pdf')
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
