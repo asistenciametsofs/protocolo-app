@@ -731,7 +731,6 @@ def descargar_informe(chancadora):
     story.append(Paragraph(f'Última intervención: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")} | Cliente: {d.get("cliente", "-")}', normal_style))
     story.append(tabla_simple([
         ['Altura Bowl Saliente', str(d.get('altura_bowl_saliente') or '-') + ' pulg'],
-        ['Altura Bowl Entrante', str(d.get('altura_bowl_entrante') or '-') + ' pulg'],
         ['Altura Final Bowl', str(d.get('altura_final_bowl') or '-') + ' pulg'],
     ]))
     story.append(Spacer(1, 0.5*cm))
