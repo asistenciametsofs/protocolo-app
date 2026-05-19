@@ -723,10 +723,10 @@ def descargar_informe(chancadora):
             ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
         ]))
         return t
-
-    def grafico_barras(valores, etiquetas, titulo, ancho=15*cm, alto=6*cm):
+    
+    def grafico_barras(valores, etiquetas, titulo, ancho=15*cm, alto=7*cm):
         try:
-            from reportlab.graphics.shapes import Drawing
+            from reportlab.graphics.shapes import Drawing, String
             from reportlab.graphics.charts.barcharts import VerticalBarChart
             d_graf = Drawing(ancho, alto)
             bc = VerticalBarChart()
@@ -740,6 +740,10 @@ def descargar_informe(chancadora):
             bc.bars[0].fillColor = colors.HexColor('#0f5132')
             bc.valueAxis.valueMin = min(vals_limpios) * 0.95 if vals_limpios else 0
             bc.valueAxis.valueMax = max(vals_limpios) * 1.05 if vals_limpios else 1
+            bc.barLabels.nudge = 7
+            bc.barLabelFormat = '%.2f'
+            bc.barLabels.fontName = 'Helvetica'
+            bc.barLabels.fontSize = 7
             d_graf.add(bc)
             return d_graf
         except:
