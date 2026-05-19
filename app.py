@@ -658,12 +658,13 @@ def descargar_informe(chancadora):
     
     # Último registro
     c.execute('''SELECT * FROM cambio_hb WHERE chancadora = %s 
-                 ORDER BY fecha_registro DESC LIMIT 1''', (chancadora,))
+                 ORDER BY fecha_inicio DESC LIMIT 1''', (chancadora,))
+    
     cols = [desc[0] for desc in c.description]
     row = c.fetchone()
     
     # Historial completo para gráficos
-    c.execute('''SELECT fecha_registro, 
+    c.execute('''SELECT fecha_inicio, 
                  socket_b1, socket_a1, socket_b2, socket_a2,
                  socket_b3, socket_a3, socket_b4, socket_a4,
                  socket_b5, socket_a5, socket_b6, socket_a6,
@@ -673,7 +674,7 @@ def descargar_informe(chancadora):
                  gp1_medida, gp2_medida, gp3_medida, gp4_medida, gp5_medida, gp6_medida,
                  altura_bowl_saliente, altura_bowl_entrante, altura_final_bowl
                  FROM cambio_hb WHERE chancadora = %s 
-                 ORDER BY fecha_registro ASC''', (chancadora,))
+                 ORDER BY fecha_inicio ASC''', (chancadora,))
     historial = c.fetchall()
     conn.close()
 
