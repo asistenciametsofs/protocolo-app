@@ -700,6 +700,17 @@ def descargar_informe(chancadora):
             ('PADDING', (0,0), (-1,-1), 6),
         ]))
         return t
+    
+    def tabla_datos(datos_tabla):
+        t = Table(datos_tabla, colWidths=[10*cm, 7*cm])
+        t.setStyle(TableStyle([
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+            ('ROWBACKGROUNDS', (0,0), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
+            ('PADDING', (0,0), (-1,-1), 6),
+            ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+        ]))
+        return t
 
     def grafico_barras(valores, etiquetas, titulo, ancho=15*cm, alto=6*cm):
         try:
@@ -729,7 +740,7 @@ def descargar_informe(chancadora):
                             fontSize=20, fontName='Helvetica-Bold', spaceAfter=4)))
     story.append(Paragraph(f'Informe Estado Chancadora {chancadora}', titulo_style))
     story.append(Paragraph(f'Última intervención: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")} | Cliente: {d.get("cliente", "-")}', normal_style))
-    story.append(tabla_simple([
+    story.append(tabla_datos([
         ['Altura Bowl Saliente', str(d.get('altura_bowl_saliente') or '-') + ' pulg'],
         ['Altura Final Bowl', str(d.get('altura_final_bowl') or '-') + ' pulg'],
     ]))
