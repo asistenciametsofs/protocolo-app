@@ -672,7 +672,7 @@ def descargar_informe(chancadora):
                  socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
                  mfl_med_a, mfl_med_b, mfl_med_c, mfl_med_d, mfl_med_e, mfl_med_f, mfl_med_g,
                  gp1_medida, gp2_medida, gp3_medida, gp4_medida, gp5_medida, gp6_medida,
-                 altura_bowl_saliente, altura_bowl_entrante, altura_final_bowl
+                 altura_bowl_saliente, altura_bowl_entrante, altura_final_bowl,
                  sl_cambio_ahora, socket_cambio_ahora, mfl_cambio_ahora, montura_cambio_ahora
                  FROM cambio_hb WHERE chancadora = %s 
                  ORDER BY fecha_inicio ASC''', (chancadora,))
