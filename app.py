@@ -223,9 +223,20 @@ def guardar_cambio_route():
 
 @app.route('/historial/<tipo>')
 def historial(tipo):
-    registros = obtener_registros(tipo)
-    return render_template('historial.html', registros=registros, tipo=tipo)
-
+    from flask import request as freq
+    filtros = {}
+    if tipo == 'cambio':
+        filtros['chancadora'] = freq.args.get('chancadora', '')
+        filtros['supervisor_metso'] = freq.args.get('supervisor_metso', '')
+        filtros['fecha'] = freq.args.get('fecha', '')
+    else:
+        filtros['id_bowl'] = freq.args.get('id_bowl', '')
+        filtros['id_head'] = freq.args.get('id_head', '')
+        filtros['supervisor_metso'] = freq.args.get('supervisor_metso', '')
+        filtros['fecha'] = freq.args.get('fecha', '')
+    
+    registros = obtener_registros(tipo, filtros)
+    return render_template('historial.html', registros=registros, tipo=tipo, filtros=filtros)
 @app.route('/tendencias')
 def tendencias():
     tab = request.args.get('tab', 'armado')
