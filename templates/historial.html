@@ -36,6 +36,53 @@
     </div>
     <div class="container">
         <a href="/" class="btn-back">← Volver al inicio</a>
+        <a href="/" class="btn-back">← Volver al inicio</a>
+
+        <div style="background:white; border-radius:12px; padding:16px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <form method="GET">
+                {% if tipo == 'cambio' %}
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; color:#555;">Chancadora</label>
+                    <select name="chancadora" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:7px; font-size:13px;">
+                        <option value="">Todas</option>
+                        <option value="CR011" {{ 'selected' if filtros.chancadora == 'CR011' }}>CR011</option>
+                        <option value="CR012" {{ 'selected' if filtros.chancadora == 'CR012' }}>CR012</option>
+                        <option value="CR013" {{ 'selected' if filtros.chancadora == 'CR013' }}>CR013</option>
+                        <option value="CR014" {{ 'selected' if filtros.chancadora == 'CR014' }}>CR014</option>
+                        <option value="CR021" {{ 'selected' if filtros.chancadora == 'CR021' }}>CR021</option>
+                        <option value="CR022" {{ 'selected' if filtros.chancadora == 'CR022' }}>CR022</option>
+                        <option value="CR023" {{ 'selected' if filtros.chancadora == 'CR023' }}>CR023</option>
+                        <option value="CR024" {{ 'selected' if filtros.chancadora == 'CR024' }}>CR024</option>
+                    </select>
+                </div>
+                {% else %}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:12px; color:#555;">ID Bowl</label>
+                        <input type="text" name="id_bowl" value="{{ filtros.id_bowl }}" placeholder="Ej: B5" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:7px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555;">ID Head</label>
+                        <input type="text" name="id_head" value="{{ filtros.id_head }}" placeholder="Ej: H1" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:7px; font-size:13px;">
+                    </div>
+                </div>
+                {% endif %}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:12px; color:#555;">Supervisor METSO</label>
+                        <input type="text" name="supervisor_metso" value="{{ filtros.supervisor_metso }}" placeholder="Nombre" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:7px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:#555;">Fecha inicio</label>
+                        <input type="date" name="fecha" value="{{ filtros.fecha }}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:7px; font-size:13px;">
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <button type="submit" style="padding:10px; background:#1a3a5c; color:white; border:none; border-radius:7px; font-size:13px; font-weight:bold; cursor:pointer;">🔍 Filtrar</button>
+                    <a href="/historial/{{ tipo }}" style="padding:10px; background:#f0f2f5; color:#555; border-radius:7px; font-size:13px; text-align:center; text-decoration:none;">✖ Limpiar</a>
+                </div>
+            </form>
+        </div>
 
         {% if registros %}
             {% for r in registros %}

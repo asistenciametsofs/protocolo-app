@@ -194,12 +194,38 @@ def guardar_cambio(datos):
               list(datos.values()))
     conn.commit()
     conn.close()
-
-def obtener_registros(tipo):
+    
+def obtener_registros(tipo, filtros=None):
     conn = get_db()
     c = conn.cursor()
     tabla = 'armado_hb' if tipo == 'armado' else 'cambio_hb'
-    c.execute(f'SELECT * FROM {tabla} ORDER BY fecha_registro DESC')
+    
+    where = []
+    params = []
+    
+    if filtros:
+        if filtros.get('chancadora'):
+            where.append('chancadora = %s' if os.environ.get('DATABASE_URL') else 'chancadora = ?')
+            params.append(filtros['chancadora'])
+        if filtros.get('id_bowl'):
+            where.append('id_bowl = %s' if os.environ.get('DATABASE_URL') else 'id_bowl = ?')
+            params.append(filtros['id_bowl'])
+        if filtros.get('id_head'):
+            where.append('id_head = %s' if os.environ.get('DATABASE_URL') else 'id_head = ?')
+            params.append(filtros['id_head'])
+        if filtros.get('supervisor_metso'):
+            where.append('supervisor_metso = %s' if os.environ.get('DATABASE_URL') else 'supervisor_metso = ?')
+            params.append(filtros['supervisor_metso'])
+        if filtros.get('fecha'):
+            where.append('fecha_inicio = %s' if os.environ.get('DATABASE_URL') else 'fecha_inicio = ?')
+            params.append(filtros['fecha'])
+    
+    query = f'SELECT * FROM {tabla}'
+    if where:
+        query += ' WHERE ' + ' AND '.join(where)
+    query += ' ORDER BY fecha_registro DESC'
+    
+    c.execute(query, params)
     registros = c.fetchall()
     conn.close()
     return registros
