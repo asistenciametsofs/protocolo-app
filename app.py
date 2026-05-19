@@ -764,7 +764,7 @@ def descargar_informe(chancadora):
 
     # 0. Anillo de ajuste
     story.append(Paragraph('0. Inspección Anillo de Ajuste', subtitulo_style))
-    story.append(tabla_simple([
+    story.append(tabla_datos([
         ['Roscas anillo de fijación', str(d.get('anillo_roscas_estado') or '-')],
         ['Observaciones', str(d.get('anillo_roscas_obs') or '-')],
     ]))
@@ -796,13 +796,13 @@ def descargar_informe(chancadora):
     ]))
     story.append(t)
     story.append(Spacer(1, 0.3*cm))
-    story.append(tabla_simple([
-        ['Promedio metrología', str(promedio_sl) + ' mm'],
+    story.append(tabla_datos([
+        ['Promedio canales de lubricación', str(promedio_sl) + ' mm'],
         ['GAP Interior', str(d.get('sl_gap_interior') or '-') + ' mm'],
         ['GAP Exterior', str(d.get('sl_gap_exterior') or '-') + ' mm'],
-        ['Fisuras', str(d.get('sl_fisuras_estado') or '-')],
+        ['Presencia de fisuras', str(d.get('sl_fisuras_estado') or '-')],
         ['Observaciones fisuras', str(d.get('sl_fisuras_obs') or '-')],
-        ['¿Se cambió?', str(d.get('sl_cambio_ahora') or '-')],
+        ['¿Se cambió en esta intervención?', str(d.get('sl_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('sl_cambio_siguiente') or '-')],
     ]))
 
@@ -823,8 +823,7 @@ def descargar_informe(chancadora):
     gap_nums = [float(v) for v in gap_vals if v is not None]
     promedio_gap = round(sum(gap_nums)/len(gap_nums), 2) if gap_nums else '-'
     
-    story.append(tabla_simple([
-        ['Fisuras', str(d.get('socket_fisuras_estado') or '-')],
+    story.append(tabla_datos([
         ['Observaciones fisuras', str(d.get('socket_fisuras_obs') or '-')],
         ['GAP 0°', str(d.get('socket_gap_0') or '-') + ' mm'],
         ['GAP 90°', str(d.get('socket_gap_90') or '-') + ' mm'],
@@ -866,7 +865,7 @@ def descargar_informe(chancadora):
     ]))
     story.append(t)
     story.append(Spacer(1, 0.3*cm))
-    story.append(tabla_simple([
+    story.append(tabla_datos([
         ['¿Se cambió?', str(d.get('mfl_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('mfl_cambio_siguiente') or '-')],
     ]))
@@ -884,11 +883,9 @@ def descargar_informe(chancadora):
 
     # 4. Monturas
     story.append(Paragraph('4. Monturas', subtitulo_style))
-    story.append(tabla_simple([
-        ['Barras de soporte', str(d.get('montura_barras_estado') or '-')],
-        ['Observaciones', str(d.get('montura_barras_obs') or '-')],
-        ['Chocky bar', str(d.get('montura_chocky_estado') or '-')],
-        ['Observaciones', str(d.get('montura_chocky_obs') or '-')],
+    story.append(tabla_datos([
+        ['Estado de barras de soporte de la montura del contraeje', str(d.get('montura_barras_estado') or '-')],
+        ['Estado de Chocky Bar', str(d.get('montura_chocky_estado') or '-')],
         ['¿Se cambió?', str(d.get('montura_cambio_ahora') or '-')],
         ['¿Se recomienda cambio?', str(d.get('montura_cambio_siguiente') or '-')],
     ]))
@@ -930,17 +927,17 @@ def descargar_informe(chancadora):
 
     # 6. Protector Estático
     story.append(Paragraph('6. Protector Estático', subtitulo_style))
-    story.append(tabla_simple([
-        ['Inspección', str(d.get('prot_estatico_estado') or '-')],
-        ['Observaciones', str(d.get('prot_estatico_obs') or '-')],
+    story.append(tabla_datos([
+        ['Estado protector estático', str(d.get('prot_estatico_estado') or '-')],
+        ['Observaciones de protector estático', str(d.get('prot_estatico_obs') or '-')],
     ]))
 
     # 7. Protector Dinámico
     story.append(Paragraph('7. Protector Dinámico', subtitulo_style))
-    story.append(tabla_simple([
-        ['Inspección', str(d.get('prot_dinamico_estado') or '-')],
-        ['¿Fuga de aceite?', str(d.get('prot_din_fuga') or '-')],
-        ['Observaciones', str(d.get('prot_dinamico_obs') or '-')],
+    story.append(tabla_datos([
+        ['Estado protector dinámico', str(d.get('prot_dinamico_estado') or '-')],
+        ['¿Hay presencia de fuga de aceite?', str(d.get('prot_din_fuga') or '-')],
+        ['Observaciones de protector dinámico', str(d.get('prot_dinamico_obs') or '-')],
     ]))
 
     # 8. Recomendaciones
