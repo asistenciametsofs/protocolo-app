@@ -118,7 +118,8 @@
         const LIMITE = 9.0;
         const fechas = registros.map(r => String(r[0]));
         const alturas = registros.map(r => parseFloat(r[1]));
-        const t0 = new Date(fechas[0]);
+        const partes0 = fechas[0].split('-');
+        const t0 = new Date(partes0[0], partes0[1]-1, partes0[2]);
         const dias = fechas.map(f => (new Date(f) - t0) / 86400000);
 
         // Regresión lineal
