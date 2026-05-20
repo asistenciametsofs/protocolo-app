@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecciones de Cambio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #1a3a5c; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #1a3a5c; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-title { font-size: 15px; font-weight: bold; color: #1a3a5c; margin-bottom: 12px; }
+        .mes-titulo { font-size: 14px; font-weight: bold; color: #1a3a5c; text-align: center; margin-bottom: 10px; text-transform: capitalize; }
+        .calendario { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .calendario th { background: #1a3a5c; color: white; text-align: center; padding: 6px; font-size: 11px; }
+        .calendario td { text-align: center; padding: 4px 2px; vertical-align: top; height: 48px; font-size: 12px; border: 1px solid #f0f0f0; }
+        .dia-num { font-size: 12px; color: #333; }
+        .dia-vacio { background: #fafafa; }
+        .dia-marcado { border-radius: 6px; }
+        .ch-badge { display: inline-block; font-size: 9px; font-weight: bold; color: white; border-radius: 4px; padding: 1px 4px; margin-top: 2px; }
+        .leyenda { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .leyenda-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #333; }
+        .leyenda-color { width: 14px; height: 14px; border-radius: 3px; }
+        .sin-datos { text-align: center; padding: 20px; color: #999; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>📅 Proyecciones de Cambio</h1>
+</div>
+<div class="container">
+    <a href="/" class="btn-back">← Volver al inicio</a>
+
+    <div class="card">
+        <div class="card-title">🗓️ Próximos 3 meses</div>
+
+        {% if proyecciones %}
+        <!-- Leyenda -->
+        <div class="leyenda" style="margin-bottom:16px;">
+            {% set colores = {
+                'CR011': '#e74c3c', 'CR012': '#e67e22', 'CR013': '#f1c40f',
+                'CR014': '#2ecc71', 'CR021': '#1abc9c', 'CR022': '#3498db',
+                'CR023': '#9b59b6', 'CR024': '#e91e63'
+            } %}
+            {% for ch, fecha in proyecciones.items() %}
+            <div class="leyenda-item">
+                <div class="leyenda-color" style="background:{{ colores[ch] }};"></div>
+                <span>{{ ch }}: {{ fecha }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Calendarios -->
+        <div id="calendarios"></div>
+
+        <script>
+        const proyecciones = {{ proyecciones | tojson }};
+        const colores = {
+            'CR011': '#e74c3c', 'CR012': '#e67e22', 'CR013': '#f1c40f',
+            'CR014': '#2ecc71', 'CR021': '#1abc9c', 'CR022': '#3498db',
+            'CR023': '#9b59b6', 'CR024': '#e91e63'
+        };
+
+        const hoy = new Date();
+        const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                       'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const dias_semana = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+        // Construir mapa de fechas → chancadoras
+        const mapaFechas = {};
+        for (const [ch, fecha] of Object.entries(proyecciones)) {
+            if (!mapaFechas[fecha]) mapaFechas[fecha] = [];
+            mapaFechas[fecha].push(ch);
+        }
+
+        let html = '';
+        for (let m = 0; m < 3; m++) {
+            const fecha = new Date(hoy.getFullYear(), hoy.getMonth() + m, 1);
+            const mes = fecha.getMonth();
+            const anio = fecha.getFullYear();
+            const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+            const primerDia = new Date(anio, mes, 1).getDay();
+
+            html += `<div class="mes-titulo">${meses[mes]} ${anio}</div>`;
+            html += `<table class="calendario"><thead><tr>`;
+            for (const d of dias_semana) html += `<th>${d}</th>`;
+            html += `</tr></thead><tbody><tr>`;
+
+            for (let i = 0; i < primerDia; i++) html += `<td class="dia-vacio"></td>`;
+
+            let diaActual = primerDia;
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                const fechaStr = `${anio}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+                const chancadoras = mapaFechas[fechaStr] || [];
+                const esHoy = (dia === hoy.getDate() && mes === hoy.getMonth() && anio === hoy.getFullYear());
+
+                let tdStyle = esHoy ? 'background:#e8f0fe;' : '';
+                let badgesHtml = '';
+                for (const ch of chancadoras) {
+                    badgesHtml += `<br><span class="ch-badge" style="background:${colores[ch]}">${ch}</span>`;
+                }
+
+                html += `<td style="${tdStyle}">
+                    <span class="dia-num" style="font-weight:${esHoy?'bold':'normal'}">${dia}</span>
+                    ${badgesHtml}
+                </td>`;
+
+                diaActual++;
+                if (diaActual % 7 === 0 && dia < diasEnMes) html += `</tr><tr>`;
+            }
+
+            // Rellenar últimos espacios
+            const restantes = 7 - (diaActual % 7);
+            if (restantes < 7) for (let i = 0; i < restantes; i++) html += `<td class="dia-vacio"></td>`;
+            html += `</tr></tbody></table>`;
+        }
+
+        document.getElementById('calendarios').innerHTML = html;
+        </script>
+
+        {% else %}
+        <div class="sin-datos">
+            📏 No hay suficientes mediciones aún.<br>
+            <span style="font-size:12px;">Registra al menos 2 mediciones por chancadora en Alturas de Bowl.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

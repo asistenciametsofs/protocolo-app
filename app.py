@@ -1008,6 +1008,44 @@ def alturas_nuevo_ciclo():
     conn.close()
     return redirect(f'/alturas?chancadora={chancadora}')
 
+@app.route('/proyecciones')
+def proyecciones():
+    import psycopg2
+    from datetime import datetime
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+    proyecciones = {}
+    
+    for ch in chancadoras:
+        c.execute('''SELECT fecha, altura FROM altura_bowl
+                     WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
+                     ORDER BY fecha ASC''', (ch,))
+        registros = c.fetchall()
+        
+        if len(registros) >= 2:
+            fechas = [r[0] for r in registros]
+            alturas = [float(r[1]) for r in registros]
+            t0 = datetime.strptime(str(fechas[0]), '%Y-%m-%d')
+            dias = [(datetime.strptime(str(f), '%Y-%m-%d') - t0).days for f in fechas]
+            
+            n = len(dias)
+            sumX = sum(dias)
+            sumY = sum(alturas)
+            sumXY = sum(dias[i]*alturas[i] for i in range(n))
+            sumX2 = sum(x*x for x in dias)
+            m = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX)
+            b = (sumY - m*sumX) / n
+            
+            if m < 0:
+                dia_limite = (9.0 - b) / m
+                fecha_cambio = t0 + __import__('datetime').timedelta(days=dia_limite)
+                proyecciones[ch] = fecha_cambio.strftime('%Y-%m-%d')
+    
+    conn.close()
+    return render_template('proyecciones.html', proyecciones=proyecciones)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
