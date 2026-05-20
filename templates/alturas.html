@@ -2,67 +2,102 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alturas de Bowl</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #1a3a5c; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #1a3a5c; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-title { font-size: 15px; font-weight: bold; color: #1a3a5c; margin-bottom: 12px; }
+        label { font-size: 12px; color: #555; display: block; margin-bottom: 4px; margin-top: 8px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; }
+        .btn-primary { width: 100%; margin-top: 12px; padding: 12px; background: #1a3a5c; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .btn-nuevo-ciclo { width: 100%; margin-top: 8px; padding: 10px; background: #c0392b; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-chancadora { display: inline-block; padding: 6px 12px; margin: 3px; border-radius: 20px; background: #f0f2f5; color: #1a3a5c; text-decoration: none; font-size: 12px; font-weight: bold; border: 2px solid transparent; }
+        .btn-chancadora.activo { background: #1a3a5c; color: white; }
+        .card-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .card-row:last-child { border-bottom: none; }
+        .card-key { color: #666; }
+        .card-val { color: #333; font-weight: 600; }
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .kpi { background: #f0f4ff; border-radius: 10px; padding: 12px; text-align: center; }
+        .kpi-label { font-size: 11px; color: #666; margin-bottom: 4px; }
+        .kpi-valor { font-size: 22px; font-weight: 700; }
+        .empty { text-align: center; padding: 24px; color: #999; font-size: 13px; }
+        .ciclo-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; background: #d1e7dd; color: #0f5132; margin-left: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        th { background: #1a3a5c; color: white; padding: 8px; text-align: left; font-size: 12px; }
+        td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; color: #333; }
+        tr:last-child td { border-bottom: none; }
+    </style>
 </head>
 <body>
+<div class="header">
+    <h1>📏 Alturas de Bowl</h1>
+</div>
 <div class="container">
-    <h2>📏 Alturas de Bowl</h2>
+    <a href="/" class="btn-back">← Volver al inicio</a>
 
     <!-- FORMULARIO REGISTRO -->
     <div class="card">
-        <h3>Registrar medición</h3>
+        <div class="card-title">➕ Registrar medición</div>
         <form method="POST" action="/alturas">
-            <div class="grid3">
-                <div>
-                    <label>Chancadora</label>
-                    <select name="chancadora" required>
-                        {% for ch in chancadoras %}
-                        <option value="{{ ch }}">{{ ch }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label>Fecha</label>
-                    <input type="date" name="fecha" required>
-                </div>
-                <div>
-                    <label>Altura (pulgadas)</label>
-                    <input type="number" name="altura" step="0.1" min="0" max="25" required>
-                </div>
-                <div>
-                    <label>Operador</label>
-                    <input type="text" name="operador" placeholder="Nombre del operador">
-                </div>
-            </div>
-            <button type="submit" class="btn-primary">Guardar medición</button>
+            <label>Chancadora</label>
+            <select name="chancadora" required>
+                {% for ch in chancadoras %}
+                <option value="{{ ch }}" {{ 'selected' if ch == chancadora_sel }}>{{ ch }}</option>
+                {% endfor %}
+            </select>
+            <label>Fecha</label>
+            <input type="date" name="fecha" required>
+            <label>Altura (pulgadas)</label>
+            <input type="number" name="altura" step="0.1" min="0" max="25" placeholder="Ej: 18.5" required>
+            <label>Operador</label>
+            <input type="text" name="operador" placeholder="Nombre del operador">
+            <button type="submit" class="btn-primary">💾 Guardar medición</button>
         </form>
     </div>
 
-    <!-- SELECTOR CHANCADORA PARA VER PRONÓSTICO -->
+    <!-- SELECTOR CHANCADORA -->
     <div class="card">
-        <h3>Pronóstico por chancadora</h3>
-        <div style="margin-bottom:16px;">
+        <div class="card-title">🔍 Ver pronóstico por chancadora</div>
+        <div>
             {% for ch in chancadoras %}
             <a href="/alturas?chancadora={{ ch }}"
-               class="btn-filtro {% if ch == chancadora_sel %}activo{% endif %}">
+               class="btn-chancadora {% if ch == chancadora_sel %}activo{% endif %}">
                 {{ ch }}
             </a>
             {% endfor %}
         </div>
+    </div>
+
+    <!-- PRONÓSTICO -->
+    <div class="card">
+        <div class="card-title">📊 {{ chancadora_sel }} — Pronóstico de desgaste</div>
 
         {% if registros|length >= 2 %}
-        <!-- RESUMEN -->
-        <div id="resumen" style="margin-bottom:20px;"></div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpi-grid"></div>
 
         <!-- GRÁFICO -->
-        <canvas id="graficoBowl" height="100"></canvas>
+        <canvas id="graficoBowl" height="160"></canvas>
 
-        <!-- TABLA DE MEDICIONES -->
-        <h4 style="margin-top:24px;">Mediciones registradas</h4>
-        <table class="tabla-historial">
+        <!-- NUEVO CICLO -->
+        <form method="POST" action="/alturas/nuevo_ciclo" style="margin-top:12px;"
+              onsubmit="return confirm('¿Confirmas inicio de nuevo ciclo para {{ chancadora_sel }}? Las mediciones anteriores se archivarán.')">
+            <input type="hidden" name="chancadora" value="{{ chancadora_sel }}">
+            <button type="submit" class="btn-nuevo-ciclo">🔄 Nuevo ciclo (forro cambiado)</button>
+        </form>
+
+        <!-- TABLA -->
+        <div class="card-title" style="margin-top:16px;">📋 Mediciones del ciclo actual</div>
+        <table>
             <thead>
                 <tr><th>Fecha</th><th>Altura (pulg)</th><th>Operador</th></tr>
             </thead>
@@ -70,7 +105,7 @@
                 {% for r in registros %}
                 <tr>
                     <td>{{ r[0] }}</td>
-                    <td>{{ r[1] }}</td>
+                    <td><strong>{{ r[1] }}</strong></td>
                     <td>{{ r[2] or '-' }}</td>
                 </tr>
                 {% endfor %}
@@ -80,14 +115,12 @@
         <script>
         const registros = {{ registros | tojson }};
         const LIMITE = 9.0;
-
-        // Convertir fechas a números (días desde primera medición)
-        const fechas = registros.map(r => r[0]);
+        const fechas = registros.map(r => String(r[0]));
         const alturas = registros.map(r => parseFloat(r[1]));
         const t0 = new Date(fechas[0]);
         const dias = fechas.map(f => (new Date(f) - t0) / 86400000);
 
-        // Regresión lineal: y = m*x + b
+        // Regresión lineal
         const n = dias.length;
         const sumX = dias.reduce((a,b) => a+b, 0);
         const sumY = alturas.reduce((a,b) => a+b, 0);
@@ -96,63 +129,59 @@
         const m = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
         const b = (sumY - m*sumX) / n;
 
-        // Día estimado en que llega a 9 pulgadas
         const diaLimite = (LIMITE - b) / m;
         const fechaLimite = new Date(t0.getTime() + diaLimite * 86400000);
         const hoy = new Date();
         const diasRestantes = Math.round((fechaLimite - hoy) / 86400000);
 
-        // Línea de tendencia (extender hasta fecha límite)
+        // Línea de tendencia
         const diaMax = Math.max(diaLimite * 1.05, dias[dias.length-1] + 5);
-        const tendenciaX = [];
-        const tendenciaY = [];
+        const tendenciaLabels = [];
+        const tendenciaVals = [];
         for (let d = 0; d <= diaMax; d += 1) {
             const fecha = new Date(t0.getTime() + d * 86400000);
-            tendenciaX.push(fecha.toISOString().split('T')[0]);
-            tendenciaY.push(Math.max(0, parseFloat((m*d + b).toFixed(2))));
+            tendenciaLabels.push(fecha.toISOString().split('T')[0]);
+            tendenciaVals.push(Math.max(0, parseFloat((m*d + b).toFixed(2))));
         }
 
-        // Resumen
+        // KPIs
         const color = diasRestantes <= 3 ? '#e74c3c' : diasRestantes <= 7 ? '#f39c12' : '#27ae60';
-        document.getElementById('resumen').innerHTML = `
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
-                    <div style="font-size:13px; color:#666;">Última altura</div>
-                    <div style="font-size:28px; font-weight:700; color:#1a3a6b;">${alturas[alturas.length-1]} pulg</div>
-                </div>
-                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
-                    <div style="font-size:13px; color:#666;">Fecha estimada de cambio</div>
-                    <div style="font-size:22px; font-weight:700; color:${color};">${fechaLimite.toLocaleDateString('es-PE')}</div>
-                </div>
-                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
-                    <div style="font-size:13px; color:#666;">Días restantes</div>
-                    <div style="font-size:28px; font-weight:700; color:${color};">${diasRestantes} días</div>
-                </div>
-                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
-                    <div style="font-size:13px; color:#666;">Tasa de desgaste</div>
-                    <div style="font-size:22px; font-weight:700; color:#555;">${Math.abs(m).toFixed(3)} pulg/día</div>
-                </div>
+        document.getElementById('kpi-grid').innerHTML = `
+            <div class="kpi">
+                <div class="kpi-label">Última altura</div>
+                <div class="kpi-valor" style="color:#1a3a5c">${alturas[alturas.length-1]} pulg</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Días restantes</div>
+                <div class="kpi-valor" style="color:${color}">${diasRestantes} días</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Fecha estimada cambio</div>
+                <div class="kpi-valor" style="color:${color}; font-size:15px">${fechaLimite.toLocaleDateString('es-PE')}</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Desgaste por día</div>
+                <div class="kpi-valor" style="color:#555; font-size:16px">${Math.abs(m).toFixed(3)} pulg/día</div>
             </div>`;
 
         // Gráfico
         new Chart(document.getElementById('graficoBowl'), {
             type: 'line',
             data: {
-                labels: tendenciaX,
+                labels: tendenciaLabels,
                 datasets: [
                     {
                         label: 'Mediciones reales',
                         data: fechas.map((f,i) => ({x: f, y: alturas[i]})),
-                        borderColor: '#1a3a6b',
-                        backgroundColor: '#1a3a6b',
+                        borderColor: '#1a3a5c',
+                        backgroundColor: '#1a3a5c',
                         pointRadius: 6,
-                        pointStyle: 'circle',
                         showLine: false,
                         order: 1
                     },
                     {
-                        label: 'Tendencia (regresión lineal)',
-                        data: tendenciaX.map((f,i) => ({x: f, y: tendenciaY[i]})),
+                        label: 'Tendencia',
+                        data: tendenciaLabels.map((f,i) => ({x: f, y: tendenciaVals[i]})),
                         borderColor: '#3498db',
                         borderDash: [6,3],
                         borderWidth: 2,
@@ -161,8 +190,8 @@
                         order: 2
                     },
                     {
-                        label: 'Límite de cambio (9 pulg)',
-                        data: tendenciaX.map(f => ({x: f, y: LIMITE})),
+                        label: 'Límite cambio (9 pulg)',
+                        data: tendenciaLabels.map(f => ({x: f, y: LIMITE})),
                         borderColor: '#e74c3c',
                         borderWidth: 2,
                         borderDash: [4,4],
@@ -175,21 +204,21 @@
             options: {
                 responsive: true,
                 scales: {
-                    x: { type: 'category', title: { display: true, text: 'Fecha' }},
-                    y: { title: { display: true, text: 'Altura (pulgadas)' }, min: 7, max: 23 }
+                    x: { type: 'category', title: { display: true, text: 'Fecha' }, ticks: { maxTicksLimit: 6 }},
+                    y: { title: { display: true, text: 'Altura (pulg)' }, min: 7, max: 23 }
                 },
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: { mode: 'index' }
-                }
+                plugins: { legend: { position: 'top' } }
             }
         });
         </script>
 
         {% else %}
-        <p style="color:#888;">Registra al menos 2 mediciones para ver el pronóstico.</p>
+        <div class="empty">
+            <p>📏 Registra al menos 2 mediciones para ver el pronóstico</p>
+        </div>
         {% endif %}
-</div>
+    </div>
+
 </div>
 </body>
 </html>
