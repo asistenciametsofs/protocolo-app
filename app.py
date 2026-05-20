@@ -1041,7 +1041,7 @@ def proyecciones():
             if m < 0:
                 dia_limite = (9.0 - b) / m
                 import math
-                fecha_cambio = t0 + __import__('datetime').timedelta(days=round(dia_limite))
+                fecha_cambio = t0 + __import__('datetime').timedelta(days=math.floor(dia_limite))
                 proyecciones[ch] = fecha_cambio.strftime('%Y-%m-%d')
     
     conn.close()
