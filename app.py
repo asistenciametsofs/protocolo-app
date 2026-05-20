@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file 
 from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias
 from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
@@ -962,6 +962,37 @@ def descargar_informe(chancadora):
                     download_name=f'Informe_{chancadora}_{str(d.get("fecha_registro",""))[:10]}.pdf',
                     mimetype='application/pdf')
 
+@app.route('/alturas', methods=['GET', 'POST'])
+def alturas():
+    import psycopg2
+    from datetime import datetime
+    
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    if request.method == 'POST':
+        chancadora = request.form.get('chancadora')
+        fecha = request.form.get('fecha')
+        altura = request.form.get('altura')
+        operador = request.form.get('operador')
+        fecha_registro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        c.execute('''INSERT INTO altura_bowl (chancadora, fecha, altura, operador, fecha_registro)
+                     VALUES (%s, %s, %s, %s, %s)''',
+                  (chancadora, fecha, altura, operador, fecha_registro))
+        conn.commit()
+    
+    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+    chancadora_sel = request.args.get('chancadora', 'CR011')
+    
+    c.execute('''SELECT fecha, altura, operador FROM altura_bowl
+                 WHERE chancadora = %s ORDER BY fecha ASC''', (chancadora_sel,))
+    registros = c.fetchall()
+    conn.close()
+    
+    return render_template('alturas.html',
+                           registros=registros,
+                           chancadora_sel=chancadora_sel,
+                           chancadoras=chancadoras)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
