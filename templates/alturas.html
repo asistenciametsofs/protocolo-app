@@ -131,7 +131,7 @@
         const diaLimite = Math.floor((LIMITE - b) / m);
         const fechaLimite = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + diaLimite);
         const hoy = new Date();
-        const diasRestantes = Math.round((fechaLimite - hoy) / 86400000);
+        const diasRestantes = Math.ceil((fechaLimite - hoy) / 86400000);
 
         // Línea de tendencia
         const diaMax = Math.max(diaLimite * 1.05, dias[dias.length-1] + 5);
