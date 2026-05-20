@@ -72,9 +72,12 @@
         // Construir mapa de fechas → chancadoras
         const mapaFechas = {};
         for (const [ch, fecha] of Object.entries(proyecciones)) {
-            if (!mapaFechas[fecha]) mapaFechas[fecha] = [];
-            mapaFechas[fecha].push(ch);
-        }
+            const [y, mo, d] = fecha.split('-').map(Number);
+            const fechaLocal = new Date(y, mo - 1, d);
+            const fechaStr = `${fechaLocal.getFullYear()}-${String(fechaLocal.getMonth()+1).padStart(2,'0')}-${String(fechaLocal.getDate()).padStart(2,'0')}`;
+            if (!mapaFechas[fechaStr]) mapaFechas[fechaStr] = [];
+            mapaFechas[fechaStr].push(ch);
+       }
 
         let html = '';
         for (let m = 0; m < 3; m++) {
