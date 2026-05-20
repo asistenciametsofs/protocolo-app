@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alturas de Bowl</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+</head>
+<body>
+<div class="container">
+    <h2>📏 Alturas de Bowl</h2>
+
+    <!-- FORMULARIO REGISTRO -->
+    <div class="card">
+        <h3>Registrar medición</h3>
+        <form method="POST" action="/alturas">
+            <div class="grid3">
+                <div>
+                    <label>Chancadora</label>
+                    <select name="chancadora" required>
+                        {% for ch in chancadoras %}
+                        <option value="{{ ch }}">{{ ch }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Fecha</label>
+                    <input type="date" name="fecha" required>
+                </div>
+                <div>
+                    <label>Altura (pulgadas)</label>
+                    <input type="number" name="altura" step="0.1" min="0" max="25" required>
+                </div>
+                <div>
+                    <label>Operador</label>
+                    <input type="text" name="operador" placeholder="Nombre del operador">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Guardar medición</button>
+        </form>
+    </div>
+
+    <!-- SELECTOR CHANCADORA PARA VER PRONÓSTICO -->
+    <div class="card">
+        <h3>Pronóstico por chancadora</h3>
+        <div style="margin-bottom:16px;">
+            {% for ch in chancadoras %}
+            <a href="/alturas?chancadora={{ ch }}"
+               class="btn-filtro {% if ch == chancadora_sel %}activo{% endif %}">
+                {{ ch }}
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if registros|length >= 2 %}
+        <!-- RESUMEN -->
+        <div id="resumen" style="margin-bottom:20px;"></div>
+
+        <!-- GRÁFICO -->
+        <canvas id="graficoBowl" height="100"></canvas>
+
+        <!-- TABLA DE MEDICIONES -->
+        <h4 style="margin-top:24px;">Mediciones registradas</h4>
+        <table class="tabla-historial">
+            <thead>
+                <tr><th>Fecha</th><th>Altura (pulg)</th><th>Operador</th></tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr>
+                    <td>{{ r[0] }}</td>
+                    <td>{{ r[1] }}</td>
+                    <td>{{ r[2] or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <script>
+        const registros = {{ registros | tojson }};
+        const LIMITE = 9.0;
+
+        // Convertir fechas a números (días desde primera medición)
+        const fechas = registros.map(r => r[0]);
+        const alturas = registros.map(r => parseFloat(r[1]));
+        const t0 = new Date(fechas[0]);
+        const dias = fechas.map(f => (new Date(f) - t0) / 86400000);
+
+        // Regresión lineal: y = m*x + b
+        const n = dias.length;
+        const sumX = dias.reduce((a,b) => a+b, 0);
+        const sumY = alturas.reduce((a,b) => a+b, 0);
+        const sumXY = dias.reduce((s,x,i) => s + x*alturas[i], 0);
+        const sumX2 = dias.reduce((s,x) => s + x*x, 0);
+        const m = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
+        const b = (sumY - m*sumX) / n;
+
+        // Día estimado en que llega a 9 pulgadas
+        const diaLimite = (LIMITE - b) / m;
+        const fechaLimite = new Date(t0.getTime() + diaLimite * 86400000);
+        const hoy = new Date();
+        const diasRestantes = Math.round((fechaLimite - hoy) / 86400000);
+
+        // Línea de tendencia (extender hasta fecha límite)
+        const diaMax = Math.max(diaLimite * 1.05, dias[dias.length-1] + 5);
+        const tendenciaX = [];
+        const tendenciaY = [];
+        for (let d = 0; d <= diaMax; d += 1) {
+            const fecha = new Date(t0.getTime() + d * 86400000);
+            tendenciaX.push(fecha.toISOString().split('T')[0]);
+            tendenciaY.push(Math.max(0, parseFloat((m*d + b).toFixed(2))));
+        }
+
+        // Resumen
+        const color = diasRestantes <= 3 ? '#e74c3c' : diasRestantes <= 7 ? '#f39c12' : '#27ae60';
+        document.getElementById('resumen').innerHTML = `
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
+                    <div style="font-size:13px; color:#666;">Última altura</div>
+                    <div style="font-size:28px; font-weight:700; color:#1a3a6b;">${alturas[alturas.length-1]} pulg</div>
+                </div>
+                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
+                    <div style="font-size:13px; color:#666;">Fecha estimada de cambio</div>
+                    <div style="font-size:22px; font-weight:700; color:${color};">${fechaLimite.toLocaleDateString('es-PE')}</div>
+                </div>
+                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
+                    <div style="font-size:13px; color:#666;">Días restantes</div>
+                    <div style="font-size:28px; font-weight:700; color:${color};">${diasRestantes} días</div>
+                </div>
+                <div style="background:#f0f4ff; border-radius:10px; padding:16px 24px; text-align:center;">
+                    <div style="font-size:13px; color:#666;">Tasa de desgaste</div>
+                    <div style="font-size:22px; font-weight:700; color:#555;">${Math.abs(m).toFixed(3)} pulg/día</div>
+                </div>
+            </div>`;
+
+        // Gráfico
+        new Chart(document.getElementById('graficoBowl'), {
+            type: 'line',
+            data: {
+                labels: tendenciaX,
+                datasets: [
+                    {
+                        label: 'Mediciones reales',
+                        data: fechas.map((f,i) => ({x: f, y: alturas[i]})),
+                        borderColor: '#1a3a6b',
+                        backgroundColor: '#1a3a6b',
+                        pointRadius: 6,
+                        pointStyle: 'circle',
+                        showLine: false,
+                        order: 1
+                    },
+                    {
+                        label: 'Tendencia (regresión lineal)',
+                        data: tendenciaX.map((f,i) => ({x: f, y: tendenciaY[i]})),
+                        borderColor: '#3498db',
+                        borderDash: [6,3],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 2
+                    },
+                    {
+                        label: 'Límite de cambio (9 pulg)',
+                        data: tendenciaX.map(f => ({x: f, y: LIMITE})),
+                        borderColor: '#e74c3c',
+                        borderWidth: 2,
+                        borderDash: [4,4],
+                        pointRadius: 0,
+                        fill: false,
+                        order: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { type: 'category', title: { display: true, text: 'Fecha' }},
+                    y: { title: { display: true, text: 'Altura (pulgadas)' }, min: 7, max: 23 }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index' }
+                }
+            }
+        });
+        </script>
+
+        {% else %}
+        <p style="color:#888;">Registra al menos 2 mediciones para ver el pronóstico.</p>
+        {% endif %}
+</div>
+</div>
+</body>
+</html>
