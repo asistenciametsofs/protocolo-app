@@ -114,6 +114,7 @@
 
         <script>
         const registros = {{ registros | tojson }};
+        window.registros = registros;
         const LIMITE = 9.0;
         const fechas = registros.map(r => String(r[0]));
         const alturas = registros.map(r => parseFloat(r[1]));
