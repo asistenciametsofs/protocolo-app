@@ -155,7 +155,8 @@
         const m = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
         const b = (sumY - m*sumX) / n;
         const diaLimite = Math.floor((LIMITE - b) / m);
-        const fechaLimite = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + diaLimite);
+        const totalParadas = paradasAcum[paradasAcum.length - 1];
+        const fechaLimite = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + diaLimite + totalParadas);
         const hoy = new Date();
         const diasRestantes = Math.ceil((fechaLimite - hoy) / 86400000);
 
