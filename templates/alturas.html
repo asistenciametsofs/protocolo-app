@@ -59,6 +59,26 @@
             <input type="number" name="altura" step="0.01" min="0" max="25" placeholder="Ej: 18.50" required>
             <label>Operador</label>
             <input type="text" name="operador" placeholder="Nombre del operador">
+
+            <label>¿Hubo parada?</label>
+            <select name="hubo_parada" id="hubo_parada" onchange="toggleParada()" >
+                  <option value="NO" selected>NO</option>
+                  <option value="SI">SI</option>
+            </select>
+
+            <div id="div_parada" style="display:none;">
+                 <label>¿Cuántos días paró?</label>
+                 <input type="number" name="dias_parada" id="dias_parada" min="0" max="30" value="0">
+            </div>
+
+            <script>
+            function toggleParada() {
+                const sel = document.getElementById('hubo_parada').value;
+                document.getElementById('div_parada').style.display = sel === 'SI' ? 'block' : 'none';
+                if (sel === 'NO') document.getElementById('dias_parada').value = 0;
+            }
+            </script>
+
             <button type="submit" class="btn-primary">💾 Guardar medición</button>
         </form>
     </div>
@@ -113,14 +133,18 @@
         </table>
 
         <script>
+
         const registros = {{ registros | tojson }};
         window.registros = registros;
         const LIMITE = 9.0;
         const fechas = registros.map(r => String(r[0]));
         const alturas = registros.map(r => parseFloat(r[1]));
+        const diasParada = registros.map(r => parseInt(r[3]) || 0);
         const partes0 = fechas[0].split('-');
         const t0 = new Date(partes0[0], partes0[1]-1, partes0[2]);
-        const dias = fechas.map(f => (new Date(f) - t0) / 86400000);
+        const diasCalendario = fechas.map(f => { const p = f.split('-'); return (new Date(p[0],p[1]-1,p[2]) - t0)/86400000; });
+        const paradasAcum = diasParada.map((_, i) => diasParada.slice(0, i+1).reduce((a,b) => a+b, 0));
+        const dias = diasCalendario.map((d, i) => d - paradasAcum[i]);
 
         // Regresión lineal
         const n = dias.length;

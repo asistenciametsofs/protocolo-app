@@ -975,17 +975,19 @@ def alturas():
         fecha = request.form.get('fecha')
         altura = request.form.get('altura')
         operador = request.form.get('operador')
+        dias_parada = int(request.form.get('dias_parada') or 0)
         fecha_registro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        c.execute('''INSERT INTO altura_bowl (chancadora, fecha, altura, operador, fecha_registro)
-                     VALUES (%s, %s, %s, %s, %s)''',
-                  (chancadora, fecha, altura, operador, fecha_registro))
+        c.execute('''INSERT INTO altura_bowl (chancadora, fecha, altura, operador, dias_parada, fecha_registro)
+                     VALUES (%s, %s, %s, %s, %s, %s)''',
+                  (chancadora, fecha, altura, operador, dias_parada, fecha_registro))
         conn.commit()
     
     chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
     chancadora_sel = request.args.get('chancadora', 'CR011')
     
-    c.execute('''SELECT fecha, altura, operador FROM altura_bowl
-                 WHERE chancadora = %s ORDER BY fecha ASC''', (chancadora_sel,))
+    c.execute('''SELECT fecha, altura, operador, dias_parada FROM altura_bowl
+             WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
+             ORDER BY fecha ASC''', (chancadora_sel,))
     registros = c.fetchall()
     conn.close()
     
