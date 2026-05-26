@@ -656,3 +656,484 @@ def generar_word_cambio(datos):
     nombre = f'reportes/Cambio_HB_{datos.get("chancadora","X")}_{datetime.now().strftime("%Y%m%d_%H%M")}.docx'
     doc.save(nombre)
     return nombre
+
+# ══════════════════════════════════════════════════════════════
+# GENERADOR INFORME METSO (formato informe oficial)
+# ══════════════════════════════════════════════════════════════
+from docx.enum.section import WD_ORIENT
+
+# ── Colores Metso ─────────────────────────────────────────────
+NARANJA   = '000000'
+GRIS_OSC  = '404040'
+GRIS_CLAR = 'F2F2F2'
+BLANCO    = 'FFFFFF'
+GRIS_MED  = 'BFBFBF'
+
+# ── Helpers ───────────────────────────────────────────────────
+def set_cell_bg(cell, color):
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:val'), 'clear')
+    shd.set(qn('w:color'), 'auto')
+    shd.set(qn('w:fill'), color)
+    tcPr.append(shd)
+
+def set_borders(cell, color='BFBFBF'):
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    tcB = OxmlElement('w:tcBorders')
+    for side in ['top','left','bottom','right']:
+        b = OxmlElement(f'w:{side}')
+        b.set(qn('w:val'), 'single')
+        b.set(qn('w:sz'), '4')
+        b.set(qn('w:color'), color)
+        tcB.append(b)
+    tcPr.append(tcB)
+
+def cell_write(cell, text, bold=False, size=9, color=None, bg=None,
+               align=WD_ALIGN_PARAGRAPH.LEFT, italic=False):
+    cell.text = ''
+    p = cell.paragraphs[0]
+    p.alignment = align
+    p.paragraph_format.space_after = Pt(0)
+    p.paragraph_format.space_before = Pt(0)
+    run = p.add_run(str(text) if text is not None else '')
+    run.bold = bold
+    run.italic = italic
+    run.font.size = Pt(size)
+    run.font.name = 'Arial'
+    if color:
+        run.font.color.rgb = RGBColor(*bytes.fromhex(color))
+    if bg:
+        set_cell_bg(cell, bg)
+    set_borders(cell)
+
+def add_para(doc, text='', bold=False, size=10, color=None,
+             align=WD_ALIGN_PARAGRAPH.LEFT, space_before=4, space_after=4):
+    p = doc.add_paragraph()
+    p.alignment = align
+    p.paragraph_format.space_before = Pt(space_before)
+    p.paragraph_format.space_after = Pt(space_after)
+    if text:
+        run = p.add_run(str(text))
+        run.bold = bold
+        run.font.size = Pt(size)
+        run.font.name = 'Arial'
+        if color:
+            run.font.color.rgb = RGBColor(*bytes.fromhex(color))
+    return p
+
+def seccion_titulo(doc, numero, texto):
+    """Título de sección con línea naranja abajo"""
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(10)
+    p.paragraph_format.space_after = Pt(4)
+    pPr = p._p.get_or_add_pPr()
+    pBdr = OxmlElement('w:pBdr')
+    bottom = OxmlElement('w:bottom')
+    bottom.set(qn('w:val'), 'single')
+    bottom.set(qn('w:sz'), '8')
+    bottom.set(qn('w:color'), NARANJA)
+    pBdr.append(bottom)
+    pPr.append(pBdr)
+    run = p.add_run(f'{numero}. {texto}')
+    run.bold = True
+    run.font.size = Pt(11)
+    run.font.name = 'Arial'
+    run.font.color.rgb = RGBColor(*bytes.fromhex(GRIS_OSC))
+    return p
+
+def tabla_2col(doc, filas, w1=8, w2=9):
+    """Tabla simple 2 columnas label/valor"""
+    t = doc.add_table(rows=0, cols=2)
+    t.style = 'Table Grid'
+    for i, (k, v) in enumerate(filas):
+        row = t.add_row()
+        bg = GRIS_CLAR if i % 2 == 0 else BLANCO
+        cell_write(row.cells[0], k, bold=True, size=9, bg=bg)
+        cell_write(row.cells[1], v, size=9, bg=BLANCO)
+        row.cells[0].width = Cm(w1)
+        row.cells[1].width = Cm(w2)
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
+    return t
+
+def tabla_inspeccion(doc, filas, header_color=NARANJA):
+    """Tabla inspección 3 cols: Componente | Estado | Observaciones"""
+    t = doc.add_table(rows=1, cols=3)
+    t.style = 'Table Grid'
+    for i, h in enumerate(['Componente', 'Estado', 'Observaciones']):
+        cell_write(t.cell(0, i), h, bold=True, size=9,
+                   color=BLANCO, bg=header_color, align=WD_ALIGN_PARAGRAPH.CENTER)
+    t.columns[0].width = Cm(8)
+    t.columns[1].width = Cm(2.5)
+    t.columns[2].width = Cm(7)
+    for comp, estado, obs in filas:
+        row = t.add_row()
+        cell_write(row.cells[0], comp, size=9)
+        est_bg = 'D1E7DD' if str(estado).upper() in ('BUENO','OK','NO','SIN OBSERVACIONES') else \
+                 'FFEBEE' if str(estado).upper() in ('MALO','SI','CON OBSERVACIONES') else BLANCO
+        cell_write(row.cells[1], estado, size=9, bg=est_bg, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[2], obs, size=9)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+def tabla_metrologia(doc, titulo, mediciones):
+    """Tabla metrología con pares B/A"""
+    add_para(doc, titulo, bold=True, size=9, color=GRIS_OSC, space_before=2, space_after=2)
+    t = doc.add_table(rows=1, cols=3)
+    t.style = 'Table Grid'
+    for i, h in enumerate(['Punto', 'B (0°)', 'A (90°)']):
+        cell_write(t.cell(0, i), h, bold=True, size=9,
+                   color=GRIS_OSC, bg='E0E0E0', align=WD_ALIGN_PARAGRAPH.CENTER)
+    for punto, b, a in mediciones:
+        row = t.add_row()
+        cell_write(row.cells[0], punto, bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[1], str(b) if b else '-', size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[2], str(a) if a else '-', size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+def tabla_cotas(doc, titulo, datos, prefijo):
+    """Tabla de cotas 4x4 A1-D4"""
+    add_para(doc, titulo, bold=True, size=9, color=GRIS_OSC, space_before=2, space_after=2)
+    t = doc.add_table(rows=1, cols=5)
+    t.style = 'Table Grid'
+    for i, h in enumerate(['COTA', '1 (0°)', '2 (45°)', '3 (90°)', '4 (135°)']):
+        cell_write(t.cell(0, i), h, bold=True, size=9,
+                   color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.CENTER)
+    for letra in ['A','B','C','D']:
+        row = t.add_row()
+        cell_write(row.cells[0], letra, bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        for j in range(1, 5):
+            v = datos.get(f'{prefijo}_{letra}{j}', '')
+            cell_write(row.cells[j], str(v) if v else '-', size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+def add_foto(doc, url):
+    """Descarga foto de Cloudinary e inserta en el doc"""
+    if not url:
+        return
+    try:
+        import urllib.request
+        with urllib.request.urlopen(url, timeout=10) as r:
+            data = io.BytesIO(r.read())
+        from PIL import Image
+        img = Image.open(data)
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+        img.thumbnail((600, 400))
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=70)
+        buf.seek(0)
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(4)
+        p.add_run().add_picture(buf, width=Cm(10))
+    except Exception as e:
+        print(f'⚠️ Foto no cargada: {e}')
+
+def add_fotos_seccion(doc, datos, prefijos):
+    """Agrega fotos de una sección específica"""
+    fotos = []
+    for pref in prefijos:
+        for k, v in datos.items():
+            if k.startswith(f'foto_path_{pref}') and v:
+                fotos.append((k, v))
+    if fotos:
+        for key, url in fotos:
+            nombre = key.replace('foto_path_','').replace('_',' ').upper()
+            add_para(doc, nombre, bold=False, size=8, color=GRIS_MED,
+                     align=WD_ALIGN_PARAGRAPH.CENTER, space_before=2, space_after=0)
+            add_foto(doc, url)
+
+# ══════════════════════════════════════════════════════════════
+# GENERADOR PRINCIPAL
+# ══════════════════════════════════════════════════════════════
+def generar_informe_metso(datos):
+    doc = Document()
+
+    # Márgenes
+    for section in doc.sections:
+        section.top_margin    = Cm(1.8)
+        section.bottom_margin = Cm(1.8)
+        section.left_margin   = Cm(1.8)
+        section.right_margin  = Cm(1.8)
+
+    d = datos  # alias corto
+    chancadora = str(d.get('chancadora','') or '')
+    fecha_i    = str(d.get('fecha_inicio','') or '')
+    fecha_t    = str(d.get('fecha_termino','') or '')
+    hora_i     = f"{d.get('hora_inicio_h','') or ''}:{d.get('hora_inicio_m','') or ''}"
+    hora_f     = f"{d.get('hora_fin_h','') or ''}:{d.get('hora_fin_m','') or ''}"
+
+    # ── PORTADA ───────────────────────────────────────────────
+    # Banda naranja superior
+    t_port = doc.add_table(rows=1, cols=2)
+    t_port.style = 'Table Grid'
+    cell_write(t_port.cell(0,0), 'METSO', bold=True, size=28,
+               color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.LEFT)
+    cell_write(t_port.cell(0,1), 'RESTRICTED', bold=True, size=10,
+               color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.RIGHT)
+    t_port.cell(0,0).width = Cm(12)
+    t_port.cell(0,1).width = Cm(5)
+
+    add_para(doc, '', space_before=20, space_after=4)
+
+    add_para(doc, 'INFORME DEL SERVICIO', bold=True, size=22,
+             color=GRIS_OSC, align=WD_ALIGN_PARAGRAPH.CENTER, space_before=0, space_after=6)
+
+    add_para(doc, f'CAMBIO DE HEAD & BOWL – INSPECCIÓN SOCKET Y SOCKET LINER {chancadora}',
+             bold=True, size=16, color=NARANJA,
+             align=WD_ALIGN_PARAGRAPH.CENTER, space_before=0, space_after=20)
+
+    # Tabla datos portada
+    tabla_2col(doc, [
+        ('CÓDIGO DE INFORME',  str(d.get('codigo_informe','') or 'IF-SE-XXXX')),
+        ('SEMANA',             str(d.get('semana','') or '')),
+        ('CLIENTE',            str(d.get('cliente','') or 'Sociedad Minera Cerro Verde')),
+        ('FECHA DE SERVICIO',  f'{fecha_i}  –  {fecha_t}'),
+        ('CHANCADORA',         chancadora),
+        ('ORDEN DE SERVICIO',  str(d.get('orden_servicio','') or '')),
+    ], w1=7, w2=10)
+
+    add_para(doc, '', space_before=10, space_after=4)
+
+    # Tabla firmas
+    t_firma = doc.add_table(rows=2, cols=3)
+    t_firma.style = 'Table Grid'
+    for i, rol in enumerate(['Elaborado por', 'Revisado por', 'Aprobado por']):
+        cell_write(t_firma.cell(0,i), rol, bold=True, size=9,
+                   color=BLANCO, bg=GRIS_OSC, align=WD_ALIGN_PARAGRAPH.CENTER)
+    nombres = [
+        str(d.get('supervisor_metso','') or ''),
+        str(d.get('revisado_por','') or ''),
+        str(d.get('aprobado_por','') or 'Jason Pozo'),
+    ]
+    cargos = ['Supervisor de Servicios', 'Site Resident', 'Manager, Perú & North']
+    for i in range(3):
+        cell_write(t_firma.cell(1,i),
+                   f'{nombres[i]}\n{cargos[i]}',
+                   size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+
+    # Salto de página
+    doc.add_page_break()
+
+    # ── 1. DATOS GENERALES ────────────────────────────────────
+    seccion_titulo(doc, 1, 'DATOS GENERALES')
+    tabla_2col(doc, [
+        ('CLIENTE',           str(d.get('cliente','') or 'Sociedad Minera Cerro Verde')),
+        ('SERVICIO',          f'CAMBIO DE HEAD & BOWL {chancadora}'),
+        ('ORDEN DE SERVICIO', str(d.get('orden_servicio','') or '')),
+        ('USUARIO DE TURNO',  str(d.get('supervisor_cliente','') or '')),
+        ('FECHA DE SERVICIO', f'{fecha_i}  –  {fecha_t}'),
+        ('HORA INICIO',       hora_i),
+        ('HORA FIN',          hora_f),
+        ('TAG EQUIPO',        chancadora),
+        ('MODELO EQUIPO',     'METSO MP1250'),
+        ('UBICACIÓN',         str(d.get('ubicacion','') or 'Chancado Secundario – C2')),
+    ])
+
+    # ── 2. RESUMEN EJECUTIVO ──────────────────────────────────
+    seccion_titulo(doc, 2, 'RESUMEN EJECUTIVO')
+
+    # Estado componentes desde protocolo
+    def estado(val):
+        return str(val) if val else 'Sin observaciones'
+
+    tabla_inspeccion(doc, [
+        ('SOCKET LINER',    estado(d.get('sl_fisuras_estado')),    estado(d.get('sl_fisuras_obs'))),
+        ('SOCKET',          estado(d.get('socket_fisuras_estado')),estado(d.get('socket_fisuras_obs'))),
+        ('EXCÉNTRICA',      estado(d.get('anillo_roscas_estado')), estado(d.get('anillo_roscas_obs'))),
+        ('GUARDA ESTÁTICA', estado(d.get('prot_estatico_estado')), estado(d.get('prot_estatico_obs'))),
+        ('MAIN FRAME',      estado(d.get('mfl_pernos_estado')),    f"Medida promedio: {d.get('mfl_medida') or '-'} mm"),
+    ])
+
+    # ── 3. OBJETIVO ───────────────────────────────────────────
+    seccion_titulo(doc, 3, 'OBJETIVO')
+    add_para(doc,
+        'Realizar el mantenimiento de la chancadora MP1250, cumpliendo con los estándares '
+        'de seguridad de SMCV y Metso, así como con las normas y especificaciones técnicas '
+        'de Metso para el montaje e instalación de sus equipos como empresa OEM.',
+        size=10, space_before=4, space_after=8)
+
+    # ── 4. DESCRIPCIÓN DEL SERVICIO ───────────────────────────
+    seccion_titulo(doc, 4, 'DESCRIPCIÓN DEL SERVICIO')
+
+    # Actividades turno
+    add_para(doc, f'Hora de bloqueo: {hora_i}', bold=True, size=10, color=GRIS_OSC)
+    add_para(doc, f'Hora de desbloqueo: {hora_f}', bold=True, size=10, color=GRIS_OSC)
+
+    # Bowl / Head
+    tabla_2col(doc, [
+        ('HEAD SALIENTE',            str(d.get('head_saliente','') or '-')),
+        ('HEAD ENTRANTE',            str(d.get('head_entrante','') or '-')),
+        ('BOWL SALIENTE',            str(d.get('bowl_saliente','') or '-')),
+        ('BOWL ENTRANTE',            str(d.get('bowl_entrante','') or '-')),
+        ('ALTURA BOWL SALIENTE',     str(d.get('altura_bowl_saliente','') or '-') + '"'),
+        ('ALTURA BOWL ENTRANTE',     str(d.get('altura_bowl_entrante','') or '-') + '"'),
+        ('ALTURA FINAL BOWL',        str(d.get('altura_final_bowl','') or '-') + '"'),
+    ])
+
+    # ── 5. INSPECCIÓN DE COMPONENTES ─────────────────────────
+    seccion_titulo(doc, 5, 'INSPECCIÓN DE COMPONENTES')
+
+    # 5.1 Socket Liner
+    add_para(doc, '5.1 SOCKET LINER', bold=True, size=10, color=NARANJA, space_before=6)
+    tabla_metrologia(doc, 'Metrología Socket Liner (mm)', [
+        ('B1/A1', d.get('socket_B1'), d.get('socket_A1')),
+        ('B2/A2', d.get('socket_B2'), d.get('socket_A2')),
+        ('B3/A3', d.get('socket_B3'), d.get('socket_A3')),
+        ('B4/A4', d.get('socket_B4'), d.get('socket_A4')),
+        ('B5/A5', d.get('socket_B5'), d.get('socket_A5')),
+        ('B6/A6', d.get('socket_B6'), d.get('socket_A6')),
+    ])
+    tabla_inspeccion(doc, [
+        ('GAP Interior Socket Liner (mm)', str(d.get('sl_gap_interior','') or '-'), ''),
+        ('GAP Exterior Socket Liner (mm)', str(d.get('sl_gap_exterior','') or '-'), ''),
+        ('Fisuras en Socket Liner',        str(d.get('sl_fisuras_estado','') or '-'), str(d.get('sl_fisuras_obs','') or '')),
+        ('Deformaciones',                  str(d.get('sl_deformaciones_estado','') or '-'), str(d.get('sl_deformaciones_obs','') or '')),
+        ('Canales libres',                 str(d.get('sl_canales_estado','') or '-'), str(d.get('sl_canales_obs','') or '')),
+        ('¿Se cambió en esta intervención?', str(d.get('sl_cambio_ahora','NO') or 'NO'), ''),
+        ('¿Requiere cambio próxima intervención?', str(d.get('sl_cambio_siguiente','NO') or 'NO'), ''),
+    ])
+    add_fotos_seccion(doc, d, ['sl', 'socket_liner', 'sl1', 'sl2'])
+
+    # 5.2 Socket
+    add_para(doc, '5.2 SOCKET', bold=True, size=10, color=NARANJA, space_before=6)
+    tabla_inspeccion(doc, [
+        ('Fisuras en Socket',       str(d.get('socket_fisuras_estado','') or '-'), str(d.get('socket_fisuras_obs','') or '')),
+        ('Pernos del Socket',       str(d.get('socket_pernos_estado','') or '-'),  str(d.get('socket_pernos_obs','') or '')),
+        ('Ranuras',                 str(d.get('socket_ranuras_estado','') or '-'), str(d.get('socket_ranuras_obs','') or '')),
+        ('Deformaciones',           str(d.get('socket_deform_estado','') or '-'),  str(d.get('socket_deform_obs','') or '')),
+        ('Canales de lubricación',  str(d.get('socket_canales_estado','') or '-'), str(d.get('socket_canales_obs','') or '')),
+        ('GAP Socket-Mainshaft 0°',   str(d.get('socket_gap_0','') or '-') + ' mm', ''),
+        ('GAP Socket-Mainshaft 90°',  str(d.get('socket_gap_90','') or '-') + ' mm', ''),
+        ('GAP Socket-Mainshaft 180°', str(d.get('socket_gap_180','') or '-') + ' mm', ''),
+        ('GAP Socket-Mainshaft 270°', str(d.get('socket_gap_270','') or '-') + ' mm', ''),
+        ('¿Se cambió en esta intervención?', str(d.get('socket_cambio_ahora','NO') or 'NO'), ''),
+        ('¿Requiere cambio próxima intervención?', str(d.get('socket_cambio_siguiente','NO') or 'NO'), ''),
+    ])
+    if d.get('socket_cambio_ahora') == 'SI':
+        add_para(doc, 'Cotas Socket Saliente:', bold=True, size=9)
+        tabla_cotas(doc, 'Socket Saliente (mm)', d, 'sk_sal')
+        add_para(doc, 'Cotas Socket Nuevo:', bold=True, size=9)
+        tabla_cotas(doc, 'Socket Nuevo (mm)', d, 'sk_new')
+        add_para(doc, 'Mainshaft:', bold=True, size=9)
+        tabla_cotas(doc, 'Mainshaft (mm)', d, 'ms')
+    add_fotos_seccion(doc, d, ['socket', 'sk', 'socket1', 'socket2'])
+
+    # 5.3 MFL
+    add_para(doc, '5.3 MAIN FRAME LINERS', bold=True, size=10, color=NARANJA, space_before=6)
+    mfl_vals = [d.get(f'mfl_med_{x}') for x in ['A','B','C','D','E','F','G']]
+    mfl_nums = [float(v) for v in mfl_vals if v is not None]
+    prom_mfl = round(sum(mfl_nums)/len(mfl_nums), 2) if mfl_nums else '-'
+
+    t_mfl = doc.add_table(rows=2, cols=8)
+    t_mfl.style = 'Table Grid'
+    for i, h in enumerate(['A','B','C','D','E','F','G','Promedio']):
+        cell_write(t_mfl.cell(0,i), h, bold=True, size=9,
+                   color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.CENTER)
+    for i, x in enumerate(['A','B','C','D','E','F','G']):
+        cell_write(t_mfl.cell(1,i), str(d.get(f'mfl_med_{x}','') or '-'),
+                   size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+    cell_write(t_mfl.cell(1,7), str(prom_mfl),
+               bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER, bg='FFF3CD')
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+    tabla_inspeccion(doc, [
+        ('Pernos MFL',    str(d.get('mfl_pernos_estado','') or '-'), str(d.get('mfl_pernos_obs','') or '')),
+        ('Medida mínima', str(d.get('mfl_medida','') or '-') + ' mm (mín 9 mm)', ''),
+        ('¿Se cambió en esta intervención?', str(d.get('mfl_cambio_ahora','NO') or 'NO'), ''),
+        ('¿Requiere cambio próxima intervención?', str(d.get('mfl_cambio_siguiente','NO') or 'NO'), ''),
+    ])
+    add_fotos_seccion(doc, d, ['mfl', 'mfl1', 'mfl2', 'main_frame'])
+
+    # 5.4 Monturas
+    add_para(doc, '5.4 MONTURAS', bold=True, size=10, color=NARANJA, space_before=6)
+    tabla_inspeccion(doc, [
+        ('Barras de soporte', str(d.get('montura_barras_estado','') or '-'), str(d.get('montura_barras_obs','') or '')),
+        ('Acumulación',       str(d.get('montura_acumulacion_estado','') or '-'), str(d.get('montura_acumulacion_obs','') or '')),
+        ('Chocky Bar',        str(d.get('montura_chocky_estado','') or '-'), str(d.get('montura_chocky_obs','') or '')),
+        ('¿Se cambió?',       str(d.get('montura_cambio_ahora','NO') or 'NO'), ''),
+        ('¿Requiere cambio próxima?', str(d.get('montura_cambio_siguiente','NO') or 'NO'), ''),
+    ])
+    add_fotos_seccion(doc, d, ['montura', 'mont'])
+
+    # 5.5 Guard Pins
+    add_para(doc, '5.5 GUARD PINS', bold=True, size=10, color=NARANJA, space_before=6)
+    t_gp = doc.add_table(rows=1, cols=4)
+    t_gp.style = 'Table Grid'
+    for i, h in enumerate(['Guard Pin','Medida','¿Se cambió?','Observaciones']):
+        cell_write(t_gp.cell(0,i), h, bold=True, size=9,
+                   color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.CENTER)
+    for i in range(1, 7):
+        row = t_gp.add_row()
+        cell_write(row.cells[0], f'Guard Pin {i}', bold=True, size=9)
+        cell_write(row.cells[1], str(d.get(f'gp{i}_medida','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[2], str(d.get(f'gp{i}_cambio','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[3], str(d.get(f'gp{i}_obs','') or ''), size=9)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+    add_fotos_seccion(doc, d, ['gp', 'guard', 'gp1', 'gp2'])
+
+    # 5.6 Protectores
+    add_para(doc, '5.6 PROTECTORES', bold=True, size=10, color=NARANJA, space_before=6)
+    tabla_inspeccion(doc, [
+        ('Protector Estático', str(d.get('prot_estatico_estado','') or '-'), str(d.get('prot_estatico_obs','') or '')),
+        ('Protector Dinámico', str(d.get('prot_dinamico_estado','') or '-'), str(d.get('prot_dinamico_obs','') or '')),
+        ('Fuga de aceite',     str(d.get('prot_din_fuga','') or '-'),        str(d.get('prot_din_fuga_obs','') or '')),
+    ])
+    add_fotos_seccion(doc, d, ['prot', 'protector'])
+
+    # 5.7 Anillo de Ajuste / Hidráulico
+    add_para(doc, '5.7 ANILLO DE AJUSTE Y SISTEMA HIDRÁULICO', bold=True, size=10, color=NARANJA, space_before=6)
+    tabla_inspeccion(doc, [
+        ('Roscas anillo de fijación', str(d.get('anillo_roscas_estado','') or '-'), str(d.get('anillo_roscas_obs','') or '')),
+        ('Nivel hidráulico',          str(d.get('hidraulico_nivel_estado','') or '-'), str(d.get('hidraulico_nivel_obs','') or '')),
+        ('GAP aro V1/V2/V3 (mm)',     'Medición', f"{d.get('gap_aro_v1','-')} / {d.get('gap_aro_v2','-')} / {d.get('gap_aro_v3','-')}"),
+        ('Fugas Clamping Cylinder',   str(d.get('clamping_fugas_estado','') or '-'), str(d.get('clamping_fugas_obs','') or '')),
+    ])
+
+    # ── 6. CONCLUSIONES ───────────────────────────────────────
+    seccion_titulo(doc, 6, 'CONCLUSIONES')
+    bowl_i_str = str(d.get('bowl_entrante','') or '')
+    head_i_str = str(d.get('head_entrante','') or '')
+    bowl_s_str = str(d.get('bowl_saliente','') or '')
+    head_s_str = str(d.get('head_saliente','') or '')
+
+    conclusiones = [
+        f'Se realizó la inspección de los componentes internos, registrándose los hallazgos correspondientes y documentados con evidencias fotográficas.',
+        f'HEAD SALIENTE: {head_s_str}  →  HEAD ENTRANTE: {head_i_str}',
+        f'BOWL SALIENTE: {bowl_s_str}  →  BOWL ENTRANTE: {bowl_i_str}',
+        f'Bowl {bowl_i_str} en buen estado.',
+        f'Head {head_i_str} en buen estado.',
+        f'Socket Liner: {d.get("sl_fisuras_estado","Sin observaciones") or "Sin observaciones"}.',
+        f'Socket: {d.get("socket_fisuras_estado","Sin observaciones") or "Sin observaciones"}.',
+        f'MFL: Medida promedio {prom_mfl} mm.',
+    ]
+    for c in conclusiones:
+        p = doc.add_paragraph(style='List Bullet')
+        p.paragraph_format.space_after = Pt(2)
+        run = p.add_run(c)
+        run.font.size = Pt(10)
+        run.font.name = 'Arial'
+
+    # ── 7. RECOMENDACIONES ────────────────────────────────────
+    seccion_titulo(doc, 7, 'RECOMENDACIONES GENERALES')
+    rec = str(d.get('recomendaciones','') or 'Sin recomendaciones.')
+    for linea in rec.split('\n'):
+        if linea.strip():
+            p = doc.add_paragraph(style='List Bullet')
+            p.paragraph_format.space_after = Pt(2)
+            run = p.add_run(linea.strip())
+            run.font.size = Pt(10)
+            run.font.name = 'Arial'
+
+    # ── PIE DE PÁGINA ─────────────────────────────────────────
+    add_para(doc, '', space_before=10, space_after=2)
+    p_pie = add_para(doc, '© Metso 2025', size=8, color=GRIS_MED,
+                     align=WD_ALIGN_PARAGRAPH.CENTER, space_before=4, space_after=0)
+
+    # ── GUARDAR ───────────────────────────────────────────────
+    os.makedirs('reportes', exist_ok=True)
+    nombre = f'reportes/InformeMetso_{chancadora}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
+    doc.save(nombre)
+    return nombre

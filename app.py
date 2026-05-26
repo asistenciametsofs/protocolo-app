@@ -1050,6 +1050,23 @@ def proyecciones():
     conn.close()
     return render_template('proyecciones.html', proyecciones=proyecciones)
 
+@app.route('/informe/metso/<int:id>')
+def descargar_informe_metso(id):
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
+    c = conn.cursor()
+    c.execute('SELECT * FROM cambio_hb WHERE id = %s', (id,))
+    registro = c.fetchone()
+    conn.close()
+    if not registro:
+        return 'No encontrado', 404
+    datos = dict(registro)
+    from word_generator import generar_informe_metso
+    ruta = generar_informe_metso(datos)
+    nombre = f"InformeMetso_{datos.get('chancadora','X')}_{datos.get('fecha_inicio','')}.docx"
+    return send_file(ruta, as_attachment=True, download_name=nombre)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
