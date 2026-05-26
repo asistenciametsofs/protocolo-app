@@ -404,6 +404,7 @@ def descargar_reporte(tipo, id):
         clave_mixed = partes[0] + '_' + '_'.join(p[0].upper() + p[1:] if len(p) > 1 else p.upper() for p in partes[1:]) if len(partes) > 1 else k
         datos_norm[clave_mixed] = v    
     datos = datos_norm
+    print(f'DEBUG epoxi: {datos.get("epoxi_venc_catalizador")} | {datos.get("epoxi_Venc_Catalizador")}')
     if tipo == 'armado':
         ruta = generar_word_armado(datos)
         nombre = f"Armado_{datos.get('equipo','X')}.docx"
