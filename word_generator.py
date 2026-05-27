@@ -632,8 +632,8 @@ def generar_word_cambio(datos):
         add_inspeccion_table(doc, [
             ('Realizar inspección del contrapeso', datos.get('contrapeso_estado',''), datos.get('contrapeso_obs','')),
             ('Realizar inspección de sellos U-T', datos.get('sello_ut_estado',''), datos.get('sello_ut_obs','')),
-            ('Altura Bowl Entrante (pulgadas)', '', str(datos.get('altura_bowl_entrante',''))),
         ], header_color='0F5132')
+        add_imagen(doc, 'static/imagenes/SelloUT.png')
 
     # ── FOTOS ────────────────────────────────────────────────
     fotos = [k for k in datos.keys() if k.startswith('foto_path_')]
