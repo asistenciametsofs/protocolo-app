@@ -499,7 +499,7 @@
         <div class="grid2" style="margin-top:10px">
             <div>
                 <label>¿Se cambiará en esta inspección las monturas?</label>
-                <select name="montura_cambio_ahora" class="estado-select">
+                <select name="montura_cambio_ahora" class="estado-select" onchange="toggleCondicional(this,'montura_cambio_sec')">
                     <option value="NO">NO</option><option value="SI">SÍ</option>
                 </select>
             </div>
@@ -509,6 +509,16 @@
                     <option value="NO">NO</option><option value="SI">SÍ</option>
                 </select>
             </div>
+        </div>
+        <div class="condicional" id="montura_cambio_sec">
+            <div class="banner-amarillo">SI SE CAMBIA MONTURAS</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Inspeccionar desgastes en los brazos de la chancadora</td><td><select name="montura_brazos_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_brazos_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont4')">📷 Foto</button><input type="file" name="foto_mont4" id="foto_mont4" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont4"></td></tr>
+                <tr><td class="paso-desc">Inspeccionar desgastes en la caja de contraeje</td><td><select name="montura_caja_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_caja_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont5')">📷 Foto</button><input type="file" name="foto_mont5" id="foto_mont5" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont5"></td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
