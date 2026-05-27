@@ -501,7 +501,7 @@ def generar_word_cambio(datos):
         ('GAP Exterior entre Socket y Socket Liner (mm)', '', str(datos.get('sl_gap_exterior',''))),
     ], header_color='0F5132')
 
-    add_imagen(doc, 'static/imagenes/gap_socket_liner.png')
+    add_imagen(doc, 'static/imagenes/gap_socket_liner1.png')
 
     add_inspeccion_table(doc, [
         ('Verificar presencia de fisuras en el socket liner', datos.get('sl_fisuras_estado',''), datos.get('sl_fisuras_obs','')),
