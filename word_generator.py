@@ -156,7 +156,7 @@ def add_cotas_tabla(doc, titulo, datos, prefijo):
     tabla.style = 'Table Grid'
     for i, h in enumerate(['COTA REAL', '1 (0°)', '2 (45°)', '3 (90°)', '4 (135°)']):
         bold_cell(tabla.cell(0,i), h, bg='D1E7DD', align=WD_ALIGN_PARAGRAPH.CENTER)
-    for letra in ['A','B','C','D']:
+    for letra in ['A','B','C','D','F']:
         row = tabla.add_row()
         normal_cell(row.cells[0], letra, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
         for j in range(1,5):
@@ -536,7 +536,7 @@ def generar_word_cambio(datos):
         ('Inspeccionar los pernos del Socket', datos.get('socket_pernos_estado',''), datos.get('socket_pernos_obs','')),
         ('Inspeccionar ranuras sin obstrucciones', datos.get('socket_ranuras_estado',''), datos.get('socket_ranuras_obs','')),
         ('Inspeccionar si presenta deformaciones (zona de los pines)', datos.get('socket_deform_estado',''), datos.get('socket_deform_obs','')),
-        ('Inspeccionar si presenta fisuras y otro daño en los canales de lubricación', datos.get('socket_canales_estado',''), datos.get('socket_canales_obs','')),
+        ('Inspeccionar si presenta fisuras u otro daño en los canales de lubricación', datos.get('socket_canales_estado',''), datos.get('socket_canales_obs','')),
         ('GAP Socket-Mainshaft 0°', '', str(datos.get('socket_gap_0',''))),
         ('GAP Socket-Mainshaft 90°', '', str(datos.get('socket_gap_90',''))),
         ('GAP Socket-Mainshaft 180°', '', str(datos.get('socket_gap_180',''))),
@@ -556,8 +556,8 @@ def generar_word_cambio(datos):
 
         add_section_title_green(doc, '8. MONTAJE DE SOCKET')
         add_inspeccion_table(doc, [
-            ('1. Calentar el socket entre 120°C por encima de la temperatura ambiente', '', datos.get('sk_mont_calentar_obs','')),
-            ('2. Enfriar el socket a temperatura ambiente y volver a realizar el torque de los pernos a 2820 N.m', '', datos.get('sk_mont_enfriar_obs','')),
+            ('1. Calentar el socket a 120°C por encima de la temperatura ambiente', '', datos.get('sk_mont_calentar_obs','')),
+            ('2. Enfriar el socket a temperatura ambiente y ajustar los pernos a 2820 N.m', '', datos.get('sk_mont_enfriar_obs','')),
             ('3. GAP entre el socket y mainshaft (debe ser 0)', '', datos.get('sk_mont_gap_obs','')),
         ], header_color='0F5132')
         add_cotas_tabla(doc, 'Posición de Cotas — Socket Nuevo', datos, 'sk_new')
@@ -582,7 +582,7 @@ def generar_word_cambio(datos):
 
     if datos.get('mfl_cambio_ahora','NO') == 'SI':
         add_banner(doc, 'SI REQUIERE CAMBIO DE MFL', 'FFC107')
-        add_section_title_green(doc, '11. MONTAJE DE MAIN FRAME LINERS')
+        add_section_title_green(doc, '11. MONTAJE DE MAIN FRAME LINERS NUEVO')
         add_inspeccion_table(doc, [
             ('Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m', datos.get('mfl_mont_pernos',''), datos.get('mfl_mont_pernos_obs','')),
             ('Medición MFL Nuevos A/B/C/D/E/F/G (mm)', '', f"A:{datos.get('mfl_new_A','-')} B:{datos.get('mfl_new_B','-')} C:{datos.get('mfl_new_C','-')} D:{datos.get('mfl_new_D','-')} E:{datos.get('mfl_new_E','-')} F:{datos.get('mfl_new_F','-')} G:{datos.get('mfl_new_G','-')}"),
@@ -812,7 +812,7 @@ def tabla_cotas(doc, titulo, datos, prefijo):
     for i, h in enumerate(['COTA', '1 (0°)', '2 (45°)', '3 (90°)', '4 (135°)']):
         cell_write(t.cell(0, i), h, bold=True, size=9,
                    color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.CENTER)
-    for letra in ['A','B','C','D']:
+    for letra in ['A','B','C','D','F']:
         row = t.add_row()
         cell_write(row.cells[0], letra, bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
         for j in range(1, 5):

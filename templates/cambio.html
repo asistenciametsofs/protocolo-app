@@ -163,7 +163,7 @@
     <!-- 2. INSPECCIÓN DE ANILLO DE AJUSTE -->
     <div class="seccion">
         <div class="seccion-titulo">2. Inspección de Anillo de Ajuste</div>
-        <div class="subseccion-titulo">Inspección de Bowl y Aro de Ajuste</div>
+        <div class="subseccion-titulo">2.1.Inspección de las roscas del conjunto del anillo de ajuste</div>
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
@@ -176,19 +176,7 @@
             </tbody>
         </table>
         <img src="/static/imagenes/aro.png" class="img-tecnica" alt="Aro de Ajuste" style="max-width:175px;">
-        <div class="subseccion-titulo">Inspección de Unidad de Ajuste Hidráulico</div>
-        <table class="tabla-pasos">
-            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr>
-                <td class="paso-desc">Inspeccionar nivel de engrase y aceite en reductor del engranaje</td>
-                <td><select name="hidraulico_nivel_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option><option>No se inspecciono</option></select></td>
-                <td><input class="obs-input" name="hidraulico_nivel_obs" placeholder="Aquí los hallazgos encontrados"></td>
-                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hid1')">📷 Foto</button><input type="file" name="foto_hid1" id="foto_hid1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hid1"></td>
-            </tr>
-            </tbody>
-        </table>
-        <img src="/static/imagenes/engranaje.png" class="img-tecnica" alt="Engranaje" style="max-width:175px;">
+        <div class="subseccion-titulo">Inspección de Unidad de motores hidráulicos de regulación del setting</div>
         <label>Realizar medición de Gap entre Aro de transmisión y piñón (7-8 mm)</label>
         <img src="/static/imagenes/Piñon.png" class="img-tecnica" alt="Piñon">
         <div class="grid3" style="margin-top:6px">
@@ -294,8 +282,7 @@
             <table class="tabla-pasos">
                 <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
                 <tbody>
-                <tr><td class="paso-desc">Precalentar la parte superior del socket de ser necesario para que el socket liner salga libremente</td><td><select name="sl_ret_precalentar" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_ret_precalentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slr1')">📷 Foto</button><input type="file" name="foto_slr1" id="foto_slr1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slr1"></td></tr>
-                <tr><td class="paso-desc">Verificar la instalación los 4 tornillos extractores en los agujeros cónicos del revestimiento del socket liner</td><td><select name="sl_ret_tornillos" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_ret_tornillos_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slr2')">📷 Foto</button><input type="file" name="foto_slr2" id="foto_slr2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slr2"></td></tr>
+                <tr><td class="paso-desc">Verificar la instalación los 4 tornillos extractores en los agujeros del revestimiento del socket liner</td><td><select name="sl_ret_tornillos" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_ret_tornillos_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_slr2')">📷 Foto</button><input type="file" name="foto_slr2" id="foto_slr2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_slr2"></td></tr>
                 </tbody>
             </table>
             <div class="seccion-titulo" style="margin-top:16px">5. Montaje de Socket Liner</div>
@@ -338,7 +325,7 @@
             <tr><td class="paso-desc">Inspeccionar los pernos del Socket</td><td><select name="socket_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_pernos_obs" placeholder="Cantidad: 04 pernos M36 x 110"></td><td></td></tr>
             <tr><td class="paso-desc">Inspeccionar ranuras sin obstrucciones</td><td><select name="socket_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_ranuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk3')">📷 Foto</button><input type="file" name="foto_sk3" id="foto_sk3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk3"></td></tr>
             <tr><td class="paso-desc">Inspeccionar si presenta deformaciones (zona de los pines)</td><td><select name="socket_deform_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_deform_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            <tr><td class="paso-desc">Inspeccionar si presenta rotura en los canales de lubricación (desprendimiento de material)</td><td><select name="socket_canales_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_canales_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            <tr><td class="paso-desc">Inspeccionar si presenta fisuras y otro daño en los canales de lubricación</td><td><select name="socket_canales_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_canales_obs" placeholder="Hallazgos..."></td><td></td></tr>
             </tbody>
         </table>
         <img src="/static/imagenes/MedidaSocket.png" class="img-tecnica" alt="Medida Socket GAP">
@@ -373,7 +360,7 @@
             <table class="tabla-pasos">
                 <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
                 <tbody>
-                <tr><td class="paso-desc">1. Calentar el socket entre 120°C por encima de la temperatura ambiente</td><td><input class="obs-input" name="sk_ret_calentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skr1')">📷 Foto</button><input type="file" name="foto_skr1" id="foto_skr1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skr1"></td></tr>
+                <tr><td class="paso-desc">1. Calentar el socket 120°C por encima de la temperatura ambiente</td><td><input class="obs-input" name="sk_ret_calentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skr1')">📷 Foto</button><input type="file" name="foto_skr1" id="foto_skr1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skr1"></td></tr>
                 <tr><td class="paso-desc">2. Toma de medidas de Socket saliente (Metrología)</td><td></td><td></td></tr>
                 </tbody>
             </table>
@@ -391,8 +378,8 @@
             <table class="tabla-pasos">
                 <thead><tr><th>Descripción</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
                 <tbody>
-                <tr><td class="paso-desc">1. Calentar el socket entre 120°C por encima de la temperatura ambiente</td><td><input class="obs-input" name="sk_mont_calentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm1')">📷 Foto</button><input type="file" name="foto_skm1" id="foto_skm1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm1"></td></tr>
-                <tr><td class="paso-desc">2. Enfriar el socket a temperatura ambiente y volver a realizar el torque de los pernos a 2820 N.m</td><td><input class="obs-input" name="sk_mont_enfriar_obs" placeholder="Torqueo al 50% asentar, y luego al enfriar al 100%"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm2')">📷 Foto</button><input type="file" name="foto_skm2" id="foto_skm2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm2"></td></tr>
+                <tr><td class="paso-desc">1. Calentar el socket 120°C por encima de la temperatura ambiente</td><td><input class="obs-input" name="sk_mont_calentar_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm1')">📷 Foto</button><input type="file" name="foto_skm1" id="foto_skm1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm1"></td></tr>
+                <tr><td class="paso-desc">2. Enfriar el socket a temperatura ambiente y ajustar los pernos a 2820 N.m</td><td><input class="obs-input" name="sk_mont_enfriar_obs" placeholder="Torqueo al 50% asentar, y luego al enfriar al 100%"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm2')">📷 Foto</button><input type="file" name="foto_skm2" id="foto_skm2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm2"></td></tr>
                 <tr><td class="paso-desc">3. GAP entre el socket y mainshaft (debe ser 0)</td><td><input class="obs-input" name="sk_mont_gap_obs" placeholder="medida (mm)"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_skm3')">📷 Foto</button><input type="file" name="foto_skm3" id="foto_skm3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_skm3"></td></tr>
                 <tr><td class="paso-desc">4. Tomar medidas de Socket nuevo (Metrología)</td><td></td><td></td></tr>
                 </tbody>
