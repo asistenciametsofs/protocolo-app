@@ -455,11 +455,11 @@ def generar_word_cambio(datos):
     add_inspeccion_table(doc, [
         ('Inspeccionar nivel de engrase y aceite en reductor del engranaje',
          datos.get('hidraulico_nivel_estado',''), datos.get('hidraulico_nivel_obs','')),
-        ('Realizar medición de Gap entre Aro de transmisión y piñón (7-8 mm) — V1/V2/V3',
-         '', f"{datos.get('gap_aro_v1','-')} / {datos.get('gap_aro_v2','-')} / {datos.get('gap_aro_v3','-')} mm"),
+        ('Realizar medición de Gap entre Aro de transmisión y piñón (7-8 mm)',
+         '', f"Motor 1= {datos.get('gap_aro_v1','-')}\nMotor 2= {datos.get('gap_aro_v2','-')}\nMotor 3= {datos.get('gap_aro_v3','-')}"),
     ], header_color='0F5132')
 
-    add_section_title_green(doc, 'Inspección de Clamping Cylinders')
+    add_section_title_green(doc, '2.3. Inspección de Clamping Cylinders')
     add_inspeccion_table(doc, [
         ('¿Se detectan fugas de aceite por el extremo del Clamping Cylinder?',
          datos.get('clamping_fugas_estado',''), datos.get('clamping_fugas_obs','')),
