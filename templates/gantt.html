@@ -313,8 +313,9 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
                 },
                 scales: {
                     x: {
-                        min: 9 * 60,
-                        max: 20 * 60,
+                        type: 'linear',
+                        min: 570,
+                        max: 1200,
                         ticks: {
                             stepSize: 60,
                             callback: v => {
