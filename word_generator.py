@@ -423,6 +423,7 @@ def generar_word_cambio(datos):
     doc.add_paragraph()
 
     # ── DATOS GENERALES ──────────────────────────────────────
+    add_section_title_green(doc, '1. DATOS DEL EQUIPO')
     tabla_dg = doc.add_table(rows=4, cols=4)
     tabla_dg.style = 'Table Grid'
     campos_dg = [
@@ -444,13 +445,13 @@ def generar_word_cambio(datos):
 
     # ── SECCIÓN 2 - ANILLO DE AJUSTE ────────────────────────
     add_section_title_green(doc, '2. INSPECCIÓN DE ANILLO DE AJUSTE')
-    add_section_title_green(doc, 'Inspección de Bowl y Aro de Ajuste')
+    add_section_title_green(doc, '2.1.Inspección de las roscas del conjunto del anillo de ajuste')
     add_inspeccion_table(doc, [
         ('Inspeccionar roscas del anillo de fijación, aro de ajuste verificando suciedad, óxido y grasa',
          datos.get('anillo_roscas_estado',''), datos.get('anillo_roscas_obs','')),
     ], header_color='0F5132')
 
-    add_section_title_green(doc, 'Inspección de Unidad de Ajuste Hidráulico')
+    add_section_title_green(doc, '2.2.Inspección de motores hidráulicos de regulación del setting')
     add_inspeccion_table(doc, [
         ('Inspeccionar nivel de engrase y aceite en reductor del engranaje',
          datos.get('hidraulico_nivel_estado',''), datos.get('hidraulico_nivel_obs','')),
@@ -502,8 +503,7 @@ def generar_word_cambio(datos):
         add_banner(doc, 'SI REQUIERE CAMBIO DE SOCKET LINER', 'FFC107')
         add_section_title_green(doc, '4. RETIRO DE SOCKET LINER')
         add_inspeccion_table(doc, [
-            ('Precalentar la parte superior del socket de ser necesario para que el socket liner salga libremente', datos.get('sl_ret_precalentar',''), datos.get('sl_ret_precalentar_obs','')),
-            ('Verificar la instalación los 4 tornillos extractores en los agujeros cónicos del revestimiento del socket liner', datos.get('sl_ret_tornillos',''), datos.get('sl_ret_tornillos_obs','')),
+            ('Verificar la instalación los 4 tornillos extractores en los agujeros del revestimiento del socket liner', datos.get('sl_ret_tornillos',''), datos.get('sl_ret_tornillos_obs','')),
         ], header_color='0F5132')
 
         add_section_title_green(doc, '5. MONTAJE DE SOCKET LINER')
@@ -524,7 +524,7 @@ def generar_word_cambio(datos):
         ('Inspeccionar los pernos del Socket', datos.get('socket_pernos_estado',''), datos.get('socket_pernos_obs','')),
         ('Inspeccionar ranuras sin obstrucciones', datos.get('socket_ranuras_estado',''), datos.get('socket_ranuras_obs','')),
         ('Inspeccionar si presenta deformaciones (zona de los pines)', datos.get('socket_deform_estado',''), datos.get('socket_deform_obs','')),
-        ('Inspeccionar si presenta rotura en los canales de lubricación', datos.get('socket_canales_estado',''), datos.get('socket_canales_obs','')),
+        ('Inspeccionar si presenta fisuras y otro daño en los canales de lubricación', datos.get('socket_canales_estado',''), datos.get('socket_canales_obs','')),
         ('GAP Socket-Mainshaft 0°', '', str(datos.get('socket_gap_0',''))),
         ('GAP Socket-Mainshaft 90°', '', str(datos.get('socket_gap_90',''))),
         ('GAP Socket-Mainshaft 180°', '', str(datos.get('socket_gap_180',''))),
@@ -582,7 +582,7 @@ def generar_word_cambio(datos):
     add_inspeccion_table(doc, [
         ('Verificar estado de las barras de soporte de la montura del contraeje', datos.get('montura_barras_estado',''), datos.get('montura_barras_obs','')),
         ('Verificar que no se tenga acumulación en las monturas', datos.get('montura_acumulacion_estado',''), datos.get('montura_acumulacion_obs','')),
-        ('Verificar si los chocky bar están en buen o realizar refuerzo', datos.get('montura_chocky_estado',''), datos.get('montura_chocky_obs','')),
+        ('Verificar si los chocky bar están en buen o se requiere reforzar', datos.get('montura_chocky_estado',''), datos.get('montura_chocky_obs','')),
         ('¿Se cambiará en esta inspección las monturas?', datos.get('montura_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('montura_cambio_siguiente','NO'), ''),
     ], header_color='0F5132')
@@ -594,7 +594,7 @@ def generar_word_cambio(datos):
     tabla_gp.style = 'Table Grid'
     bold_cell(tabla_gp.cell(0,0), 'Guard Pin', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
     bold_cell(tabla_gp.cell(0,1), '¿Se cambió?', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-    bold_cell(tabla_gp.cell(0,2), 'Medida', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+    bold_cell(tabla_gp.cell(0,2), 'Medida (mm)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
     bold_cell(tabla_gp.cell(0,3), 'Observaciones', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
     for i in range(1, 7):
         row = tabla_gp.add_row()
