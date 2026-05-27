@@ -88,6 +88,15 @@ def init_db():
         recomendaciones TEXT, correo_destino TEXT
     )''')
 
+    c.execute(f'''CREATE TABLE IF NOT EXISTS altura_bowl (
+        id {tipo_id},
+        chancadora TEXT NOT NULL,
+        fecha TEXT NOT NULL,
+        altura REAL NOT NULL,
+        operador TEXT,
+        fecha_registro TEXT 
+    )''')
+
     c.execute(f'''CREATE TABLE IF NOT EXISTS cambio_hb (
         id {tipo_id},
         fecha_registro TEXT,
@@ -106,6 +115,7 @@ def init_db():
         socket_B1 REAL, socket_A1 REAL, socket_B2 REAL, socket_A2 REAL,
         socket_B3 REAL, socket_A3 REAL, socket_B4 REAL, socket_A4 REAL,
         socket_B5 REAL, socket_A5 REAL, socket_B6 REAL, socket_A6 REAL,
+        socket_med_a REAL, socket_med_b REAL, socket_med_c REAL, socket_med_d REAL,
         sl_asentamiento_estado TEXT, sl_asentamiento_obs TEXT,
         sl_gap_interior REAL, sl_gap_exterior REAL,
         sl_fisuras_estado TEXT, sl_fisuras_obs TEXT,

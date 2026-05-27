@@ -107,6 +107,7 @@ def guardar_cambio_route():
         'socket_B1','socket_A1','socket_B2','socket_A2',
         'socket_B3','socket_A3','socket_B4','socket_A4',
         'socket_B5','socket_A5','socket_B6','socket_A6',
+        'socket_med_a', 'socket_med_b', 'socket_med_c', 'socket_med_d',
         'sl_asentamiento_estado','sl_asentamiento_obs',
         'sl_gap_interior','sl_gap_exterior',
         'sl_fisuras_estado','sl_fisuras_obs',

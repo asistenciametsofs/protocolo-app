@@ -130,6 +130,22 @@ def add_metro_tabla(doc, titulo, mediciones, header_color='E8F0FE', label_color=
         normal_cell(row.cells[2], str(b) if b is not None else '-', align=WD_ALIGN_PARAGRAPH.CENTER)
     doc.add_paragraph()
 
+def add_metro_tabla_simple(doc, titulo, mediciones, header_color='E8F0FE', label_color=(0x0F,0x51,0x32)):
+    p = doc.add_paragraph()
+    run = p.add_run(titulo)
+    run.bold = True
+    run.font.size = Pt(9)
+    run.font.color.rgb = RGBColor(*label_color)
+    tabla = doc.add_table(rows=1, cols=2)
+    tabla.style = 'Table Grid'
+    bold_cell(tabla.cell(0,0), 'Punto', bg=header_color, align=WD_ALIGN_PARAGRAPH.CENTER)
+    bold_cell(tabla.cell(0,1), 'Medida (mm)', bg=header_color, align=WD_ALIGN_PARAGRAPH.CENTER)
+    for punto, val in mediciones:
+        row = tabla.add_row()
+        normal_cell(row.cells[0], punto, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+        normal_cell(row.cells[1], str(val) if (val is not None and val != '') else '-', align=WD_ALIGN_PARAGRAPH.CENTER)
+    doc.add_paragraph()
+
 def add_cotas_tabla(doc, titulo, datos, prefijo):
     p = doc.add_paragraph()
     run = p.add_run(titulo)
@@ -453,8 +469,6 @@ def generar_word_cambio(datos):
 
     add_section_title_green(doc, '2.2.Inspección de motores hidráulicos de regulación del setting')
     add_inspeccion_table(doc, [
-        ('Inspeccionar nivel de engrase y aceite en reductor del engranaje',
-         datos.get('hidraulico_nivel_estado',''), datos.get('hidraulico_nivel_obs','')),
         ('Realizar medición de Gap entre Aro de transmisión y piñón (7-8 mm)',
          '', f"Motor 1= {datos.get('gap_aro_v1','-')}\nMotor 2= {datos.get('gap_aro_v2','-')}\nMotor 3= {datos.get('gap_aro_v3','-')}"),
     ], header_color='0F5132')
@@ -471,16 +485,14 @@ def generar_word_cambio(datos):
         ('Inspección de ranuras de aceite del Socket Liner',
          datos.get('sl_ranuras_estado',''), datos.get('sl_ranuras_obs','')),
     ], header_color='0F5132')
-    add_imagen(doc, 'static/imagenes/socket_liner.png')
+    add_imagen(doc, 'static/imagenes/socket_liner1.png')
 
-    add_metro_tabla(doc, 'Metrología Socket Liner', [
-        ('B1/A1', datos.get('socket_B1',''), datos.get('socket_A1','')),
-        ('B2/A2', datos.get('socket_B2',''), datos.get('socket_A2','')),
-        ('B3/A3', datos.get('socket_B3',''), datos.get('socket_A3','')),
-        ('B4/A4', datos.get('socket_B4',''), datos.get('socket_A4','')),
-        ('B5/A5', datos.get('socket_B5',''), datos.get('socket_A5','')),
-        ('B6/A6', datos.get('socket_B6',''), datos.get('socket_A6','')),
-    ], header_color='D1E7DD', label_color=(0x0F,0x51,0x32))
+    add_metro_tabla_simple(doc, 'Metrología Socket Liner', [
+        ('A', datos.get('socket_med_a','')),
+        ('B', datos.get('socket_med_b','')),
+        ('C', datos.get('socket_med_c','')),
+        ('D', datos.get('socket_med_d','')),
+    ], header_color='D1E7DD')
 
     add_inspeccion_table(doc, [
         ('El asentamiento de la bola del Head en el socket liner es correcto',
