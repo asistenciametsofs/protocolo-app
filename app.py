@@ -779,18 +779,16 @@ def descargar_informe(chancadora):
     story.append(Paragraph('1. Estado de Socket Liner', subtitulo_style))
     
     # Metrología
-    sl_data = [['Punto', 'B (0°)', 'A (90°)']]
+    sl_data = [['Punto', 'Medida (mm)']]
     vals_sl = []
-    for i in range(1, 7):
-        b = d.get(f'socket_b{i}')
-        a = d.get(f'socket_a{i}')
-        sl_data.append([f'B{i}/A{i}', str(b or '-'), str(a or '-')])
-        if b: vals_sl.append(float(b))
-        if a: vals_sl.append(float(a))
+    for letra, campo in [('A','socket_med_a'),('B','socket_med_b'),('C','socket_med_c'),('D','socket_med_d')]:
+        v = d.get(campo)
+        sl_data.append([letra, str(v or '-')])
+        if v: vals_sl.append(float(v))
     
     promedio_sl = round(sum(vals_sl)/len(vals_sl), 2) if vals_sl else '-'
-    
-    t = Table(sl_data, colWidths=[6*cm, 5.5*cm, 5.5*cm])
+
+    t = Table(sl_data, colWidths=[8*cm, 9*cm])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),

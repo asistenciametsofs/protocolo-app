@@ -599,6 +599,14 @@ def generar_word_cambio(datos):
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('montura_cambio_siguiente','NO'), ''),
     ], header_color='0F5132')
 
+    if datos.get('montura_cambio_ahora','NO') == 'SI':
+        add_banner(doc, 'SI SE CAMBIA MONTURAS', 'FFC107')
+        add_inspeccion_table(doc, [
+            ('Inspeccionar desgastes en los brazos de la chancadora', datos.get('montura_brazos_estado',''), datos.get('montura_brazos_obs','')),
+            ('Inspeccionar desgastes en la caja de contraeje', datos.get('montura_caja_estado',''), datos.get('montura_caja_obs','')),
+        ], header_color='0F5132')
+    
+
     # ── SECCIÓN 13-15 - EXCÉNTRICA ───────────────────────────
     add_section_title_green(doc, 'INSPECCIÓN DE CONJUNTO DE EXCÉNTRICA')
     add_section_title_green(doc, '13. INSPECCIÓN DE GUARD PIN')
@@ -989,15 +997,17 @@ def generar_informe_metso(datos):
     seccion_titulo(doc, 5, 'INSPECCIÓN DE COMPONENTES')
 
     # 5.1 Socket Liner
-    add_para(doc, '5.1 SOCKET LINER', bold=True, size=10, color=NARANJA, space_before=6)
-    tabla_metrologia(doc, 'Metrología Socket Liner (mm)', [
-        ('B1/A1', d.get('socket_B1'), d.get('socket_A1')),
-        ('B2/A2', d.get('socket_B2'), d.get('socket_A2')),
-        ('B3/A3', d.get('socket_B3'), d.get('socket_A3')),
-        ('B4/A4', d.get('socket_B4'), d.get('socket_A4')),
-        ('B5/A5', d.get('socket_B5'), d.get('socket_A5')),
-        ('B6/A6', d.get('socket_B6'), d.get('socket_A6')),
-    ])
+    add_para(doc, 'Metrología Socket Liner (mm)', bold=True, size=9, color=GRIS_OSC, space_before=2, space_after=2)
+    t = doc.add_table(rows=1, cols=2)
+    t.style = 'Table Grid'
+    cell_write(t.cell(0,0), 'Punto', bold=True, size=9, color=GRIS_OSC, bg='E0E0E0', align=WD_ALIGN_PARAGRAPH.CENTER)
+    cell_write(t.cell(0,1), 'Medida (mm)', bold=True, size=9, color=GRIS_OSC, bg='E0E0E0', align=WD_ALIGN_PARAGRAPH.CENTER)
+    for letra, campo in [('A','socket_med_a'),('B','socket_med_b'),('C','socket_med_c'),('D','socket_med_d')]:
+        row = t.add_row()
+        cell_write(row.cells[0], letra, bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[1], str(d.get(campo,'') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
     tabla_inspeccion(doc, [
         ('GAP Interior Socket Liner (mm)', str(d.get('sl_gap_interior','') or '-'), ''),
         ('GAP Exterior Socket Liner (mm)', str(d.get('sl_gap_exterior','') or '-'), ''),
@@ -1068,6 +1078,11 @@ def generar_informe_metso(datos):
         ('¿Se cambió?',       str(d.get('montura_cambio_ahora','NO') or 'NO'), ''),
         ('¿Requiere cambio próxima?', str(d.get('montura_cambio_siguiente','NO') or 'NO'), ''),
     ])
+    if d.get('montura_cambio_ahora') == 'SI':
+        tabla_inspeccion(doc, [
+            ('Desgastes en brazos de la chancadora', str(d.get('montura_brazos_estado','') or '-'), str(d.get('montura_brazos_obs','') or '')),
+            ('Desgastes en caja de contraeje', str(d.get('montura_caja_estado','') or '-'), str(d.get('montura_caja_obs','') or '')),
+        ])
     add_fotos_seccion(doc, d, ['montura', 'mont'])
 
     # 5.5 Guard Pins
