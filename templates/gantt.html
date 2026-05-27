@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt — Cambio H&B</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Arial,sans-serif; background:#f0f2f5; color:#1a1a1a; }
+.header { background:#1a3a5c; color:#fff; padding:14px 16px; position:sticky; top:0; z-index:100; }
+.header h1 { font-size:16px; font-weight:bold; }
+.container { max-width:960px; margin:0 auto; padding:16px; }
+.card { background:#fff; border-radius:12px; padding:16px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,.07); }
+.filtros { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+select,input[type=date] { width:100%; padding:9px 10px; border:1px solid #ddd; border-radius:8px; font-size:13px; }
+.btn { padding:10px; border:none; border-radius:8px; font-size:13px; font-weight:bold; cursor:pointer; width:100%; }
+.btn-primary { background:#1a3a5c; color:#fff; }
+.btn-primary:hover { background:#0d2440; }
+.leyenda { display:flex; gap:16px; flex-wrap:wrap; font-size:12px; margin-bottom:8px; }
+.ley-item { display:flex; align-items:center; gap:5px; }
+.ley-dot { width:12px; height:12px; border-radius:2px; }
+.stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px; }
+.stat { background:#fff; border-radius:10px; padding:12px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+.stat-val { font-size:22px; font-weight:bold; color:#1a3a5c; }
+.stat-lbl { font-size:11px; color:#888; margin-top:2px; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:#1a3a5c; color:#fff; padding:8px 6px; text-align:left; font-size:11px; font-weight:bold; }
+td { padding:7px 6px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+tr:hover td { background:#f8f9fa; }
+.act-nombre { font-weight:500; font-size:12px; max-width:180px; }
+.badge { display:inline-block; padding:2px 7px; border-radius:8px; font-size:10px; font-weight:bold; }
+.badge-ok { background:#d1e7dd; color:#0f5132; }
+.badge-demora { background:#fff3cd; color:#664d03; }
+.badge-pendiente { background:#f0f0f0; color:#666; }
+input[type=time] { padding:4px 6px; border:1px solid #ddd; border-radius:6px; font-size:12px; width:82px; }
+input[type=number] { padding:4px 6px; border:1px solid #ddd; border-radius:6px; font-size:12px; width:60px; }
+input[type=text] { padding:4px 6px; border:1px solid #ddd; border-radius:6px; font-size:12px; width:100%; }
+input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
+.guardar-row { background:#e8f0fe; }
+.btn-save { padding:4px 10px; background:#1a3a5c; color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer; }
+.btn-save:hover { background:#0d2440; }
+.gantt-wrap { overflow-x:auto; }
+.gantt-svg { display:block; }
+.curva-wrap { position:relative; height:220px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📊 Gantt — Cambio de Head & Bowl</h1>
+</div>
+
+<div class="container">
+    <a href="/" style="font-size:13px;color:#1a3a5c;text-decoration:none;display:block;margin-bottom:12px;">← Volver al inicio</a>
+
+    <div class="card">
+        <form method="GET" id="formFiltro">
+            <div class="filtros" style="margin-bottom:10px;">
+                <div>
+                    <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Chancadora</label>
+                    <select name="chancadora" required>
+                        <option value="">Seleccionar...</option>
+                        {% for ch in chancadoras %}
+                        <option value="{{ ch }}" {{ 'selected' if chancadora == ch }}>{{ ch }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Fecha del servicio</label>
+                    <input type="date" name="fecha" value="{{ fecha }}" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Ver Gantt</button>
+        </form>
+    </div>
+
+    {% if chancadora and fecha %}
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-val" id="stat-completadas">0</div>
+            <div class="stat-lbl">Completadas</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val" id="stat-demoras" style="color:#b45309;">0</div>
+            <div class="stat-lbl">Con demora</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val" id="stat-avance" style="color:#0f5132;">0%</div>
+            <div class="stat-lbl">Avance real</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Diagrama de Gantt</div>
+        <div class="leyenda">
+            <div class="ley-item"><div class="ley-dot" style="background:#b5d4f4;"></div><span>Planificado</span></div>
+            <div class="ley-item"><div class="ley-dot" style="background:#3b6d11;"></div><span>Real completado</span></div>
+            <div class="ley-item"><div class="ley-dot" style="background:#e24b4a;"></div><span>Demora</span></div>
+            <div class="ley-item"><div class="ley-dot" style="background:#ef9f27;"></div><span>En progreso</span></div>
+        </div>
+        <div class="gantt-wrap">
+            <canvas id="ganttChart" style="min-width:600px;" role="img" aria-label="Gantt Cambio H&B"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Curva S — Avance planificado vs real</div>
+        <div class="curva-wrap">
+            <canvas id="curvaS" role="img" aria-label="Curva S avance planificado vs real"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold;font-size:13px;margin-bottom:12px;">Registro de actividades — {{ chancadora }} {{ fecha }}</div>
+        <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Actividad</th>
+                    <th>Plan inicio</th>
+                    <th>Plan fin</th>
+                    <th>Real inicio</th>
+                    <th>Real fin</th>
+                    <th>Demora (min)</th>
+                    <th>Motivo</th>
+                    <th>Listo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for act in actividades %}
+            {% set av = avance.get(act.id, {}) %}
+            <tr id="row-{{ act.id }}">
+                <td style="color:#888;">{{ act.id }}</td>
+                <td class="act-nombre">
+                    {{ act.nombre }}
+                    {% if av.get('completado') %}
+                        <span class="badge badge-ok">✓</span>
+                    {% elif av.get('inicio_real') %}
+                        <span class="badge" style="background:#fff3cd;color:#664d03;">En curso</span>
+                    {% else %}
+                        <span class="badge badge-pendiente">Pendiente</span>
+                    {% endif %}
+                    {% if av.get('demora_minutos') and av.get('demora_minutos')|int > 0 %}
+                        <span class="badge badge-demora">+{{ av.get('demora_minutos') }}min</span>
+                    {% endif %}
+                </td>
+                <td style="color:#1a3a5c;font-weight:500;">{{ act.inicio_plan }}</td>
+                <td style="color:#1a3a5c;font-weight:500;">{{ act.fin_plan }}</td>
+                <td><input type="time" id="ini-{{ act.id }}" value="{{ av.get('inicio_real','') }}"></td>
+                <td><input type="time" id="fin-{{ act.id }}" value="{{ av.get('fin_real','') }}"></td>
+                <td><input type="number" id="dem-{{ act.id }}" min="0" max="999" value="{{ av.get('demora_minutos',0) or 0 }}"></td>
+                <td><input type="text" id="mot-{{ act.id }}" value="{{ av.get('demora_motivo','') or '' }}" placeholder="Motivo..."></td>
+                <td style="text-align:center;"><input type="checkbox" id="chk-{{ act.id }}" {{ 'checked' if av.get('completado') }}></td>
+                <td><button class="btn-save" onclick="guardar({{ act.id }})">Guardar</button></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <script>
+    const CHANCADORA = "{{ chancadora }}";
+    const FECHA = "{{ fecha }}";
+
+    const actividades = {{ actividades | tojson }};
+    const avance = {{ avance | tojson }};
+
+    function timeToMin(t) {
+        if (!t) return null;
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    function guardar(id) {
+        const data = {
+            chancadora: CHANCADORA,
+            fecha: FECHA,
+            actividad_id: id,
+            inicio_real: document.getElementById('ini-' + id).value || null,
+            fin_real: document.getElementById('fin-' + id).value || null,
+            demora_minutos: parseInt(document.getElementById('dem-' + id).value) || 0,
+            demora_motivo: document.getElementById('mot-' + id).value || null,
+            completado: document.getElementById('chk-' + id).checked
+        };
+        fetch('/gantt/guardar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        }).then(r => r.json()).then(res => {
+            if (res.ok) {
+                const btn = document.querySelector('#row-' + id + ' .btn-save');
+                btn.textContent = '✓';
+                btn.style.background = '#0f5132';
+                setTimeout(() => { btn.textContent = 'Guardar'; btn.style.background = '#1a3a5c'; }, 1500);
+                actualizarStats();
+                dibujarGantt();
+                dibujarCurvaS();
+            }
+        }).catch(e => alert('Error al guardar: ' + e));
+    }
+
+    function getDatos() {
+        return actividades.map(act => {
+            const id = act.id;
+            return {
+                ...act,
+                inicio_real: document.getElementById('ini-' + id).value || null,
+                fin_real: document.getElementById('fin-' + id).value || null,
+                demora_minutos: parseInt(document.getElementById('dem-' + id).value) || 0,
+                completado: document.getElementById('chk-' + id).checked
+            };
+        });
+    }
+
+    function actualizarStats() {
+        const datos = getDatos();
+        const completadas = datos.filter(d => d.completado).length;
+        const conDemora = datos.filter(d => d.demora_minutos > 0).length;
+        const avancePct = Math.round((completadas / datos.length) * 100);
+        document.getElementById('stat-completadas').textContent = completadas;
+        document.getElementById('stat-demoras').textContent = conDemora;
+        document.getElementById('stat-avance').textContent = avancePct + '%';
+    }
+
+    let ganttChart = null;
+    function dibujarGantt() {
+        const datos = getDatos();
+        const baseMin = 9 * 60 + 30;
+        const labels = datos.map(d => d.nombre.length > 30 ? d.nombre.substring(0, 28) + '…' : d.nombre);
+
+        const planStart = datos.map(d => timeToMin(d.inicio_plan) - baseMin);
+        const planDur   = datos.map(d => d.duracion * 60);
+        const realStart = datos.map(d => d.inicio_real ? timeToMin(d.inicio_real) - baseMin : null);
+        const realDur   = datos.map(d => {
+            if (!d.inicio_real || !d.fin_real) return null;
+            return timeToMin(d.fin_real) - timeToMin(d.inicio_real);
+        });
+        const demoraDur = datos.map(d => d.demora_minutos || 0);
+
+        const h = Math.max(datos.length * 38 + 60, 300);
+        document.getElementById('ganttChart').style.height = h + 'px';
+
+        if (ganttChart) ganttChart.destroy();
+        ganttChart = new Chart(document.getElementById('ganttChart'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Offset',
+                        data: planStart,
+                        backgroundColor: 'transparent',
+                        borderWidth: 0,
+                        skipNull: true,
+                    },
+                    {
+                        label: 'Planificado',
+                        data: planDur,
+                        backgroundColor: '#b5d4f4',
+                        borderColor: '#378add',
+                        borderWidth: 1,
+                        borderRadius: 3,
+                    },
+                    {
+                        label: 'Real',
+                        data: realDur,
+                        backgroundColor: datos.map(d => d.completado ? '#639922' : '#ef9f27'),
+                        borderWidth: 0,
+                        borderRadius: 3,
+                    },
+                    {
+                        label: 'Demora',
+                        data: demoraDur,
+                        backgroundColor: '#f09595',
+                        borderColor: '#e24b4a',
+                        borderWidth: 1,
+                        borderRadius: 3,
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                if (ctx.datasetIndex === 0) return null;
+                                const v = ctx.raw;
+                                if (!v) return null;
+                                const h = Math.floor(v / 60);
+                                const m = v % 60;
+                                const label = ctx.dataset.label;
+                                return `${label}: ${h}h ${m}min`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        min: 0,
+                        max: 660,
+                        ticks: {
+                            callback: v => {
+                                const totalMin = 9 * 60 + 30 + v;
+                                const h = Math.floor(totalMin / 60);
+                                const m = totalMin % 60;
+                                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+                            },
+                            maxTicksLimit: 10,
+                            font: { size: 10 }
+                        },
+                        title: { display: true, text: 'Hora del día', font: { size: 11 } }
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: { font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
+
+    let curvaChart = null;
+    function dibujarCurvaS() {
+        const datos = getDatos();
+        const total = datos.length;
+        const horasEje = [];
+        for (let h = 9; h <= 20; h++) {
+            horasEje.push(`${String(h).padStart(2,'0')}:00`);
+        }
+
+        const planAcum = horasEje.map(hora => {
+            const hMin = timeToMin(hora);
+            const completadas = datos.filter(d => timeToMin(d.fin_plan) <= hMin).length;
+            return Math.round((completadas / total) * 100);
+        });
+
+        const realAcum = horasEje.map(hora => {
+            const hMin = timeToMin(hora);
+            const completadas = datos.filter(d => d.completado && d.fin_real && timeToMin(d.fin_real) <= hMin).length;
+            return Math.round((completadas / total) * 100);
+        });
+
+        if (curvaChart) curvaChart.destroy();
+        curvaChart = new Chart(document.getElementById('curvaS'), {
+            type: 'line',
+            data: {
+                labels: horasEje,
+                datasets: [
+                    {
+                        label: 'Planificado',
+                        data: planAcum,
+                        borderColor: '#378add',
+                        backgroundColor: '#e6f1fb',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        borderDash: [5, 4],
+                    },
+                    {
+                        label: 'Real',
+                        data: realAcum,
+                        borderColor: '#3b6d11',
+                        backgroundColor: 'rgba(99,153,34,0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0, max: 100,
+                        ticks: {
+                            callback: v => v + '%',
+                            font: { size: 10 }
+                        },
+                        title: { display: true, text: 'Avance (%)', font: { size: 11 } }
+                    },
+                    x: {
+                        ticks: { font: { size: 10 }, maxRotation: 45 }
+                    }
+                }
+            }
+        });
+    }
+
+    actualizarStats();
+    dibujarGantt();
+    dibujarCurvaS();
+
+    document.querySelectorAll('input[type=time], input[type=number], input[type=text], input[type=checkbox]')
+        .forEach(el => el.addEventListener('change', () => {
+            actualizarStats();
+            dibujarGantt();
+            dibujarCurvaS();
+        }));
+    </script>
+
+    {% endif %}
+</div>
+</body>
+</html>

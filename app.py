@@ -1069,6 +1069,142 @@ def descargar_informe_metso(id):
     nombre = f"InformeMetso_{datos.get('chancadora','X')}_{datos.get('fecha_inicio','')}.docx"
     return send_file(ruta, as_attachment=True, download_name=nombre)
 
+# ══════════════════════════════════════════════════════════════
+# MÓDULO GANTT — pegar en app.py antes de: if __name__ == '__main__':
+# ══════════════════════════════════════════════════════════════
+
+# Actividades planificadas del Cronograma (del Excel)
+ACTIVIDADES_GANTT = [
+    {"id": 1,  "nombre": "Bloqueo",                                              "inicio_plan": "09:30", "fin_plan": "09:45", "duracion": 0.25, "recursos": "SMCV"},
+    {"id": 2,  "nombre": "Retiro de pernos de segmento de feeder",               "inicio_plan": "09:45", "fin_plan": "10:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 3,  "nombre": "Retiro de Guardas y pines",                            "inicio_plan": "09:45", "fin_plan": "10:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 4,  "nombre": "Retiro de Ductos nivel Chancadora",                    "inicio_plan": "09:45", "fin_plan": "11:45", "duracion": 2.0,  "recursos": ""},
+    {"id": 5,  "nombre": "Desmontaje de Segmento de Feeder",                     "inicio_plan": "11:15", "fin_plan": "11:45", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 6,  "nombre": "Retiro de sensores de Chancadora y Feeder",            "inicio_plan": "10:45", "fin_plan": "11:45", "duracion": 1.0,  "recursos": "SMCV"},
+    {"id": 7,  "nombre": "Retracción de feeder, Limpieza y desmontaje de chute", "inicio_plan": "11:45", "fin_plan": "12:15", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 8,  "nombre": "Desenroscado de Bowl y Bloqueo Sist. Hidráulico",      "inicio_plan": "12:15", "fin_plan": "12:45", "duracion": 0.5,  "recursos": "SMCV"},
+    {"id": 9,  "nombre": "Inspección y cambio de Liners de Chute",               "inicio_plan": "12:45", "fin_plan": "15:45", "duracion": 3.0,  "recursos": ""},
+    {"id": 10, "nombre": "Retiro de Bowl",                                        "inicio_plan": "12:45", "fin_plan": "13:15", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 11, "nombre": "Retiro de Head",                                        "inicio_plan": "13:15", "fin_plan": "14:00", "duracion": 0.75, "recursos": "Grúa"},
+    {"id": 12, "nombre": "Limpieza de Componentes internos",                      "inicio_plan": "14:00", "fin_plan": "14:45", "duracion": 0.75, "recursos": ""},
+    {"id": 13, "nombre": "Inspección y metrología de Componentes Internos",       "inicio_plan": "14:45", "fin_plan": "15:45", "duracion": 1.0,  "recursos": ""},
+    {"id": 14, "nombre": "Montaje de Head",                                       "inicio_plan": "15:45", "fin_plan": "16:15", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 15, "nombre": "Montaje de Bowl",                                       "inicio_plan": "16:15", "fin_plan": "16:45", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 16, "nombre": "Roscado de Bowl y Bloqueo Sist. Hidráulico",            "inicio_plan": "16:45", "fin_plan": "17:15", "duracion": 0.5,  "recursos": "SMCV"},
+    {"id": 17, "nombre": "Montaje de Chute",                                      "inicio_plan": "17:15", "fin_plan": "17:45", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 18, "nombre": "Instalación de Ductos",                                 "inicio_plan": "17:45", "fin_plan": "19:15", "duracion": 1.5,  "recursos": ""},
+    {"id": 19, "nombre": "Extensión de Feeder",                                   "inicio_plan": "17:45", "fin_plan": "18:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 20, "nombre": "Instalación de sensores de Chancadora y Feeder",        "inicio_plan": "17:45", "fin_plan": "18:45", "duracion": 1.0,  "recursos": "SMCV"},
+    {"id": 21, "nombre": "Montaje de Segmento de Feeder y ajuste de pernos",      "inicio_plan": "17:45", "fin_plan": "18:15", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 22, "nombre": "Instalación de Guardas y pines",                        "inicio_plan": "18:45", "fin_plan": "19:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 23, "nombre": "Desbloqueo",                                             "inicio_plan": "19:15", "fin_plan": "19:30", "duracion": 0.25, "recursos": "SMCV"},
+]
+
+
+def init_gantt_db():
+    """Crea la tabla gantt_cambio_hb si no existe"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS gantt_cambio_hb (
+                id SERIAL PRIMARY KEY,
+                chancadora TEXT NOT NULL,
+                fecha DATE NOT NULL,
+                actividad_id INTEGER NOT NULL,
+                inicio_real TEXT,
+                fin_real TEXT,
+                demora_minutos INTEGER DEFAULT 0,
+                demora_motivo TEXT,
+                completado BOOLEAN DEFAULT FALSE,
+                fecha_registro TIMESTAMP DEFAULT NOW(),
+                UNIQUE(chancadora, fecha, actividad_id)
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        print('✅ Tabla gantt_cambio_hb lista')
+    except Exception as e:
+        print(f'❌ Error init_gantt_db: {e}')
+
+
+with app.app_context():
+    init_gantt_db()
+
+
+@app.route('/gantt')
+def gantt():
+    chancadora = request.args.get('chancadora', '')
+    fecha = request.args.get('fecha', '')
+    avance = {}
+
+    if chancadora and fecha:
+        try:
+            import psycopg2
+            from psycopg2.extras import RealDictCursor
+            conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
+            c = conn.cursor()
+            c.execute(
+                'SELECT * FROM gantt_cambio_hb WHERE chancadora = %s AND fecha = %s',
+                (chancadora, fecha)
+            )
+            rows = c.fetchall()
+            conn.close()
+            avance = {r['actividad_id']: dict(r) for r in rows}
+        except Exception as e:
+            print(f'Error cargando gantt: {e}')
+
+    chancadoras = ['CR011', 'CR012', 'CR013', 'CR014', 'CR021', 'CR022', 'CR023', 'CR024']
+    return render_template('gantt.html',
+                           chancadoras=chancadoras,
+                           chancadora=chancadora,
+                           fecha=fecha,
+                           actividades=ACTIVIDADES_GANTT,
+                           avance=avance)
+
+
+@app.route('/gantt/guardar', methods=['POST'])
+def gantt_guardar():
+    data = request.get_json()
+    chancadora = data.get('chancadora')
+    fecha = data.get('fecha')
+    actividad_id = data.get('actividad_id')
+    inicio_real = data.get('inicio_real') or None
+    fin_real = data.get('fin_real') or None
+    demora_minutos = int(data.get('demora_minutos') or 0)
+    demora_motivo = data.get('demora_motivo') or None
+    completado = bool(data.get('completado', False))
+
+    if not (chancadora and fecha and actividad_id):
+        return {'error': 'Datos incompletos'}, 400
+
+    try:
+        import psycopg2
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO gantt_cambio_hb
+                (chancadora, fecha, actividad_id, inicio_real, fin_real,
+                 demora_minutos, demora_motivo, completado)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (chancadora, fecha, actividad_id)
+            DO UPDATE SET
+                inicio_real = EXCLUDED.inicio_real,
+                fin_real = EXCLUDED.fin_real,
+                demora_minutos = EXCLUDED.demora_minutos,
+                demora_motivo = EXCLUDED.demora_motivo,
+                completado = EXCLUDED.completado,
+                fecha_registro = NOW()
+        ''', (chancadora, fecha, actividad_id, inicio_real, fin_real,
+              demora_minutos, demora_motivo, completado))
+        conn.commit()
+        conn.close()
+        return {'ok': True}
+    except Exception as e:
+        print(f'Error guardando gantt: {e}')
+        return {'error': str(e)}, 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
