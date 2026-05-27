@@ -1,4 +1,3 @@
-· HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,14 +46,14 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
 </style>
 </head>
 <body>
- 
+
 <div class="header">
     <h1>📊 Gantt — Cambio de Head & Bowl</h1>
 </div>
- 
+
 <div class="container">
     <a href="/" style="font-size:13px;color:#1a3a5c;text-decoration:none;display:block;margin-bottom:12px;">← Volver al inicio</a>
- 
+
     <div class="card">
         <form method="GET" id="formFiltro">
             <div class="filtros" style="margin-bottom:10px;">
@@ -75,9 +74,9 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             <button type="submit" class="btn btn-primary">Ver Gantt</button>
         </form>
     </div>
- 
+
     {% if chancadora and fecha %}
- 
+
     <div class="stats">
         <div class="stat">
             <div class="stat-val" id="stat-completadas">0</div>
@@ -92,7 +91,7 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             <div class="stat-lbl">Avance real</div>
         </div>
     </div>
- 
+
     <div class="card">
         <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Diagrama de Gantt</div>
         <div class="leyenda">
@@ -105,14 +104,14 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             <canvas id="ganttChart" style="min-width:600px;" role="img" aria-label="Gantt Cambio H&B"></canvas>
         </div>
     </div>
- 
+
     <div class="card">
         <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Curva S — Avance planificado vs real</div>
         <div class="curva-wrap">
             <canvas id="curvaS" role="img" aria-label="Curva S avance planificado vs real"></canvas>
         </div>
     </div>
- 
+
     <div class="card">
         <div style="font-weight:bold;font-size:13px;margin-bottom:12px;">Registro de actividades — {{ chancadora }} {{ fecha }}</div>
         <div style="overflow-x:auto;">
@@ -163,20 +162,20 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
         </table>
         </div>
     </div>
- 
+
     <script>
     const CHANCADORA = "{{ chancadora }}";
     const FECHA = "{{ fecha }}";
- 
+
     const actividades = {{ actividades | tojson }};
     const avance = {{ avance | tojson }};
- 
+
     function timeToMin(t) {
         if (!t) return null;
         const [h, m] = t.split(':').map(Number);
         return h * 60 + m;
     }
- 
+
     function guardar(id) {
         const data = {
             chancadora: CHANCADORA,
@@ -204,7 +203,7 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             }
         }).catch(e => alert('Error al guardar: ' + e));
     }
- 
+
     function getDatos() {
         return actividades.map(act => {
             const id = act.id;
@@ -217,7 +216,7 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             };
         });
     }
- 
+
     function actualizarStats() {
         const datos = getDatos();
         const completadas = datos.filter(d => d.completado).length;
@@ -227,27 +226,37 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
         document.getElementById('stat-demoras').textContent = conDemora;
         document.getElementById('stat-avance').textContent = avancePct + '%';
     }
- 
+
     let ganttChart = null;
     function dibujarGantt() {
         const datos = getDatos();
-        const baseMin = 9 * 60 + 30;
+        const BASE = 9 * 60 + 30;
         const labels = datos.map(d => d.nombre.length > 30 ? d.nombre.substring(0, 28) + '…' : d.nombre);
- 
-        const offsets     = datos.map(d => timeToMin(d.inicio_plan) - baseMin);
-        const durPlan     = datos.map(d => d.duracion * 60);
-        const durReal     = datos.map(d => {
-            if (!d.inicio_real || !d.fin_real) return 0;
-            const dur = timeToMin(d.fin_real) - timeToMin(d.inicio_real);
-            return dur > 0 ? dur : 0;
+
+        // Floating bars: cada punto es [inicio, fin] en minutos desde medianoche
+        const dsPlan = datos.map(d => [
+            timeToMin(d.inicio_plan),
+            timeToMin(d.fin_plan)
+        ]);
+
+        const dsReal = datos.map(d => {
+            if (!d.inicio_real || !d.fin_real) return null;
+            const ini = timeToMin(d.inicio_real);
+            const fin = timeToMin(d.fin_real);
+            return ini < fin ? [ini, fin] : null;
         });
-        const durDemora   = datos.map(d => d.demora_minutos || 0);
-        const coloresReal = datos.map(d => d.completado ? '#639922' : (d.inicio_real ? '#ef9f27' : 'rgba(0,0,0,0)'));
- 
+
+        const dsDemora = datos.map(d => {
+            if (!d.demora_minutos || !d.fin_real) return null;
+            const fin = timeToMin(d.fin_real);
+            return [fin, fin + d.demora_minutos];
+        });
+
+        const coloresReal = datos.map(d => d.completado ? '#3b6d11' : '#ef9f27');
+
         const h = Math.max(datos.length * 36 + 60, 300);
-        const wrap = document.getElementById('ganttChart').parentElement;
-        wrap.style.height = h + 'px';
- 
+        document.getElementById('ganttChart').parentElement.style.height = h + 'px';
+
         if (ganttChart) ganttChart.destroy();
         ganttChart = new Chart(document.getElementById('ganttChart'), {
             type: 'bar',
@@ -255,38 +264,30 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
                 labels,
                 datasets: [
                     {
-                        label: 'offset',
-                        data: offsets,
-                        backgroundColor: 'rgba(0,0,0,0)',
-                        borderColor: 'rgba(0,0,0,0)',
-                        borderWidth: 0,
-                        borderSkipped: false,
-                    },
-                    {
                         label: 'Planificado',
-                        data: durPlan,
+                        data: dsPlan,
                         backgroundColor: '#b5d4f4',
                         borderColor: '#378add',
                         borderWidth: 1,
                         borderRadius: 3,
-                        borderSkipped: false,
+                        barPercentage: 0.5,
                     },
                     {
                         label: 'Real',
-                        data: durReal,
+                        data: dsReal,
                         backgroundColor: coloresReal,
                         borderWidth: 0,
                         borderRadius: 3,
-                        borderSkipped: false,
+                        barPercentage: 0.5,
                     },
                     {
                         label: 'Demora',
-                        data: durDemora,
+                        data: dsDemora,
                         backgroundColor: '#f09595',
                         borderColor: '#e24b4a',
                         borderWidth: 1,
                         borderRadius: 3,
-                        borderSkipped: false,
+                        barPercentage: 0.5,
                     }
                 ]
             },
@@ -297,43 +298,43 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        filter: item => item.datasetIndex !== 0,
                         callbacks: {
                             label: (ctx) => {
                                 const v = ctx.raw;
-                                if (!v) return null;
-                                const hh = Math.floor(v / 60);
-                                const mm = v % 60;
-                                return `${ctx.dataset.label}: ${hh > 0 ? hh + 'h ' : ''}${mm}min`;
+                                if (!v || !Array.isArray(v)) return null;
+                                const fmt = m => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+                                const dur = v[1] - v[0];
+                                const hh = Math.floor(dur/60);
+                                const mm = dur % 60;
+                                return `${ctx.dataset.label}: ${fmt(v[0])} - ${fmt(v[1])} (${hh > 0 ? hh+'h ' : ''}${mm}min)`;
                             }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        stacked: true,
-                        min: 0,
-                        max: 660,
+                        min: 9 * 60,
+                        max: 20 * 60,
                         ticks: {
+                            stepSize: 60,
                             callback: v => {
-                                const totalMin = baseMin + v;
-                                const hh = Math.floor(totalMin / 60);
-                                const mm = totalMin % 60;
+                                const hh = Math.floor(v / 60);
+                                const mm = v % 60;
                                 return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
                             },
-                            maxTicksLimit: 12,
                             font: { size: 10 }
                         }
                     },
                     y: {
-                        stacked: true,
                         ticks: { font: { size: 10 } }
                     }
                 }
             }
         });
     }
- 
+
+    }
+
     let curvaChart = null;
     function dibujarCurvaS() {
         const datos = getDatos();
@@ -342,19 +343,19 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
         for (let h = 9; h <= 20; h++) {
             horasEje.push(`${String(h).padStart(2,'0')}:00`);
         }
- 
+
         const planAcum = horasEje.map(hora => {
             const hMin = timeToMin(hora);
             const completadas = datos.filter(d => timeToMin(d.fin_plan) <= hMin).length;
             return Math.round((completadas / total) * 100);
         });
- 
+
         const realAcum = horasEje.map(hora => {
             const hMin = timeToMin(hora);
             const completadas = datos.filter(d => d.completado && d.fin_real && timeToMin(d.fin_real) <= hMin).length;
             return Math.round((completadas / total) * 100);
         });
- 
+
         if (curvaChart) curvaChart.destroy();
         curvaChart = new Chart(document.getElementById('curvaS'), {
             type: 'line',
@@ -411,11 +412,11 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             }
         });
     }
- 
+
     actualizarStats();
     dibujarGantt();
     dibujarCurvaS();
- 
+
     document.querySelectorAll('input[type=time], input[type=number], input[type=text], input[type=checkbox]')
         .forEach(el => el.addEventListener('change', () => {
             actualizarStats();
@@ -423,7 +424,7 @@ input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
             dibujarCurvaS();
         }));
     </script>
- 
+
     {% endif %}
 </div>
 </body>
