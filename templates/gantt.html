@@ -214,16 +214,17 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
     </div>
 
     <script>
-    const CHANCADORA = "{{ chancadora }}";
-    const LINEA_JS = "{{ linea }}";
-    const FECHA = "{{ fecha }}";
-    const EQUIPO = TIPO === "armado" ? LINEA_JS : CHANCADORA;
+    const CHANCADORA_VAL = "{{ chancadora }}";
+    const FECHA_VAL = "{{ fecha }}";
     const HORAS_PLAN = 7.7;
 
-    const actividades = {{ actividades | tojson }};
     const TIPO = "{{ tipo }}";
-    const LINEA = "{{ linea }}";
-    const HORAS_PLAN_MIN = TIPO === 'armado' ? 690 : 462; // 11.5h vs 7.7h en minutos
+    const LINEA_JS = "{{ linea }}";
+    const CHANCADORA = CHANCADORA_VAL;
+    const FECHA = FECHA_VAL;
+    const EQUIPO = TIPO === "armado" ? LINEA_JS : CHANCADORA;
+    const HORAS_PLAN_MIN = TIPO === 'armado' ? 690 : 462;
+    const actividades = {{ actividades | tojson }};
     const avanceInicial = {{ avance | tojson }};
 
     function timeToMin(t) {
