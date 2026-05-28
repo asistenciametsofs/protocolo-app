@@ -1256,7 +1256,7 @@ def gantt():
                 c.execute('SELECT * FROM gantt_cambio_hb WHERE chancadora = %s AND fecha = %s', (chancadora, fecha))
             rows = c.fetchall()
             conn.close()
-            avance = {r['actividad_id']: dict(r) for r in rows}
+            avance = {int(r['actividad_id']): dict(r) for r in rows}
         except Exception as e:
             print(f'Error cargando gantt: {e}')
 
