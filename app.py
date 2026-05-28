@@ -1074,32 +1074,33 @@ def descargar_informe_metso(id):
 # ══════════════════════════════════════════════════════════════
 
 # Actividades planificadas del Cronograma (del Excel)
-ACTIVIDADES_GANTT = [
-    {"id": 1,  "nombre": "Bloqueo",                                              "inicio_plan": "09:30", "fin_plan": "09:45", "duracion": 0.25, "recursos": "SMCV"},
-    {"id": 2,  "nombre": "Retiro de pernos de segmento de feeder",               "inicio_plan": "09:45", "fin_plan": "10:15", "duracion": 0.5,  "recursos": ""},
-    {"id": 3,  "nombre": "Retiro de Guardas y pines",                            "inicio_plan": "09:45", "fin_plan": "10:15", "duracion": 0.5,  "recursos": ""},
-    {"id": 4,  "nombre": "Retiro de Ductos nivel Chancadora",                    "inicio_plan": "09:45", "fin_plan": "11:45", "duracion": 2.0,  "recursos": ""},
-    {"id": 5,  "nombre": "Desmontaje de Segmento de Feeder",                     "inicio_plan": "11:15", "fin_plan": "11:45", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 6,  "nombre": "Retiro de sensores de Chancadora y Feeder",            "inicio_plan": "10:45", "fin_plan": "11:45", "duracion": 1.0,  "recursos": "SMCV"},
-    {"id": 7,  "nombre": "Retracción de feeder, Limpieza y desmontaje de chute", "inicio_plan": "11:45", "fin_plan": "12:15", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 8,  "nombre": "Desenroscado de Bowl y Bloqueo Sist. Hidráulico",      "inicio_plan": "12:15", "fin_plan": "12:45", "duracion": 0.5,  "recursos": "SMCV"},
-    {"id": 9,  "nombre": "Inspección y cambio de Liners de Chute",               "inicio_plan": "12:45", "fin_plan": "15:45", "duracion": 3.0,  "recursos": ""},
-    {"id": 10, "nombre": "Retiro de Bowl",                                        "inicio_plan": "12:45", "fin_plan": "13:15", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 11, "nombre": "Retiro de Head",                                        "inicio_plan": "13:15", "fin_plan": "14:00", "duracion": 0.75, "recursos": "Grúa"},
-    {"id": 12, "nombre": "Limpieza de Componentes internos",                      "inicio_plan": "14:00", "fin_plan": "14:45", "duracion": 0.75, "recursos": ""},
-    {"id": 13, "nombre": "Inspección y metrología de Componentes Internos",       "inicio_plan": "14:45", "fin_plan": "15:45", "duracion": 1.0,  "recursos": ""},
-    {"id": 14, "nombre": "Montaje de Head",                                       "inicio_plan": "15:45", "fin_plan": "16:15", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 15, "nombre": "Montaje de Bowl",                                       "inicio_plan": "16:15", "fin_plan": "16:45", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 16, "nombre": "Roscado de Bowl y Bloqueo Sist. Hidráulico",            "inicio_plan": "16:45", "fin_plan": "17:15", "duracion": 0.5,  "recursos": "SMCV"},
-    {"id": 17, "nombre": "Montaje de Chute",                                      "inicio_plan": "17:15", "fin_plan": "17:45", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 18, "nombre": "Instalación de Ductos",                                 "inicio_plan": "17:45", "fin_plan": "19:15", "duracion": 1.5,  "recursos": ""},
-    {"id": 19, "nombre": "Extensión de Feeder",                                   "inicio_plan": "17:45", "fin_plan": "18:15", "duracion": 0.5,  "recursos": ""},
-    {"id": 20, "nombre": "Instalación de sensores de Chancadora y Feeder",        "inicio_plan": "17:45", "fin_plan": "18:45", "duracion": 1.0,  "recursos": "SMCV"},
-    {"id": 21, "nombre": "Montaje de Segmento de Feeder y ajuste de pernos",      "inicio_plan": "17:45", "fin_plan": "18:15", "duracion": 0.5,  "recursos": "Grúa"},
-    {"id": 22, "nombre": "Instalación de Guardas y pines",                        "inicio_plan": "18:45", "fin_plan": "19:15", "duracion": 0.5,  "recursos": ""},
-    {"id": 23, "nombre": "Desbloqueo",                                             "inicio_plan": "19:15", "fin_plan": "19:30", "duracion": 0.25, "recursos": "SMCV"},
-]
 
+ACTIVIDADES_GANTT = [
+    {"id": 1,  "nombre": "Bloqueo",                                                                         "inicio_plan": "08:30", "fin_plan": "08:45", "duracion": 0.25, "recursos": "SMCV"},
+    {"id": 2,  "nombre": "Retiro de pernos de segmento de feeder",                                         "inicio_plan": "08:45", "fin_plan": "09:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 3,  "nombre": "Retiro de Guardas y pines",                                                      "inicio_plan": "08:45", "fin_plan": "09:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 4,  "nombre": "Retiro de Ductos nivel Chancadora",                                              "inicio_plan": "08:45", "fin_plan": "09:45", "duracion": 1.0,  "recursos": ""},
+    {"id": 5,  "nombre": "Retiro de sensores de Chancadora y Feeder",                                      "inicio_plan": "08:45", "fin_plan": "09:45", "duracion": 1.0,  "recursos": "SMCV"},
+    {"id": 6,  "nombre": "Desmontaje de Segmento de Feeder",                                               "inicio_plan": "09:45", "fin_plan": "10:09", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 7,  "nombre": "Retracción de feeder, Limpieza y desmontaje de chute",                           "inicio_plan": "10:09", "fin_plan": "10:33", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 8,  "nombre": "Desbloqueo Sist. Hidráulico, Desenroscado de Bowl y Bloqueo Sist. Hidráulico",  "inicio_plan": "10:33", "fin_plan": "10:57", "duracion": 0.4,  "recursos": "SMCV"},
+    {"id": 9,  "nombre": "Inspección y cambio de Liners de Chute",                                        "inicio_plan": "10:57", "fin_plan": "13:57", "duracion": 3.0,  "recursos": ""},
+    {"id": 10, "nombre": "Retiro de Bowl",                                                                 "inicio_plan": "10:57", "fin_plan": "11:21", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 11, "nombre": "Retiro de Head",                                                                 "inicio_plan": "11:21", "fin_plan": "11:45", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 12, "nombre": "Limpieza de Componentes internos",                                               "inicio_plan": "11:45", "fin_plan": "12:15", "duracion": 0.5,  "recursos": ""},
+    {"id": 13, "nombre": "Inspección y metrología de Componentes Internos",                               "inicio_plan": "12:15", "fin_plan": "12:45", "duracion": 0.5,  "recursos": ""},
+    {"id": 14, "nombre": "Montaje de Head",                                                                "inicio_plan": "12:45", "fin_plan": "13:09", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 15, "nombre": "Montaje de Bowl",                                                                "inicio_plan": "13:09", "fin_plan": "13:33", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 16, "nombre": "Desbloqueo Sist. Hidráulico, Roscado de Bowl y Bloqueo Sist. Hidráulico",       "inicio_plan": "13:33", "fin_plan": "13:57", "duracion": 0.4,  "recursos": "SMCV"},
+    {"id": 17, "nombre": "Montaje de Chute",                                                               "inicio_plan": "13:57", "fin_plan": "14:27", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 18, "nombre": "Instalación de Ductos",                                                          "inicio_plan": "14:27", "fin_plan": "15:27", "duracion": 1.0,  "recursos": ""},
+    {"id": 19, "nombre": "Extensión de Feeder",                                                            "inicio_plan": "14:27", "fin_plan": "14:57", "duracion": 0.5,  "recursos": ""},
+    {"id": 20, "nombre": "Instalación de sensores de Chancadora y Feeder",                                "inicio_plan": "14:27", "fin_plan": "15:27", "duracion": 1.0,  "recursos": "SMCV"},
+    {"id": 21, "nombre": "Montaje de Segmento de Feeder y ajuste de pernos",                              "inicio_plan": "14:27", "fin_plan": "14:57", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 22, "nombre": "Instalación de Guardas y pines",                                                "inicio_plan": "15:27", "fin_plan": "15:57", "duracion": 0.5,  "recursos": ""},
+    {"id": 23, "nombre": "Desbloqueo",                                                                     "inicio_plan": "15:57", "fin_plan": "16:12", "duracion": 0.25, "recursos": "SMCV"},
+]
+ 
 
 def init_gantt_db():
     """Crea la tabla gantt_cambio_hb si no existe"""
