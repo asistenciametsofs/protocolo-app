@@ -77,8 +77,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                     <option value="armado" {{ 'selected' if tipo == 'armado' }}>⚙️ Armado H&B</option>
                 </select>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div id="divChancadora" {{ 'style="display:none"' if tipo == 'armado' else '' }}>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">  
+                <div id="divChancadora" style="{{ 'display:none' if tipo == 'armado' else '' }}">    
                     <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Chancadora</label>
                     <select name="chancadora">
                         <option value="">Seleccionar...</option>
@@ -87,7 +87,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                         {% endfor %}
                     </select>
                 </div>
-                <div id="divLinea" {{ '' if tipo == 'armado' else 'style="display:none"' }}>
+                <div id="divLinea" style="{{ '' if tipo == 'armado' else 'display:none' }}">
                     <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Línea</label>
                     <select name="linea">
                         <option value="">Seleccionar...</option>
