@@ -986,11 +986,11 @@ def alturas():
         conn.commit()
     
     chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
-    chancadora_sel = request.args.get('chancadora', 'CR011')
+    chancadora_sel = request.args.get('chancadora', request.form.get('chancadora', 'CR011'))
     
     c.execute('''SELECT fecha, altura, operador, dias_parada FROM altura_bowl
              WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
-             ORDER BY fecha ASC''', (chancadora,))
+             ORDER BY fecha ASC''', (chancadora_sel,))
     registros = c.fetchall()
     conn.close()
     
@@ -998,6 +998,7 @@ def alturas():
                            registros=registros,
                            chancadora_sel=chancadora_sel,
                            chancadoras=chancadoras)
+
 @app.route('/alturas/nuevo_ciclo', methods=['POST'])
 def alturas_nuevo_ciclo():
     import psycopg2
@@ -1008,7 +1009,7 @@ def alturas_nuevo_ciclo():
     # Archivar marcando con ciclo_cerrado
     c.execute('''SELECT fecha, altura, operador FROM altura_bowl
              WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
-             ORDER BY fecha ASC''', (chancadora_sel,))
+             ORDER BY fecha ASC''', (chancadora,))
     conn.commit()
     conn.close()
     return redirect(f'/alturas?chancadora={chancadora}')
