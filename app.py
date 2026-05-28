@@ -990,7 +990,7 @@ def alturas():
     
     c.execute('''SELECT fecha, altura, operador, dias_parada FROM altura_bowl
              WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
-             ORDER BY fecha ASC''', (chancadora_sel,))
+             ORDER BY fecha ASC''', (chancadora,))
     registros = c.fetchall()
     conn.close()
     
