@@ -300,6 +300,18 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             if (res.ok) {
                 const btn = document.getElementById('btn-' + id);
                 btn.textContent = '✓ Guardado';
+                
+                // Actualizar badge visualmente
+               const row = document.getElementById('row-' + id);
+               const badge = row.querySelector('.badge');
+               if (badge && data.completado) {
+                    badge.textContent = '✓';
+                    badge.className = 'badge badge-ok';
+               } else if (badge && data.inicio_real) {
+                    badge.textContent = 'En curso';
+                    badge.className = 'badge';
+                    badge.style = 'background:#fff3cd;color:#664d03;';
+              }
                 btn.classList.add('saved');
                 setTimeout(() => { btn.textContent = 'Guardar'; btn.classList.remove('saved'); }, 2000);
                 actualizarTodo();
