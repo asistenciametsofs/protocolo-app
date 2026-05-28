@@ -61,7 +61,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
 <body>
 
 <div class="header">
-    <h1>📊 Gantt — Cambio de Head & Bowl</h1>
+    <h1>📊 Gantt — {% if tipo == "armado" %}Armado{% else %}Cambio{% endif %} de Head & Bowl</h1>
 </div>
 
 <div class="container">
@@ -69,15 +69,30 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
 
     <!-- Filtro -->
     <div class="card">
-        <form method="GET">
+        <form method="GET" id="formGantt">
+            <div style="margin-bottom:10px;">
+                <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Tipo de servicio</label>
+                <select name="tipo" id="tipoServicio" onchange="cambiarTipo(this.value)" required>
+                    <option value="cambio" {{ 'selected' if tipo == 'cambio' }}>🔄 Cambio H&B</option>
+                    <option value="armado" {{ 'selected' if tipo == 'armado' }}>⚙️ Armado H&B</option>
+                </select>
+            </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div>
+                <div id="divChancadora" {{ 'style="display:none"' if tipo == 'armado' else '' }}>
                     <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Chancadora</label>
-                    <select name="chancadora" required>
+                    <select name="chancadora">
                         <option value="">Seleccionar...</option>
                         {% for ch in chancadoras %}
                         <option value="{{ ch }}" {{ 'selected' if chancadora == ch }}>{{ ch }}</option>
                         {% endfor %}
+                    </select>
+                </div>
+                <div id="divLinea" {{ '' if tipo == 'armado' else 'style="display:none"' }}>
+                    <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Línea</label>
+                    <select name="linea">
+                        <option value="">Seleccionar...</option>
+                        <option value="L1" {{ 'selected' if linea == 'L1' }}>Línea 1</option>
+                        <option value="L2" {{ 'selected' if linea == 'L2' }}>Línea 2</option>
                     </select>
                 </div>
                 <div>
@@ -88,6 +103,12 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             <button type="submit" class="btn btn-primary">Ver Gantt</button>
         </form>
     </div>
+    <script>
+    function cambiarTipo(val) {
+        document.getElementById('divChancadora').style.display = val === 'cambio' ? '' : 'none';
+        document.getElementById('divLinea').style.display = val === 'armado' ? '' : 'none';
+    }
+    </script>
 
     {% if chancadora and fecha %}
 
@@ -98,8 +119,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             <div class="stat-lbl">Horas efectivas reales</div>
         </div>
         <div class="stat">
-            <div class="stat-val verde">7:42</div>
-            <div class="stat-lbl">Horas planificadas (7.7h)</div>
+            <div class="stat-val verde">{% if tipo == "armado" %}11:30{% else %}7:42{% endif %}</div>
+            <div class="stat-lbl">Horas planificadas ({% if tipo == "armado" %}11.5h{% else %}7.7h{% endif %})</div>
         </div>
         <div class="stat">
             <div class="stat-val" id="stat-comp">0</div>
@@ -170,7 +191,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
     <!-- Gantt -->
     <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-weight:bold;font-size:13px;">Diagrama de Gantt — {{ chancadora }} {{ fecha }}</div>
+            <div style="font-weight:bold;font-size:13px;">Diagrama de Gantt — {% if tipo == "armado" %}{{ linea }}{% else %}{{ chancadora }}{% endif %} {{ fecha }}</div>
             <button class="btn-report" onclick="descargarReporte()">⬇️ Descargar Reporte</button>
         </div>
         <div class="leyenda">
@@ -194,10 +215,15 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
 
     <script>
     const CHANCADORA = "{{ chancadora }}";
+    const LINEA_JS = "{{ linea }}";
     const FECHA = "{{ fecha }}";
+    const EQUIPO = TIPO === "armado" ? LINEA_JS : CHANCADORA;
     const HORAS_PLAN = 7.7;
 
     const actividades = {{ actividades | tojson }};
+    const TIPO = "{{ tipo }}";
+    const LINEA = "{{ linea }}";
+    const HORAS_PLAN_MIN = TIPO === 'armado' ? 690 : 462; // 11.5h vs 7.7h en minutos
     const avanceInicial = {{ avance | tojson }};
 
     function timeToMin(t) {
@@ -238,7 +264,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
 
     function guardar(id) {
         const data = {
-            chancadora: CHANCADORA, fecha: FECHA, actividad_id: id,
+            tipo: TIPO, chancadora: CHANCADORA, linea: LINEA_JS,
+            fecha: FECHA, actividad_id: id,
             inicio_real:    document.getElementById('ini-' + id).value || null,
             fin_real:       document.getElementById('fin-' + id).value || null,
             demora_minutos: parseInt(document.getElementById('dem-' + id).value) || 0,
@@ -354,7 +381,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                 scales: {
                     x: {
                         type: 'linear',
-                        min: 480,
+                        min: TIPO === "armado" ? 420 : 480,
                         max: Math.max(972, ...datos.map(d => d.fin_real ? timeToMin(d.fin_real) + 30 : 0).filter(v=>v>0), 972),
                         ticks: {
                             stepSize: 60,
@@ -373,13 +400,15 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const datos = getDatos();
         const total = datos.length;
 
-        // Puntos cada 30 min — se extiende si hay actividades más allá de 16:12
+        // Puntos cada 30 min — inicio y fin según tipo de servicio
+        const horaInicioBase = TIPO === 'armado' ? 450 : 510; // 07:30 o 08:30
+        const horaFinBase = TIPO === 'armado' ? 1140 : 972;   // 19:00 o 16:12
         const maxRealMin = datos
             .filter(d => d.fin_real && timeToMin(d.fin_real) !== null)
-            .reduce((acc, d) => Math.max(acc, timeToMin(d.fin_real)), 972);
-        const horaFin = Math.ceil(maxRealMin / 30) * 30; // redondear a siguiente 30min
+            .reduce((acc, d) => Math.max(acc, timeToMin(d.fin_real)), horaFinBase);
+        const horaFin = Math.ceil(maxRealMin / 30) * 30;
         const horas = [];
-        for (let m = 510; m <= horaFin; m += 30) horas.push(m);
+        for (let m = horaInicioBase; m <= horaFin; m += 30) horas.push(m);
         if (horas[horas.length-1] !== horaFin) horas.push(horaFin);
         const labels = horas.map(m => minToHHMM(m));
 
@@ -509,7 +538,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         }).join('');
 
         const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-        <title>Reporte Gantt ${CHANCADORA} ${FECHA}</title>
+        <title>Reporte Gantt ${EQUIPO} ${FECHA}</title>
         <style>
             body{font-family:Arial,sans-serif;margin:30px;color:#1a1a1a;font-size:13px;}
             h1{color:#1a3a5c;font-size:18px;margin-bottom:4px;}
@@ -529,7 +558,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         </style></head><body>
         <button class="btn-pdf" onclick="window.print()">🖨️ Guardar como PDF</button>
         <h1>📊 Reporte Gantt — Cambio de Head & Bowl</h1>
-        <h2>${CHANCADORA} &nbsp;|&nbsp; ${FECHA} &nbsp;|&nbsp; Generado: ${new Date().toLocaleString('es-PE')}</h2>
+        <h2>${EQUIPO} &nbsp;|&nbsp; ${FECHA} &nbsp;|&nbsp; Generado: ${new Date().toLocaleString('es-PE')}</h2>
         <div class="stats">
             <div class="stat"><div class="stat-val verde">${horasEfStr}</div><div class="stat-lbl">Horas efectivas reales</div></div>
             <div class="stat"><div class="stat-val verde">7:42</div><div class="stat-lbl">Horas planificadas</div></div>
@@ -557,7 +586,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Gantt_${CHANCADORA}_${FECHA}.html`;
+        a.download = `Gantt_${EQUIPO}_${FECHA}.html`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

@@ -1100,10 +1100,41 @@ ACTIVIDADES_GANTT = [
     {"id": 22, "nombre": "Instalación de Guardas y pines",                                                "inicio_plan": "15:27", "fin_plan": "15:57", "duracion": 0.5,  "recursos": ""},
     {"id": 23, "nombre": "Desbloqueo",                                                                     "inicio_plan": "15:57", "fin_plan": "16:12", "duracion": 0.25, "recursos": "SMCV"},
 ]
- 
+
+ACTIVIDADES_ARMADO = [
+    {"id": 1,  "nombre": "Charla de seguridad y permisos de trabajo",                              "inicio_plan": "07:30", "fin_plan": "08:00", "duracion": 0.5,  "recursos": ""},
+    {"id": 2,  "nombre": "Check list de herramientas y equipos / grúa semi pórtico",               "inicio_plan": "08:00", "fin_plan": "08:30", "duracion": 0.5,  "recursos": ""},
+    {"id": 3,  "nombre": "Demarcación de áreas de trabajo",                                        "inicio_plan": "08:00", "fin_plan": "08:30", "duracion": 0.5,  "recursos": ""},
+    {"id": 4,  "nombre": "Posicionamiento de Head y Bowl",                                         "inicio_plan": "08:30", "fin_plan": "09:00", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 5,  "nombre": "Instalación de plataformas y escaleras de acceso en Bowl",               "inicio_plan": "09:00", "fin_plan": "09:30", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 6,  "nombre": "Limpieza de Bowl y retiro pernos y cuñas",                               "inicio_plan": "09:30", "fin_plan": "10:30", "duracion": 1.0,  "recursos": ""},
+    {"id": 7,  "nombre": "Instalación de maniobra",                                                "inicio_plan": "10:30", "fin_plan": "11:00", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 8,  "nombre": "Reubicación de Bowl y limpieza mecánica",                                "inicio_plan": "11:00", "fin_plan": "12:30", "duracion": 1.5,  "recursos": "Grúa"},
+    {"id": 9,  "nombre": "Instalación de Bowl sobre Bowl liner",                                   "inicio_plan": "12:30", "fin_plan": "13:30", "duracion": 1.0,  "recursos": "Grúa"},
+    {"id": 10, "nombre": "Instalación de pernos cuñas en Bowl",                                    "inicio_plan": "13:30", "fin_plan": "14:30", "duracion": 1.0,  "recursos": ""},
+    {"id": 11, "nombre": "Ajuste de pernos",                                                       "inicio_plan": "14:30", "fin_plan": "15:15", "duracion": 0.75, "recursos": ""},
+    {"id": 12, "nombre": "Aplicación de Backing",                                                  "inicio_plan": "15:15", "fin_plan": "16:45", "duracion": 1.5,  "recursos": ""},
+    {"id": 13, "nombre": "Instalación de sellos de polvo en Bowl",                                 "inicio_plan": "16:45", "fin_plan": "17:30", "duracion": 0.75, "recursos": ""},
+    {"id": 14, "nombre": "Inspección y metrología de Head",                                        "inicio_plan": "09:00", "fin_plan": "11:00", "duracion": 2.0,  "recursos": ""},
+    {"id": 15, "nombre": "Instalación de Plataforma de armado",                                    "inicio_plan": "11:00", "fin_plan": "11:30", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 16, "nombre": "Corte de anillo de sacrificio, soldeo de orejas y corte pernos feed plate", "inicio_plan": "11:30", "fin_plan": "12:30", "duracion": 1.0,  "recursos": ""},
+    {"id": 17, "nombre": "Desmontaje de Feed Plate",                                               "inicio_plan": "12:30", "fin_plan": "13:00", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 18, "nombre": "Retiro de Seguros, pernos y limpieza de Locking Nut",                    "inicio_plan": "13:00", "fin_plan": "14:30", "duracion": 1.5,  "recursos": ""},
+    {"id": 19, "nombre": "Desmontaje de Locking Nut",                                              "inicio_plan": "13:00", "fin_plan": "13:30", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 20, "nombre": "Retiro de Plataforma",                                                   "inicio_plan": "13:30", "fin_plan": "14:00", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 21, "nombre": "Desmontaje de forro usado",                                              "inicio_plan": "14:00", "fin_plan": "14:30", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 22, "nombre": "Inspección y limpieza mecánica de Head",                                 "inicio_plan": "14:30", "fin_plan": "15:30", "duracion": 1.0,  "recursos": ""},
+    {"id": 23, "nombre": "Montaje de Plataforma y forro nuevo",                                    "inicio_plan": "15:30", "fin_plan": "16:00", "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 24, "nombre": "Instalación de anillo de sacrificio y Locking Nut",                      "inicio_plan": "16:00", "fin_plan": "16:24", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 25, "nombre": "Retorqueo de pernos de Locking Nut",                                     "inicio_plan": "16:24", "fin_plan": "17:24", "duracion": 1.0,  "recursos": ""},
+    {"id": 26, "nombre": "Instalación de seguros y soldeo Locking Nut",                            "inicio_plan": "17:24", "fin_plan": "17:48", "duracion": 0.4,  "recursos": ""},
+    {"id": 27, "nombre": "Montaje de Feed Plate",                                                   "inicio_plan": "17:48", "fin_plan": "18:12", "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 28, "nombre": "Corte de Orejas",                                                        "inicio_plan": "18:12", "fin_plan": "18:36", "duracion": 0.4,  "recursos": ""},
+    {"id": 29, "nombre": "Aplicación de Backing (Head)",                                           "inicio_plan": "18:36", "fin_plan": "19:00", "duracion": 0.4,  "recursos": ""},
+] 
 
 def init_gantt_db():
-    """Crea la tabla gantt_cambio_hb si no existe"""
+    """Crea las tablas de gantt si no existen"""
     try:
         import psycopg2
         conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
@@ -1123,52 +1154,67 @@ def init_gantt_db():
                 UNIQUE(chancadora, fecha, actividad_id)
             )
         ''')
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS gantt_armado_hb (
+                id SERIAL PRIMARY KEY,
+                linea TEXT NOT NULL,
+                fecha DATE NOT NULL,
+                actividad_id INTEGER NOT NULL,
+                inicio_real TEXT,
+                fin_real TEXT,
+                demora_minutos INTEGER DEFAULT 0,
+                demora_motivo TEXT,
+                completado BOOLEAN DEFAULT FALSE,
+                fecha_registro TIMESTAMP DEFAULT NOW(),
+                UNIQUE(linea, fecha, actividad_id)
+            )
+        ''')
         conn.commit()
         conn.close()
-        print('✅ Tabla gantt_cambio_hb lista')
+        print('✅ Tablas gantt listas')
     except Exception as e:
         print(f'❌ Error init_gantt_db: {e}')
-
 
 with app.app_context():
     init_gantt_db()
 
-
 @app.route('/gantt')
 def gantt():
+    tipo = request.args.get('tipo', 'cambio')
     chancadora = request.args.get('chancadora', '')
+    linea = request.args.get('linea', '')
     fecha = request.args.get('fecha', '')
     avance = {}
 
-    if chancadora and fecha:
+    if fecha and (chancadora or linea):
         try:
             import psycopg2
             from psycopg2.extras import RealDictCursor
             conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
             c = conn.cursor()
-            c.execute(
-                'SELECT * FROM gantt_cambio_hb WHERE chancadora = %s AND fecha = %s',
-                (chancadora, fecha)
-            )
+            if tipo == 'armado':
+                c.execute('SELECT * FROM gantt_armado_hb WHERE linea = %s AND fecha = %s', (linea, fecha))
+            else:
+                c.execute('SELECT * FROM gantt_cambio_hb WHERE chancadora = %s AND fecha = %s', (chancadora, fecha))
             rows = c.fetchall()
             conn.close()
             avance = {r['actividad_id']: dict(r) for r in rows}
         except Exception as e:
             print(f'Error cargando gantt: {e}')
 
-    chancadoras = ['CR011', 'CR012', 'CR013', 'CR014', 'CR021', 'CR022', 'CR023', 'CR024']
+    actividades = ACTIVIDADES_ARMADO if tipo == 'armado' else ACTIVIDADES_GANTT
+    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
     return render_template('gantt.html',
-                           chancadoras=chancadoras,
-                           chancadora=chancadora,
-                           fecha=fecha,
-                           actividades=ACTIVIDADES_GANTT,
-                           avance=avance)
-
+        tipo=tipo, chancadora=chancadora, linea=linea,
+        fecha=fecha, actividades=actividades, avance=avance,
+        chancadoras=chancadoras)
 
 @app.route('/gantt/guardar', methods=['POST'])
 def gantt_guardar():
     data = request.get_json()
+    tipo = data.get('tipo', 'cambio')
     chancadora = data.get('chancadora')
+    linea = data.get('linea')
     fecha = data.get('fecha')
     actividad_id = data.get('actividad_id')
     inicio_real = data.get('inicio_real') or None
@@ -1177,28 +1223,43 @@ def gantt_guardar():
     demora_motivo = data.get('demora_motivo') or None
     completado = bool(data.get('completado', False))
 
-    if not (chancadora and fecha and actividad_id):
+    if not (fecha and actividad_id):
         return {'error': 'Datos incompletos'}, 400
 
     try:
         import psycopg2
         conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
         c = conn.cursor()
-        c.execute('''
-            INSERT INTO gantt_cambio_hb
-                (chancadora, fecha, actividad_id, inicio_real, fin_real,
-                 demora_minutos, demora_motivo, completado)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (chancadora, fecha, actividad_id)
-            DO UPDATE SET
-                inicio_real = EXCLUDED.inicio_real,
-                fin_real = EXCLUDED.fin_real,
-                demora_minutos = EXCLUDED.demora_minutos,
-                demora_motivo = EXCLUDED.demora_motivo,
-                completado = EXCLUDED.completado,
-                fecha_registro = NOW()
-        ''', (chancadora, fecha, actividad_id, inicio_real, fin_real,
-              demora_minutos, demora_motivo, completado))
+        if tipo == 'armado':
+            c.execute('''
+                INSERT INTO gantt_armado_hb
+                    (linea, fecha, actividad_id, inicio_real, fin_real,
+                     demora_minutos, demora_motivo, completado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (linea, fecha, actividad_id)
+                DO UPDATE SET inicio_real=EXCLUDED.inicio_real,
+                    fin_real=EXCLUDED.fin_real,
+                    demora_minutos=EXCLUDED.demora_minutos,
+                    demora_motivo=EXCLUDED.demora_motivo,
+                    completado=EXCLUDED.completado,
+                    fecha_registro=NOW()
+            ''', (linea, fecha, actividad_id, inicio_real, fin_real,
+                  demora_minutos, demora_motivo, completado))
+        else:
+            c.execute('''
+                INSERT INTO gantt_cambio_hb
+                    (chancadora, fecha, actividad_id, inicio_real, fin_real,
+                     demora_minutos, demora_motivo, completado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (chancadora, fecha, actividad_id)
+                DO UPDATE SET inicio_real=EXCLUDED.inicio_real,
+                    fin_real=EXCLUDED.fin_real,
+                    demora_minutos=EXCLUDED.demora_minutos,
+                    demora_motivo=EXCLUDED.demora_motivo,
+                    completado=EXCLUDED.completado,
+                    fecha_registro=NOW()
+            ''', (chancadora, fecha, actividad_id, inicio_real, fin_real,
+                  demora_minutos, demora_motivo, completado))
         conn.commit()
         conn.close()
         return {'ok': True}
