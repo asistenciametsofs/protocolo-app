@@ -1252,6 +1252,8 @@ def gantt():
             c = conn.cursor()
             if tipo == 'armado':
                 c.execute('SELECT * FROM gantt_armado_hb WHERE linea = %s AND fecha = %s', (linea, fecha))
+            elif tipo == 'escaneo':
+                c.execute('SELECT * FROM gantt_escaneo_hb WHERE chancadora = %s AND fecha = %s', (chancadora, fecha))
             else:
                 c.execute('SELECT * FROM gantt_cambio_hb WHERE chancadora = %s AND fecha = %s', (chancadora, fecha))
             rows = c.fetchall()
