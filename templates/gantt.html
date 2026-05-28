@@ -453,8 +453,12 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const completadas = datos.filter(d => d.completado).length;
         const conDemora = datos.filter(d => d.demora_minutos > 0).length;
         const avancePct = Math.round((completadas / datos.length) * 100);
+        const totalDemoraMin = datos.reduce((acc, d) => acc + (d.demora_minutos || 0), 0);
+        const demoraStr = totalDemoraMin > 0
+            ? (Math.floor(totalDemoraMin/60) > 0 ? Math.floor(totalDemoraMin/60)+'h ' : '') + (totalDemoraMin%60) + 'min'
+            : '0 min';
 
-        // Calcular horas efectivas
+        // Horas efectivas
         const bloq = datos[0];
         let horasEfStr = '--:--';
         const completadasList = datos.filter(d => d.completado && d.fin_real);
@@ -465,49 +469,70 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             if (iniMin !== null && maxFin > iniMin) horasEfStr = minToHHMM(maxFin - iniMin);
         }
 
-        // Solo actividades con algún dato ingresado
+        // Capturar Gantt (canvas)
+        let ganttImgTag = '';
+        const ganttCanvas = document.getElementById('ganttChart');
+        if (ganttCanvas) {
+            ganttImgTag = `<img src="${ganttCanvas.toDataURL('image/png')}" style="width:100%;border:1px solid #eee;border-radius:6px;margin-bottom:20px;">`;
+        }
+
+        // Capturar Curva S (SVG puro)
+        let curvaImgTag = '';
+        const curvaSvg = document.querySelector('.curva-wrap svg');
+        if (curvaSvg) {
+            const svgData = new XMLSerializer().serializeToString(curvaSvg);
+            const svgBlob = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData);
+            curvaImgTag = `<img src="${svgBlob}" style="width:100%;border:1px solid #eee;border-radius:6px;margin-bottom:20px;">`;
+        }
+
+        // Filas de la tabla
         const filas = datos.map(d => {
-            const tieneData = d.inicio_real || d.fin_real || d.completado || d.demora_minutos > 0;
             const estado = d.completado ? '✅ Completado' : (d.inicio_real ? '🔄 En curso' : '⏳ Pendiente');
             const demStr = d.demora_minutos > 0 ? `${d.demora_minutos} min — ${d.demora_motivo || 'sin detalle'}` : '—';
-            return `
-            <tr style="background:${d.completado ? '#f0faf4' : (d.demora_minutos > 0 ? '#fffbeb' : 'white')};">
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;color:#666;">${d.id}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;font-weight:500;">${d.nombre}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;color:#1a3a5c;">${d.inicio_plan}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;color:#1a3a5c;">${d.fin_plan}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;">${d.inicio_real || '—'}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;">${d.fin_real || '—'}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;">${estado}</td>
-                <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;color:${d.demora_minutos > 0 ? '#b45309' : '#666'};">${demStr}</td>
+            const bg = d.completado ? '#f0faf4' : (d.demora_minutos > 0 ? '#fffbeb' : 'white');
+            return `<tr style="background:${bg}">
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;color:#666;">${d.id}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;font-weight:500;">${d.nombre}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;color:#1a3a5c;">${d.inicio_plan}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;color:#1a3a5c;">${d.fin_plan}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;">${d.inicio_real || '—'}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;">${d.fin_real || '—'}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;">${estado}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11px;color:${d.demora_minutos>0?'#b45309':'#666'}">${demStr}</td>
             </tr>`;
         }).join('');
 
         const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
         <title>Reporte Gantt ${CHANCADORA} ${FECHA}</title>
         <style>
-            body { font-family:Arial,sans-serif; margin:30px; color:#1a1a1a; }
-            h1 { color:#1a3a5c; font-size:20px; margin-bottom:4px; }
-            h2 { color:#1a3a5c; font-size:14px; font-weight:normal; margin-bottom:20px; }
-            .stats { display:flex; gap:20px; margin-bottom:24px; flex-wrap:wrap; }
-            .stat { background:#f8f9fa; border-radius:8px; padding:14px 20px; text-align:center; min-width:120px; }
-            .stat-val { font-size:24px; font-weight:bold; color:#1a3a5c; }
-            .stat-val.verde { color:#0f5132; }
-            .stat-val.naranja { color:#b45309; }
-            .stat-lbl { font-size:11px; color:#888; margin-top:3px; }
-            table { width:100%; border-collapse:collapse; font-size:12px; }
-            th { background:#1a3a5c; color:white; padding:9px 10px; text-align:left; font-size:11px; }
-            .footer { margin-top:30px; font-size:11px; color:#aaa; text-align:right; }
+            body{font-family:Arial,sans-serif;margin:30px;color:#1a1a1a;font-size:13px;}
+            h1{color:#1a3a5c;font-size:18px;margin-bottom:4px;}
+            h2{color:#666;font-size:12px;font-weight:normal;margin-bottom:20px;}
+            h3{color:#1a3a5c;font-size:14px;margin:24px 0 10px;}
+            .stats{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+            .stat{background:#f8f9fa;border-radius:8px;padding:12px 16px;text-align:center;min-width:100px;}
+            .stat-val{font-size:20px;font-weight:bold;color:#1a3a5c;}
+            .stat-val.verde{color:#0f5132;}
+            .stat-val.naranja{color:#b45309;}
+            .stat-val.rojo{color:#b91c1c;}
+            .stat-lbl{font-size:10px;color:#888;margin-top:2px;}
+            table{width:100%;border-collapse:collapse;}
+            th{background:#1a3a5c;color:white;padding:8px;text-align:left;font-size:11px;}
+            .btn-pdf{display:block;margin-bottom:20px;padding:10px 20px;background:#1a3a5c;color:white;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;}
+            @media print{.btn-pdf{display:none;}}
         </style></head><body>
+        <button class="btn-pdf" onclick="window.print()">🖨️ Guardar como PDF</button>
         <h1>📊 Reporte Gantt — Cambio de Head & Bowl</h1>
         <h2>${CHANCADORA} &nbsp;|&nbsp; ${FECHA} &nbsp;|&nbsp; Generado: ${new Date().toLocaleString('es-PE')}</h2>
         <div class="stats">
             <div class="stat"><div class="stat-val verde">${horasEfStr}</div><div class="stat-lbl">Horas efectivas reales</div></div>
-            <div class="stat"><div class="stat-val verde">7:42</div><div class="stat-lbl">Horas planificadas (7.7h)</div></div>
-            <div class="stat"><div class="stat-val">${completadas} / ${datos.length}</div><div class="stat-lbl">Completadas</div></div>
+            <div class="stat"><div class="stat-val verde">7:42</div><div class="stat-lbl">Horas planificadas</div></div>
+            <div class="stat"><div class="stat-val">${completadas}/${datos.length}</div><div class="stat-lbl">Completadas</div></div>
             <div class="stat"><div class="stat-val naranja">${conDemora}</div><div class="stat-lbl">Con demora</div></div>
+            <div class="stat"><div class="stat-val rojo">${demoraStr}</div><div class="stat-lbl">Total demoras</div></div>
             <div class="stat"><div class="stat-val verde">${avancePct}%</div><div class="stat-lbl">Avance real</div></div>
         </div>
+        <h3>Actividades</h3>
         <table>
             <thead><tr>
                 <th>#</th><th>Actividad</th><th>Plan Ini</th><th>Plan Fin</th>
@@ -515,35 +540,21 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             </tr></thead>
             <tbody>${filas}</tbody>
         </table>
-        <div class="footer">Protocolo MP1250 — Metso Perú S.A.</div>
+        <h3>Diagrama de Gantt</h3>
+        ${ganttImgTag || '<p style="color:#999;font-size:12px;">No disponible</p>'}
+        <h3>Curva S — Avance planificado vs real</h3>
+        ${curvaImgTag || '<p style="color:#999;font-size:12px;">No disponible</p>'}
+        <div style="margin-top:30px;font-size:10px;color:#aaa;text-align:right;">Protocolo MP1250 — Metso Perú S.A.</div>
         </body></html>`;
 
-        // Capturar imágenes de los gráficos
-        const ganttImg = document.getElementById('ganttChart').toDataURL('image/png');
-        const curvaImg = document.getElementById('curvaS').toDataURL('image/png');
-
-        const graficos = `
-        <h3 style="color:#1a3a5c;margin:30px 0 10px;font-size:14px;">Diagrama de Gantt</h3>
-        <img src="${ganttImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:24px;page-break-inside:avoid;">
-        <h3 style="color:#1a3a5c;margin:30px 0 10px;font-size:14px;">Curva S — Avance planificado vs real</h3>
-        <img src="${curvaImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:24px;page-break-inside:avoid;">
-        `;
-
-        // Tabla primero, gráficos al final + botón imprimir como PDF
-        const printBtn = `<div style="text-align:right;margin-bottom:16px;">
-            <button onclick="window.print()" style="padding:10px 20px;background:#1a3a5c;color:white;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;">🖨️ Guardar como PDF</button>
-        </div>`;
-
-        const htmlFinal = html
-            .replace('<table>', printBtn + '<table>')
-            .replace('</body>', graficos + '</body>');
-
-        const blob = new Blob([htmlFinal], { type: 'text/html;charset=utf-8' });
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `Gantt_${CHANCADORA}_${FECHA}.html`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
 
