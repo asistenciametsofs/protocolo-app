@@ -115,31 +115,6 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         </div>
     </div>
 
-    <!-- Gantt -->
-    <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-weight:bold;font-size:13px;">Diagrama de Gantt — {{ chancadora }} {{ fecha }}</div>
-            <button class="btn-report" onclick="descargarReporte()">⬇️ Descargar Reporte</button>
-        </div>
-        <div class="leyenda">
-            <div class="ley-item"><div class="ley-dot" style="background:#b5d4f4;border:1px solid #378add;"></div><span>Planificado</span></div>
-            <div class="ley-item"><div class="ley-dot" style="background:#3b6d11;"></div><span>Real completado</span></div>
-            <div class="ley-item"><div class="ley-dot" style="background:#ef9f27;"></div><span>En progreso</span></div>
-            <div class="ley-item"><div class="ley-dot" style="background:#f09595;border:1px solid #e24b4a;"></div><span>Demora</span></div>
-        </div>
-        <div class="gantt-wrap">
-            <canvas id="ganttChart" style="min-width:600px;"></canvas>
-        </div>
-    </div>
-
-    <!-- Curva S -->
-    <div class="card">
-        <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Curva S — Avance planificado vs real</div>
-        <div class="curva-wrap">
-            <canvas id="curvaS"></canvas>
-        </div>
-    </div>
-
     <!-- Tabla de registro -->
     <div class="card">
         <div style="font-weight:bold;font-size:13px;margin-bottom:12px;">Registro de actividades</div>
@@ -185,6 +160,31 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             {% endfor %}
             </tbody>
         </table>
+        </div>
+    </div>
+
+    <!-- Gantt -->
+    <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-weight:bold;font-size:13px;">Diagrama de Gantt — {{ chancadora }} {{ fecha }}</div>
+            <button class="btn-report" onclick="descargarReporte()">⬇️ Descargar Reporte</button>
+        </div>
+        <div class="leyenda">
+            <div class="ley-item"><div class="ley-dot" style="background:#b5d4f4;border:1px solid #378add;"></div><span>Planificado</span></div>
+            <div class="ley-item"><div class="ley-dot" style="background:#3b6d11;"></div><span>Real completado</span></div>
+            <div class="ley-item"><div class="ley-dot" style="background:#ef9f27;"></div><span>En progreso</span></div>
+            <div class="ley-item"><div class="ley-dot" style="background:#f09595;border:1px solid #e24b4a;"></div><span>Demora</span></div>
+        </div>
+        <div class="gantt-wrap">
+            <canvas id="ganttChart" style="min-width:600px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Curva S -->
+    <div class="card">
+        <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">Curva S — Avance planificado vs real</div>
+        <div class="curva-wrap">
+            <canvas id="curvaS"></canvas>
         </div>
     </div>
 
@@ -461,7 +461,21 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         <div class="footer">Protocolo MP1250 — Metso Perú S.A.</div>
         </body></html>`;
 
-        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        // Capturar imágenes de los gráficos
+        const ganttImg  = document.getElementById('ganttChart').toDataURL('image/png');
+        const curvaImg  = document.getElementById('curvaS').toDataURL('image/png');
+
+        const graficos = `
+        <h3 style="color:#1a3a5c;margin:24px 0 10px;">Diagrama de Gantt</h3>
+        <img src="${ganttImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:20px;">
+        <h3 style="color:#1a3a5c;margin:24px 0 10px;">Curva S — Avance planificado vs real</h3>
+        <img src="${curvaImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:20px;">
+        `;
+
+        // Insertar gráficos antes de la tabla
+        const htmlFinal = html.replace('<table>', graficos + '<table>');
+
+        const blob = new Blob([htmlFinal], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -474,8 +488,12 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
     actualizarTodo();
 
     // Actualizar gráficos cuando cambian campos
-    document.querySelectorAll('input[type=time],input[type=number],input[type=checkbox]')
-        .forEach(el => el.addEventListener('change', actualizarTodo));
+    // Actualizar gráficos en tiempo real con cualquier cambio
+    document.querySelectorAll('input[type=time],input[type=number],input[type=checkbox],input[type=text]')
+        .forEach(el => {
+            el.addEventListener('change', actualizarTodo);
+            el.addEventListener('input', actualizarTodo);
+        });
     </script>
 
     {% endif %}
