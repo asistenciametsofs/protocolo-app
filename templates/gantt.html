@@ -231,6 +231,9 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
     const FECHA = FECHA_VAL;
     const EQUIPO = TIPO === "armado" ? LINEA_JS : CHANCADORA;
     const HORAS_PLAN_MIN = TIPO === 'armado' ? 690 : 462;
+    // Variables globales de rango horario
+    window.horaInicioBase = TIPO === 'armado' ? 450 : 510;
+    window.horaFinBase    = TIPO === 'armado' ? 1140 : (TIPO === 'escaneo' ? 1950 : 972);
     const actividades = {{ actividades | tojson }};
     const avanceInicial = {{ avance | tojson }};
 
@@ -418,8 +421,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const total = datos.length;
 
         // Puntos cada 30 min — inicio y fin según tipo de servicio
-        const horaInicioBase = TIPO === 'armado' ? 450 : 510;
-        const horaFinBase = TIPO === 'armado' ? 1140 : (TIPO === 'escaneo' ? 1950 : 972);
+        const horaInicioBase = window.horaInicioBase;
+        const horaFinBase = window.horaFinBase;
         const maxRealMin = datos
             .filter(d => d.fin_real && timeToMin(d.fin_real) !== null)
             .reduce((acc, d) => Math.max(acc, timeToMin(d.fin_real)), horaFinBase);
