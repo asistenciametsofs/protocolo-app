@@ -1002,14 +1002,12 @@ def alturas():
 @app.route('/alturas/nuevo_ciclo', methods=['POST'])
 def alturas_nuevo_ciclo():
     import psycopg2
-    from datetime import datetime
     chancadora = request.form.get('chancadora')
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
-    # Archivar marcando con ciclo_cerrado
-    c.execute('''SELECT fecha, altura, operador FROM altura_bowl
-             WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
-             ORDER BY fecha ASC''', (chancadora,))
+    c.execute('''UPDATE altura_bowl SET ciclo_cerrado = TRUE
+                 WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)''',
+              (chancadora,))
     conn.commit()
     conn.close()
     return redirect(f'/alturas?chancadora={chancadora}')
