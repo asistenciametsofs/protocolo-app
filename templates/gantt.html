@@ -150,8 +150,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                 </td>
                 <td style="color:#1a3a5c;font-weight:500;font-size:11px;">{{ act.inicio_plan }}</td>
                 <td style="color:#1a3a5c;font-weight:500;font-size:11px;">{{ act.fin_plan }}</td>
-                <td><input type="time" id="ini-{{ act.id }}" value="{{ av.get('inicio_real','') }}"></td>
-                <td><input type="time" id="fin-{{ act.id }}" value="{{ av.get('fin_real','') }}"></td>
+                <td><input type="text" id="ini-{{ act.id }}" value="{{ av.get('inicio_real','') }}" placeholder="HH:MM" maxlength="5" style="width:70px;text-align:center;" oninput="formatTime(this)"></td>
+                <td><input type="text" id="fin-{{ act.id }}" value="{{ av.get('fin_real','') }}" placeholder="HH:MM" maxlength="5" style="width:70px;text-align:center;" oninput="formatTime(this)"></td>
                 <td><input type="number" id="dem-{{ act.id }}" min="0" max="999" value="{{ av.get('demora_minutos',0) or 0 }}"></td>
                 <td><input type="text" id="mot-{{ act.id }}" value="{{ av.get('demora_motivo','') or '' }}" placeholder="Motivo..."></td>
                 <td style="text-align:center;"><input type="checkbox" id="chk-{{ act.id }}" {{ 'checked' if av.get('completado') }}></td>
@@ -212,6 +212,13 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const h = Math.floor(min / 60);
         const m = Math.round(min % 60);
         return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+
+    function formatTime(el) {
+        let v = el.value.replace(/[^0-9]/g, '');
+        if (v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2,4);
+        el.value = v;
+        actualizarTodo();
     }
 
     function getDatos() {
