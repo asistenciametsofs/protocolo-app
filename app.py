@@ -1133,6 +1133,49 @@ ACTIVIDADES_ARMADO = [
     {"id": 29, "nombre": "Aplicación de Backing (Head)",                                           "inicio_plan": "18:36", "fin_plan": "19:00", "duracion": 0.4,  "recursos": ""},
 ] 
 
+ACTIVIDADES_ESCANEO = [
+    {"id": 1,  "nombre": "Bloqueo",                                                                              "inicio_plan": "08:30", "fin_plan": "08:45",   "duracion": 0.25, "recursos": "SMCV"},
+    {"id": 2,  "nombre": "Retiro de pernos de segmento de feeder",                                              "inicio_plan": "08:45", "fin_plan": "09:15",   "duracion": 0.5,  "recursos": ""},
+    {"id": 3,  "nombre": "Retiro de Guardas y pines",                                                           "inicio_plan": "08:45", "fin_plan": "09:15",   "duracion": 0.5,  "recursos": ""},
+    {"id": 4,  "nombre": "Retiro de Ductos nivel Chancadora",                                                   "inicio_plan": "08:45", "fin_plan": "09:45",   "duracion": 1.0,  "recursos": ""},
+    {"id": 5,  "nombre": "Retiro de sensores de Chancadora y Feeder",                                           "inicio_plan": "08:45", "fin_plan": "09:45",   "duracion": 1.0,  "recursos": "SMCV"},
+    {"id": 6,  "nombre": "Desmontaje de Segmento de Feeder",                                                    "inicio_plan": "09:45", "fin_plan": "10:15",   "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 7,  "nombre": "Retracción de feeder, Limpieza y desmontaje de chute",                                "inicio_plan": "10:15", "fin_plan": "10:45",   "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 8,  "nombre": "Desbloqueo Sist. Hidráulico, Desenroscado de Bowl y Bloqueo Sist. Hidráulico",        "inicio_plan": "10:45", "fin_plan": "11:15",   "duracion": 0.4,  "recursos": "SMCV"},
+    {"id": 9,  "nombre": "Retiro de Bowl",                                                                       "inicio_plan": "11:15", "fin_plan": "11:45",   "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 10, "nombre": "Inspección y cambio de Liners de Chute",                                              "inicio_plan": "11:45", "fin_plan": "14:45",   "duracion": 7.0,  "recursos": ""},
+    {"id": 11, "nombre": "Cambio de faldón de chute de alimentación",                                           "inicio_plan": "14:45", "fin_plan": "15:45",   "duracion": 1.0,  "recursos": ""},
+    {"id": 12, "nombre": "Retiro de Head",                                                                       "inicio_plan": "11:45", "fin_plan": "12:30",   "duracion": 0.4,  "recursos": "Grúa"},
+    {"id": 13, "nombre": "Limpieza de Componentes internos",                                                    "inicio_plan": "12:30", "fin_plan": "13:00",   "duracion": 0.4,  "recursos": ""},
+    {"id": 14, "nombre": "Inspección y metrología de Componentes Internos",                                     "inicio_plan": "13:00", "fin_plan": "13:30",   "duracion": 0.4,  "recursos": ""},
+    {"id": 15, "nombre": "Limpieza de monturas",                                                                 "inicio_plan": "14:00", "fin_plan": "14:30",   "duracion": 0.4,  "recursos": ""},
+    {"id": 16, "nombre": "Retiro de protector estático",                                                        "inicio_plan": "14:30", "fin_plan": "15:00",   "duracion": 0.4,  "recursos": ""},
+    {"id": 17, "nombre": "Soldeo de orejas en monturas y corte de barras (contraeje)",                          "inicio_plan": "15:00", "fin_plan": "16:30",   "duracion": 1.0,  "recursos": ""},
+    {"id": 18, "nombre": "Pruebas NDT de orejas de izaje MFL / monturas de contraeje",                         "inicio_plan": "16:30", "fin_plan": "17:00",   "duracion": 0.5,  "recursos": ""},
+    {"id": 19, "nombre": "Desmontaje de grapas y pernos de los MFLs",                                          "inicio_plan": "17:00", "fin_plan": "18:00",   "duracion": 1.0,  "recursos": ""},
+    {"id": 20, "nombre": "Instalación de Sombrero (protector)",                                                 "inicio_plan": "13:30", "fin_plan": "14:00",   "duracion": 0.5,  "recursos": ""},
+    {"id": 21, "nombre": "Instalación de araña y retiro de MFLs (YAHLE)",                                      "inicio_plan": "18:00", "fin_plan": "20:00",   "duracion": 1.6,  "recursos": ""},
+    {"id": 22, "nombre": "Desmontaje de monturas de brazos",                                                    "inicio_plan": "20:00", "fin_plan": "21:30",   "duracion": 1.5,  "recursos": ""},
+    {"id": 23, "nombre": "Limpieza previa para escaneo",                                                        "inicio_plan": "21:30", "fin_plan": "22:00",   "duracion": 0.5,  "recursos": ""},
+    {"id": 24, "nombre": "Escaneo",                                                                             "inicio_plan": "22:00", "fin_plan": "23:30",   "duracion": 1.5,  "recursos": ""},
+    {"id": 25, "nombre": "Cambio de guard pin (a condición)",                                                   "inicio_plan": "23:30", "fin_plan": "24:00",   "duracion": 0.5,  "recursos": ""},
+    {"id": 26, "nombre": "Retiro de sombrero",                                                                  "inicio_plan": "23:30", "fin_plan": "23:45",   "duracion": 0.25, "recursos": ""},
+    {"id": 27, "nombre": "Montaje de MFLs",                                                                     "inicio_plan": "23:45", "fin_plan": "25:45",   "duracion": 2.0,  "recursos": ""},
+    {"id": 28, "nombre": "Montaje de monturas de brazos y contraeje",                                           "inicio_plan": "25:45", "fin_plan": "26:45",   "duracion": 1.0,  "recursos": ""},
+    {"id": 29, "nombre": "Soldeo de Barras en Monturas de contraeje",                                           "inicio_plan": "26:45", "fin_plan": "27:45",   "duracion": 1.0,  "recursos": ""},
+    {"id": 30, "nombre": "Reforzamiento con Wearing en MFL",                                                    "inicio_plan": "27:45", "fin_plan": "28:45",   "duracion": 1.0,  "recursos": ""},
+    {"id": 31, "nombre": "Montaje de Head",                                                                     "inicio_plan": "28:45", "fin_plan": "29:15",   "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 32, "nombre": "Montaje de Bowl",                                                                     "inicio_plan": "29:15", "fin_plan": "29:45",   "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 33, "nombre": "Desbloqueo Sist. Hidráulico, Roscado de Bowl y Bloqueo Sist. Hidráulico",             "inicio_plan": "29:45", "fin_plan": "30:15",   "duracion": 0.5,  "recursos": "SMCV"},
+    {"id": 34, "nombre": "Montaje de Chute",                                                                    "inicio_plan": "30:15", "fin_plan": "30:45",   "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 35, "nombre": "Instalación de Ductos",                                                               "inicio_plan": "30:45", "fin_plan": "32:15",   "duracion": 1.5,  "recursos": ""},
+    {"id": 36, "nombre": "Extensión de Feeder",                                                                 "inicio_plan": "30:45", "fin_plan": "31:15",   "duracion": 0.5,  "recursos": ""},
+    {"id": 37, "nombre": "Instalación de sensores de Chancadora y Feeder",                                      "inicio_plan": "30:45", "fin_plan": "31:45",   "duracion": 1.0,  "recursos": "SMCV"},
+    {"id": 38, "nombre": "Montaje de Segmento de Feeder y ajuste de pernos",                                   "inicio_plan": "30:45", "fin_plan": "31:15",   "duracion": 0.5,  "recursos": "Grúa"},
+    {"id": 39, "nombre": "Instalación de Guardas y pines",                                                      "inicio_plan": "31:45", "fin_plan": "32:15",   "duracion": 0.5,  "recursos": ""},
+    {"id": 40, "nombre": "Desbloqueo",                                                                          "inicio_plan": "32:15", "fin_plan": "32:30",   "duracion": 0.25, "recursos": "SMCV"},
+]
+
 def init_gantt_db():
     """Crea las tablas de gantt si no existen"""
     try:
@@ -1169,6 +1212,21 @@ def init_gantt_db():
                 UNIQUE(linea, fecha, actividad_id)
             )
         ''')
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS gantt_escaneo_hb (
+                id SERIAL PRIMARY KEY,
+                chancadora TEXT NOT NULL,
+                fecha DATE NOT NULL,
+                actividad_id INTEGER NOT NULL,
+                inicio_real TEXT,
+                fin_real TEXT,
+                demora_minutos INTEGER DEFAULT 0,
+                demora_motivo TEXT,
+                completado BOOLEAN DEFAULT FALSE,
+                fecha_registro TIMESTAMP DEFAULT NOW(),
+                UNIQUE(chancadora, fecha, actividad_id)
+            )
+        ''')
         conn.commit()
         conn.close()
         print('✅ Tablas gantt listas')
@@ -1202,13 +1260,13 @@ def gantt():
         except Exception as e:
             print(f'Error cargando gantt: {e}')
 
-    actividades = ACTIVIDADES_ARMADO if tipo == 'armado' else ACTIVIDADES_GANTT
+    actividades = ACTIVIDADES_ESCANEO if tipo == 'escaneo' else (ACTIVIDADES_ARMADO if tipo == 'armado' else ACTIVIDADES_GANTT)
     chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
     return render_template('gantt.html',
         tipo=tipo, chancadora=chancadora, linea=linea,
         fecha=fecha, actividades=actividades, avance=avance,
         chancadoras=chancadoras)
-
+    
 @app.route('/gantt/guardar', methods=['POST'])
 def gantt_guardar():
     data = request.get_json()
@@ -1222,10 +1280,8 @@ def gantt_guardar():
     demora_minutos = int(data.get('demora_minutos') or 0)
     demora_motivo = data.get('demora_motivo') or None
     completado = bool(data.get('completado', False))
-
     if not (fecha and actividad_id):
         return {'error': 'Datos incompletos'}, 400
-
     try:
         import psycopg2
         conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
@@ -1244,6 +1300,21 @@ def gantt_guardar():
                     completado=EXCLUDED.completado,
                     fecha_registro=NOW()
             ''', (linea, fecha, actividad_id, inicio_real, fin_real,
+                  demora_minutos, demora_motivo, completado))
+        elif tipo == 'escaneo':
+            c.execute('''
+                INSERT INTO gantt_escaneo_hb
+                    (chancadora, fecha, actividad_id, inicio_real, fin_real,
+                     demora_minutos, demora_motivo, completado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (chancadora, fecha, actividad_id)
+                DO UPDATE SET inicio_real=EXCLUDED.inicio_real,
+                    fin_real=EXCLUDED.fin_real,
+                    demora_minutos=EXCLUDED.demora_minutos,
+                    demora_motivo=EXCLUDED.demora_motivo,
+                    completado=EXCLUDED.completado,
+                    fecha_registro=NOW()
+            ''', (chancadora, fecha, actividad_id, inicio_real, fin_real,
                   demora_minutos, demora_motivo, completado))
         else:
             c.execute('''

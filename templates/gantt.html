@@ -61,7 +61,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
 <body>
 
 <div class="header">
-    <h1>📊 Gantt — {% if tipo == "armado" %}Armado{% else %}Cambio{% endif %} de Head & Bowl</h1>
+    <h1>📊 Gantt — {% if tipo == "armado" %}Armado{% elif tipo == "escaneo" %}Cambio H&B + Escaneo Frame{% else %}Cambio{% endif %} de Head & Bowl</h1>
 </div>
 
 <div class="container">
@@ -75,10 +75,11 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                 <select name="tipo" id="tipoServicio" onchange="cambiarTipo(this.value)" required>
                     <option value="cambio" {{ 'selected' if tipo == 'cambio' }}>🔄 Cambio H&B</option>
                     <option value="armado" {{ 'selected' if tipo == 'armado' }}>⚙️ Armado H&B</option>
+                    <option value="escaneo" {{ 'selected' if tipo == 'escaneo' }}>🔬 Cambio H&B + Escaneo Frame</option>
                 </select>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">  
-                <div id="divChancadora" style="{{ 'display:none' if tipo == 'armado' else '' }}">    
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div id="divChancadora" style="{{ 'display:none' if tipo == 'armado' else '' }}">
                     <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Chancadora</label>
                     <select name="chancadora">
                         <option value="">Seleccionar...</option>
@@ -105,9 +106,15 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
     </div>
     <script>
     function cambiarTipo(val) {
-        document.getElementById('divChancadora').style.display = val === 'cambio' ? '' : 'none';
-        document.getElementById('divLinea').style.display = val === 'armado' ? '' : 'none';
+        const divCh = document.getElementById('divChancadora');
+        const divLi = document.getElementById('divLinea');
+        // Chancadora para cambio y escaneo, Linea para armado
+        divCh.style.display = (val === 'cambio' || val === 'escaneo') ? '' : 'none';
+        divLi.style.display = val === 'armado' ? '' : 'none';
+        divCh.querySelector('select').required = (val === 'cambio' || val === 'escaneo');
+        divLi.querySelector('select').required = val === 'armado';
     }
+    document.addEventListener('DOMContentLoaded', () => cambiarTipo(document.getElementById('tipoServicio').value));
     </script>
 
     {% if chancadora and fecha %}
@@ -119,8 +126,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             <div class="stat-lbl">Horas efectivas reales</div>
         </div>
         <div class="stat">
-            <div class="stat-val verde">{% if tipo == "armado" %}11:30{% else %}7:42{% endif %}</div>
-            <div class="stat-lbl">Horas planificadas ({% if tipo == "armado" %}11.5h{% else %}7.7h{% endif %})</div>
+            <div class="stat-val verde">{% if tipo == "armado" %}11:30{% elif tipo == "escaneo" %}21:39{% else %}7:42{% endif %}</div>
+            <div class="stat-lbl">Horas planificadas ({% if tipo == "armado" %}11.5h{% elif tipo == "escaneo" %}21.65h{% else %}7.7h{% endif %})</div>
         </div>
         <div class="stat">
             <div class="stat-val" id="stat-comp">0</div>
@@ -234,14 +241,23 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         if (parts.length < 2) return null;
         const h = parseInt(parts[0], 10);
         const m = parseInt(parts[1], 10);
-        if (isNaN(h) || isNaN(m) || h > 23 || m > 59) return null;
+        if (isNaN(h) || isNaN(m) || m > 59) return null;
+        // Acepta horas > 24 para servicios que cruzan medianoche
         return h * 60 + m;
     }
 
     function minToHHMM(min) {
         if (min === null || isNaN(min)) return '--:--';
-        const h = Math.floor(min / 60);
-        const m = Math.round(min % 60);
+        // Para escaneo: horas > 24 = siguiente día
+        const totalMin = Math.round(min);
+        if (totalMin >= 1440) {
+            const nextDayMin = totalMin - 1440;
+            const h = Math.floor(nextDayMin / 60);
+            const m = nextDayMin % 60;
+            return `+1 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        }
+        const h = Math.floor(totalMin / 60);
+        const m = totalMin % 60;
         return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     }
 
@@ -383,7 +399,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                     x: {
                         type: 'linear',
                         min: TIPO === "armado" ? 420 : 480,
-                        max: Math.max(972, ...datos.map(d => d.fin_real ? timeToMin(d.fin_real) + 30 : 0).filter(v=>v>0), 972),
+                        max: Math.max(horaFinBase, ...datos.map(d => d.fin_real ? timeToMin(d.fin_real) + 30 : 0).filter(v=>v>0), horaFinBase),
                         ticks: {
                             stepSize: 60,
                             callback: v => minToHHMM(v),
@@ -402,8 +418,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const total = datos.length;
 
         // Puntos cada 30 min — inicio y fin según tipo de servicio
-        const horaInicioBase = TIPO === 'armado' ? 450 : 510; // 07:30 o 08:30
-        const horaFinBase = TIPO === 'armado' ? 1140 : 972;   // 19:00 o 16:12
+        const horaInicioBase = TIPO === 'armado' ? 450 : 510;
+        const horaFinBase = TIPO === 'armado' ? 1140 : (TIPO === 'escaneo' ? 1950 : 972);
         const maxRealMin = datos
             .filter(d => d.fin_real && timeToMin(d.fin_real) !== null)
             .reduce((acc, d) => Math.max(acc, timeToMin(d.fin_real)), horaFinBase);
