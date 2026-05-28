@@ -281,7 +281,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         document.getElementById('stat-avance').textContent = avancePct + '%';
     }
 
-    let ganttChart = null;
+    window.ganttChart = null;
     function dibujarGantt() {
         const datos = getDatos();
         const labels = datos.map(d => d.nombre.length > 32 ? d.nombre.substring(0, 30) + '…' : d.nombre);
@@ -303,8 +303,8 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const h = Math.max(datos.length * 34 + 60, 300);
         document.getElementById('ganttChart').style.height = h + 'px';
 
-        if (ganttChart) ganttChart.destroy();
-        ganttChart = new Chart(document.getElementById('ganttChart'), {
+        if (window.ganttChart) window.ganttChart.destroy();
+        window.ganttChart = new Chart(document.getElementById('ganttChart'), {
             type: 'bar',
             data: {
                 labels,
@@ -350,7 +350,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         });
     }
 
-    let curvaChart = null;
+    window.curvaChart = null;
     function dibujarCurvaS() {
         const datos = getDatos();
         const total = datos.length;
@@ -372,14 +372,14 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             return Math.round((c / total) * 100);
         });
 
-        if (curvaChart) {
+        if (window.curvaChart) {
             // Actualizar datos sin destruir el chart
-            curvaChart.data.datasets[0].data = planAcum;
-            curvaChart.data.datasets[1].data = realAcum;
-            curvaChart.update('active');
+            window.curvaChart.data.datasets[0].data = planAcum;
+            window.curvaChart.data.datasets[1].data = realAcum;
+            window.curvaChart.update('active');
             return;
         }
-        curvaChart = new Chart(document.getElementById('curvaS'), {
+        window.curvaChart = new Chart(document.getElementById('curvaS'), {
             type: 'line',
             data: {
                 labels: horas.map(m => minToHHMM(m)),
