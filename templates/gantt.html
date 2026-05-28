@@ -355,60 +355,61 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
     function dibujarCurvaS() {
         const datos = getDatos();
         const total = datos.length;
-        const horas = [480,540,600,660,720,780,840,900,960,1020];
+
+        // Puntos cada 30 min, desde 08:30 hasta 16:12
+        const horas = [510,540,570,600,630,660,690,720,750,780,810,840,870,900,930,960,972];
+        const labels = horas.map(m => minToHHMM(m));
 
         const planAcum = horas.map(hMin =>
             Math.round(datos.filter(d => timeToMin(d.fin_plan) <= hMin).length / total * 100)
         );
         const realAcum = horas.map(hMin =>
             Math.round(datos.filter(d =>
-                d.completado && d.fin_real && timeToMin(d.fin_real) <= hMin
+                d.completado && d.fin_real && timeToMin(d.fin_real) !== null && timeToMin(d.fin_real) <= hMin
             ).length / total * 100)
         );
 
-        // SVG puro — sin Chart.js, siempre se redibuja
-        const W = 560, H = 160, PL = 36, PR = 10, PT = 10, PB = 30;
+        // SVG puro — siempre redibuja completo
+        const W = 560, H = 170, PL = 38, PR = 10, PT = 20, PB = 28;
         const w = W - PL - PR, h = H - PT - PB;
         const n = horas.length;
+        const px = i => PL + (i / (n - 1)) * w;
+        const py = v => PT + h - (v / 100) * h;
 
-        const px = (i) => PL + (i / (n-1)) * w;
-        const py = (v) => PT + h - (v / 100) * h;
+        const polyPlan = planAcum.map((v,i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
+        const polyReal = realAcum.map((v,i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
+        const fillPlan = `${px(0).toFixed(1)},${py(0).toFixed(1)} ${polyPlan} ${px(n-1).toFixed(1)},${py(0).toFixed(1)}`;
+        const fillReal = `${px(0).toFixed(1)},${py(0).toFixed(1)} ${polyReal} ${px(n-1).toFixed(1)},${py(0).toFixed(1)}`;
 
-        const polyPlan = planAcum.map((v,i) => `${px(i)},${py(v)}`).join(' ');
-        const polyReal = realAcum.map((v,i) => `${px(i)},${py(v)}`).join(' ');
-
-        const fillPlan = `${px(0)},${py(0)} ` + planAcum.map((v,i) => `${px(i)},${py(v)}`).join(' ') + ` ${px(n-1)},${py(0)}`;
-        const fillReal = `${px(0)},${py(0)} ` + realAcum.map((v,i) => `${px(i)},${py(v)}`).join(' ') + ` ${px(n-1)},${py(0)}`;
-
-        const ticksY = [0,25,50,75,100];
-        const ticksYSvg = ticksY.map(v => `
-            <line x1="${PL}" y1="${py(v)}" x2="${PL+w}" y2="${py(v)}" stroke="#e0e0e0" stroke-width="1"/>
-            <text x="${PL-4}" y="${py(v)+4}" text-anchor="end" font-size="9" fill="#888">${v}%</text>
+        const gridY = [0,25,50,75,100].map(v => `
+            <line x1="${PL}" y1="${py(v).toFixed(1)}" x2="${PL+w}" y2="${py(v).toFixed(1)}" stroke="#e8e8e8" stroke-width="1"/>
+            <text x="${PL-4}" y="${(py(v)+4).toFixed(1)}" text-anchor="end" font-size="9" fill="#888">${v}%</text>
         `).join('');
 
+        // Solo mostrar labels cada 60 min para no saturar
         const ticksX = horas.map((m,i) => {
-            const lbl = minToHHMM(m);
-            return `<text x="${px(i)}" y="${H-6}" text-anchor="middle" font-size="9" fill="#888">${lbl}</text>`;
+            if (m % 60 !== 0 && m !== 972) return '';
+            return `<text x="${px(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="#888">${minToHHMM(m)}</text>`;
         }).join('');
 
-        const dotsplan = planAcum.map((v,i) => `<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="#378add"/>`).join('');
-        const dotsreal = realAcum.map((v,i) => `<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="#3b6d11"/>`).join('');
+        const dotsP = planAcum.map((v,i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.5" fill="#378add"/>`).join('');
+        const dotsR = realAcum.map((v,i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.5" fill="#3b6d11"/>`).join('');
 
         const svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;">
-            ${ticksYSvg}
-            <polygon points="${fillPlan}" fill="rgba(180,210,244,0.4)"/>
-            <polygon points="${fillReal}" fill="rgba(59,109,17,0.15)"/>
+            ${gridY}
+            <polygon points="${fillPlan}" fill="rgba(180,210,244,0.35)"/>
+            <polygon points="${fillReal}" fill="rgba(59,109,17,0.2)"/>
             <polyline points="${polyPlan}" fill="none" stroke="#378add" stroke-width="2" stroke-dasharray="6,4"/>
             <polyline points="${polyReal}" fill="none" stroke="#3b6d11" stroke-width="2.5"/>
-            ${dotsplan}
-            ${dotsreal}
+            ${dotsP}
+            ${dotsR}
             ${ticksX}
             <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+h}" stroke="#ccc" stroke-width="1"/>
             <line x1="${PL}" y1="${PT+h}" x2="${PL+w}" y2="${PT+h}" stroke="#ccc" stroke-width="1"/>
-            <rect x="${PL+w-130}" y="${PT}" width="10" height="10" fill="rgba(180,210,244,0.8)" stroke="#378add" stroke-width="1.5" stroke-dasharray="4,2"/>
-            <text x="${PL+w-116}" y="${PT+9}" font-size="10" fill="#378add">Planificado</text>
-            <rect x="${PL+w-50}" y="${PT}" width="10" height="10" fill="rgba(59,109,17,0.3)" stroke="#3b6d11" stroke-width="1.5"/>
-            <text x="${PL+w-36}" y="${PT+9}" font-size="10" fill="#3b6d11">Real</text>
+            <rect x="${PL+w-148}" y="${PT-14}" width="10" height="8" fill="rgba(180,210,244,0.7)" stroke="#378add" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="${PL+w-134}" y="${PT-7}" font-size="10" fill="#378add">Planificado</text>
+            <rect x="${PL+w-60}" y="${PT-14}" width="10" height="8" fill="rgba(59,109,17,0.3)" stroke="#3b6d11" stroke-width="1.5"/>
+            <text x="${PL+w-46}" y="${PT-7}" font-size="10" fill="#3b6d11">Real</text>
         </svg>`;
 
         document.querySelector('.curva-wrap').innerHTML = svg;
