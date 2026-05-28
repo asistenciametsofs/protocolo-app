@@ -355,7 +355,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
                     x: {
                         type: 'linear',
                         min: 480,
-                        max: 1020,
+                        max: Math.max(972, ...datos.map(d => d.fin_real ? timeToMin(d.fin_real) + 30 : 0).filter(v=>v>0), 972),
                         ticks: {
                             stepSize: 60,
                             callback: v => minToHHMM(v),
@@ -373,8 +373,14 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const datos = getDatos();
         const total = datos.length;
 
-        // Puntos cada 30 min, desde 08:30 hasta 16:12
-        const horas = [510,540,570,600,630,660,690,720,750,780,810,840,870,900,930,960,972];
+        // Puntos cada 30 min — se extiende si hay actividades más allá de 16:12
+        const maxRealMin = datos
+            .filter(d => d.fin_real && timeToMin(d.fin_real) !== null)
+            .reduce((acc, d) => Math.max(acc, timeToMin(d.fin_real)), 972);
+        const horaFin = Math.ceil(maxRealMin / 30) * 30; // redondear a siguiente 30min
+        const horas = [];
+        for (let m = 510; m <= horaFin; m += 30) horas.push(m);
+        if (horas[horas.length-1] !== horaFin) horas.push(horaFin);
         const labels = horas.map(m => minToHHMM(m));
 
         const planAcum = horas.map(hMin =>
