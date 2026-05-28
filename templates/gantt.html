@@ -363,11 +363,15 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const planAcum = horas.map(hMin =>
             Math.round(datos.filter(d => timeToMin(d.fin_plan) <= hMin).length / total * 100)
         );
-        const realAcum = horas.map(hMin =>
-            Math.round(datos.filter(d =>
-                d.completado && d.fin_real && timeToMin(d.fin_real) !== null && timeToMin(d.fin_real) <= hMin
-            ).length / total * 100)
-        );
+        const realAcum = horas.map(hMin => {
+            const completadasConHora = datos.filter(d => {
+                if (!d.completado) return false;
+                if (!d.fin_real) return false;
+                const t = timeToMin(d.fin_real);
+                return t !== null && t <= hMin;
+            }).length;
+            return Math.round(completadasConHora / total * 100);
+        });
 
         // SVG puro — siempre redibuja completo
         const W = 560, H = 170, PL = 38, PR = 10, PT = 20, PB = 28;
