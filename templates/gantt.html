@@ -362,11 +362,23 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
             return Math.round((c / total) * 100);
         });
         const realAcum = horas.map(hMin => {
-            const c = datos.filter(d => d.completado && d.fin_real && timeToMin(d.fin_real) <= hMin).length;
+            // Solo cuenta si checkbox marcado Y tiene fin_real
+            const c = datos.filter(d => {
+                if (!d.completado) return false;
+                if (!d.fin_real) return false;
+                const fin = timeToMin(d.fin_real);
+                return fin !== null && fin <= hMin;
+            }).length;
             return Math.round((c / total) * 100);
         });
 
-        if (curvaChart) curvaChart.destroy();
+        if (curvaChart) {
+            // Actualizar datos sin destruir el chart
+            curvaChart.data.datasets[0].data = planAcum;
+            curvaChart.data.datasets[1].data = realAcum;
+            curvaChart.update('active');
+            return;
+        }
         curvaChart = new Chart(document.getElementById('curvaS'), {
             type: 'line',
             data: {
@@ -462,18 +474,24 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         </body></html>`;
 
         // Capturar imágenes de los gráficos
-        const ganttImg  = document.getElementById('ganttChart').toDataURL('image/png');
-        const curvaImg  = document.getElementById('curvaS').toDataURL('image/png');
+        const ganttImg = document.getElementById('ganttChart').toDataURL('image/png');
+        const curvaImg = document.getElementById('curvaS').toDataURL('image/png');
 
         const graficos = `
-        <h3 style="color:#1a3a5c;margin:24px 0 10px;">Diagrama de Gantt</h3>
-        <img src="${ganttImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:20px;">
-        <h3 style="color:#1a3a5c;margin:24px 0 10px;">Curva S — Avance planificado vs real</h3>
-        <img src="${curvaImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:20px;">
+        <h3 style="color:#1a3a5c;margin:30px 0 10px;font-size:14px;">Diagrama de Gantt</h3>
+        <img src="${ganttImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:24px;page-break-inside:avoid;">
+        <h3 style="color:#1a3a5c;margin:30px 0 10px;font-size:14px;">Curva S — Avance planificado vs real</h3>
+        <img src="${curvaImg}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-bottom:24px;page-break-inside:avoid;">
         `;
 
-        // Insertar gráficos antes de la tabla
-        const htmlFinal = html.replace('<table>', graficos + '<table>');
+        // Tabla primero, gráficos al final + botón imprimir como PDF
+        const printBtn = `<div style="text-align:right;margin-bottom:16px;">
+            <button onclick="window.print()" style="padding:10px 20px;background:#1a3a5c;color:white;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;">🖨️ Guardar como PDF</button>
+        </div>`;
+
+        const htmlFinal = html
+            .replace('<table>', printBtn + '<table>')
+            .replace('</body>', graficos + '</body>');
 
         const blob = new Blob([htmlFinal], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
