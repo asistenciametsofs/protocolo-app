@@ -20,7 +20,7 @@ select, input[type=date] { width:100%; padding:9px 10px; border:1px solid #ddd; 
 .btn-report:hover { background:#0a3d26; }
 
 /* Stats */
-.stats { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:14px; }
+.stats { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:14px; }
 @media(max-width:600px){ .stats { grid-template-columns:repeat(2,1fr); } }
 .stat { background:#fff; border-radius:10px; padding:12px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,.06); }
 .stat-val { font-size:20px; font-weight:bold; color:#1a3a5c; }
@@ -108,6 +108,10 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         <div class="stat">
             <div class="stat-val naranja" id="stat-dem">0</div>
             <div class="stat-lbl">Con demora</div>
+        </div>
+        <div class="stat" style="grid-column: span 1;">
+            <div class="stat-val rojo" id="stat-min-demora">0 min</div>
+            <div class="stat-lbl">Total demoras</div>
         </div>
         <div class="stat">
             <div class="stat-val verde" id="stat-avance">0%</div>
@@ -284,9 +288,15 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         }
 
         document.getElementById('stat-horas-ef').textContent = minToHHMM(horasEf);
+        const totalDemoraMin = datos.reduce((acc, d) => acc + (d.demora_minutos || 0), 0);
+        const demoraHH = Math.floor(totalDemoraMin / 60);
+        const demoraMM = totalDemoraMin % 60;
+        const demoraStr = demoraHH > 0 ? `${demoraHH}h ${demoraMM}min` : `${demoraMM} min`;
+
         document.getElementById('stat-comp').textContent = completadas;
         document.getElementById('stat-dem').textContent = conDemora;
         document.getElementById('stat-avance').textContent = avancePct + '%';
+        document.getElementById('stat-min-demora').textContent = totalDemoraMin > 0 ? demoraStr : '0 min';
     }
 
     window.ganttChart = null;
@@ -370,7 +380,15 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const planAcum = horas.map(hMin =>
             Math.round(datos.filter(d => timeToMin(d.fin_plan) <= hMin).length / total * 100)
         );
+        // Encontrar el tiempo de la última actividad completada con fin_real
+        const finsReales = datos
+            .filter(d => d.completado && d.fin_real && timeToMin(d.fin_real) !== null)
+            .map(d => timeToMin(d.fin_real));
+        const maxFinReal = finsReales.length > 0 ? Math.max(...finsReales) : null;
+
         const realAcum = horas.map(hMin => {
+            // No dibujar más allá de la última actividad completada
+            if (maxFinReal === null || hMin > maxFinReal) return null;
             const completadasConHora = datos.filter(d => {
                 if (!d.completado) return false;
                 if (!d.fin_real) return false;
@@ -388,9 +406,12 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         const py = v => PT + h - (v / 100) * h;
 
         const polyPlan = planAcum.map((v,i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
-        const polyReal = realAcum.map((v,i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(' ');
+        const polyReal = realAcum
+            .map((v,i) => v !== null ? `${px(i).toFixed(1)},${py(v).toFixed(1)}` : null)
+            .filter(p => p !== null).join(' ');
+        const lastRealIdx = realAcum.reduce((acc,v,i) => v !== null ? i : acc, 0);
         const fillPlan = `${px(0).toFixed(1)},${py(0).toFixed(1)} ${polyPlan} ${px(n-1).toFixed(1)},${py(0).toFixed(1)}`;
-        const fillReal = `${px(0).toFixed(1)},${py(0).toFixed(1)} ${polyReal} ${px(n-1).toFixed(1)},${py(0).toFixed(1)}`;
+        const fillReal = polyReal ? `${px(0).toFixed(1)},${py(0).toFixed(1)} ${polyReal} ${px(lastRealIdx).toFixed(1)},${py(0).toFixed(1)}` : '';
 
         const gridY = [0,25,50,75,100].map(v => `
             <line x1="${PL}" y1="${py(v).toFixed(1)}" x2="${PL+w}" y2="${py(v).toFixed(1)}" stroke="#e8e8e8" stroke-width="1"/>
@@ -404,7 +425,7 @@ input[type=checkbox] { width:15px; height:15px; cursor:pointer; }
         }).join('');
 
         const dotsP = planAcum.map((v,i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.5" fill="#378add"/>`).join('');
-        const dotsR = realAcum.map((v,i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.5" fill="#3b6d11"/>`).join('');
+        const dotsR = realAcum.map((v,i) => v !== null ? `<circle cx="${px(i).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.5" fill="#3b6d11"/>` : '').join('');
 
         const svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;">
             ${gridY}
