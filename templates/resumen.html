@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen Semanal SMCV</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Arial,sans-serif; background:#f0f2f5; color:#1a1a1a; }
+.header { background:#1a3a5c; color:#fff; padding:14px 16px; position:sticky; top:0; z-index:100; }
+.header h1 { font-size:16px; font-weight:bold; }
+.container { max-width:960px; margin:0 auto; padding:16px; }
+.card { background:#fff; border-radius:12px; padding:16px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,.07); }
+.card-title { font-size:13px; font-weight:bold; color:#1a3a5c; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid #1a3a5c; }
+.semana-form { display:flex; gap:10px; align-items:flex-end; }
+.semana-form input { padding:9px 10px; border:1px solid #ddd; border-radius:8px; font-size:13px; flex:1; }
+.btn { padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:bold; cursor:pointer; }
+.btn-primary { background:#1a3a5c; color:#fff; }
+.btn-primary:hover { background:#0d2440; }
+.btn-save { padding:5px 12px; background:#1a3a5c; color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer; white-space:nowrap; }
+.btn-save:hover { background:#0d2440; }
+.btn-save.saved { background:#0f5132; }
+
+/* Tabla chancadoras */
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:#1a3a5c; color:#fff; padding:9px 10px; text-align:left; font-size:11px; font-weight:bold; }
+td { padding:8px 10px; border-bottom:1px solid #f0f0f0; vertical-align:top; }
+tr:hover td { background:#f8f9fa; }
+.chancadora-tag { font-weight:bold; color:#1a3a5c; font-size:13px; }
+.fecha-tag { font-size:10px; color:#999; margin-top:2px; }
+.comp-tag { font-size:12px; font-weight:500; }
+.comp-none { color:#ccc; font-size:11px; }
+.obs-text { font-size:11px; color:#555; line-height:1.4; max-width:280px; }
+
+/* Grid lineas armado */
+.lineas-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:600px){ .lineas-grid { grid-template-columns:1fr; } }
+.linea-card { background:#f8f9fa; border-radius:10px; padding:14px; border:1px solid #e0e0e0; }
+.linea-title { font-size:13px; font-weight:bold; color:#1a3a5c; margin-bottom:12px; }
+.field-group { margin-bottom:10px; }
+.field-label { font-size:11px; color:#666; margin-bottom:3px; display:block; }
+.field-input { width:100%; padding:7px 10px; border:1px solid #ddd; border-radius:7px; font-size:12px; }
+.field-input:focus { outline:none; border-color:#1a3a5c; }
+textarea.field-input { resize:vertical; min-height:70px; }
+
+/* Botón descarga */
+.btn-report { background:#0f5132; color:#fff; padding:9px 18px; border:none; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; }
+.btn-report:hover { background:#0a3d26; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📋 Resumen Semanal — SMCV MP1250</h1>
+</div>
+
+<div class="container">
+    <a href="/" style="font-size:13px;color:#1a3a5c;text-decoration:none;display:block;margin-bottom:12px;">← Volver al inicio</a>
+
+    <!-- Selector semana -->
+    <div class="card">
+        <form method="GET" class="semana-form">
+            <div style="flex:1">
+                <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;">Semana</label>
+                <input type="week" name="semana" value="{{ semana }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Ver Resumen</button>
+            <button type="button" class="btn-report" onclick="descargarResumen()">⬇️ Descargar</button>
+        </form>
+    </div>
+
+    <!-- Tabla chancadoras -->
+    <div class="card">
+        <div class="card-title">🔄 Estado de Chancadoras — Head & Bowl instalado</div>
+        <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Chancadora</th>
+                    <th>Head instalado</th>
+                    <th>Bowl instalado</th>
+                    <th>Último servicio</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ch in chancadoras %}
+            {% set d = datos.get(ch, {}) %}
+            <tr>
+                <td>
+                    <div class="chancadora-tag">{{ ch }}</div>
+                    {% if d.get('supervisor_metso') %}
+                    <div class="fecha-tag">Sup: {{ d.get('supervisor_metso','') }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if d.get('head_entrante') and d.get('head_entrante') != '-' %}
+                    <span class="comp-tag">{{ d.get('head_entrante') }}</span>
+                    {% else %}
+                    <span class="comp-none">Sin registro</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if d.get('bowl_entrante') and d.get('bowl_entrante') != '-' %}
+                    <span class="comp-tag">{{ d.get('bowl_entrante') }}</span>
+                    {% else %}
+                    <span class="comp-none">Sin registro</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if d.get('fecha_inicio') %}
+                    <span style="font-size:11px;color:#555;">{{ d.get('fecha_inicio') }}</span>
+                    {% else %}
+                    <span class="comp-none">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if d.get('recomendaciones') %}
+                    <div class="obs-text">{{ d.get('recomendaciones','')[:200] }}</div>
+                    {% else %}
+                    <span class="comp-none">Sin observaciones</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <!-- Head/Bowl Armados -->
+    <div class="card">
+        <div class="card-title">⚙️ Head & Bowl Armados — Semana {{ semana }}</div>
+        <div class="lineas-grid">
+            {% for linea in ['L1', 'L2'] %}
+            {% set ld = lineas.get(linea, {}) %}
+            <div class="linea-card">
+                <div class="linea-title">Línea {{ '1' if linea == 'L1' else '2' }}</div>
+                <div class="field-group">
+                    <label class="field-label">Head armado</label>
+                    <input type="text" class="field-input" id="head-{{ linea }}"
+                           value="{{ ld.get('head','') or '' }}" placeholder="Ej: H-12">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Bowl armado</label>
+                    <input type="text" class="field-input" id="bowl-{{ linea }}"
+                           value="{{ ld.get('bowl','') or '' }}" placeholder="Ej: B-5">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Observaciones</label>
+                    <textarea class="field-input" id="obs-{{ linea }}"
+                              placeholder="Ej: Pendiente aplicar backing, forro nuevo...">{{ ld.get('observaciones','') or '' }}</textarea>
+                </div>
+                <button class="btn-save" id="btn-{{ linea }}" onclick="guardarLinea('{{ linea }}')">
+                    Guardar {{ 'L1' if linea == 'L1' else 'L2' }}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+const SEMANA = "{{ semana }}";
+
+function guardarLinea(linea) {
+    const data = {
+        semana: SEMANA,
+        linea: linea,
+        head: document.getElementById('head-' + linea).value || null,
+        bowl: document.getElementById('bowl-' + linea).value || null,
+        observaciones: document.getElementById('obs-' + linea).value || null,
+    };
+    fetch('/resumen/guardar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(res => {
+        if (res.ok) {
+            const btn = document.getElementById('btn-' + linea);
+            btn.textContent = '✓ Guardado';
+            btn.classList.add('saved');
+            setTimeout(() => {
+                btn.textContent = 'Guardar ' + linea;
+                btn.classList.remove('saved');
+            }, 2000);
+        }
+    }).catch(e => alert('Error: ' + e));
+}
+
+function descargarResumen() {
+    const chancadoras = {{ datos | tojson }};
+    const lineas = {{ lineas | tojson }};
+
+    // Leer valores actuales de L1 y L2
+    ['L1','L2'].forEach(l => {
+        if (!lineas[l]) lineas[l] = {};
+        lineas[l].head = document.getElementById('head-' + l).value;
+        lineas[l].bowl = document.getElementById('bowl-' + l).value;
+        lineas[l].observaciones = document.getElementById('obs-' + l).value;
+    });
+
+    const filasCh = Object.values(chancadoras).map(d => `
+        <tr>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;font-weight:bold;color:#1a3a5c;">${d.chancadora}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${d.head_entrante || '—'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${d.bowl_entrante || '—'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;font-size:11px;color:#555;">${d.fecha_inicio || '—'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;font-size:11px;color:#555;">${(d.recomendaciones||'').substring(0,200)}</td>
+        </tr>`).join('');
+
+    const filasL = ['L1','L2'].map(l => {
+        const ld = lineas[l] || {};
+        return `
+        <tr>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;font-weight:bold;color:#1a3a5c;">Línea ${l === 'L1' ? '1' : '2'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${ld.head || '—'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${ld.bowl || '—'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #eee;font-size:11px;color:#555;" colspan="2">${ld.observaciones || '—'}</td>
+        </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+    <title>Resumen Semanal ${SEMANA}</title>
+    <style>
+        body{font-family:Arial,sans-serif;margin:30px;color:#1a1a1a;}
+        h1{color:#1a3a5c;font-size:18px;margin-bottom:4px;}
+        h2{color:#666;font-size:12px;font-weight:normal;margin-bottom:20px;}
+        h3{color:#1a3a5c;font-size:14px;margin:24px 0 10px;}
+        table{width:100%;border-collapse:collapse;}
+        th{background:#1a3a5c;color:white;padding:8px 10px;text-align:left;font-size:11px;}
+        .btn-pdf{display:block;margin-bottom:20px;padding:10px 20px;background:#1a3a5c;color:white;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;}
+        @media print{.btn-pdf{display:none;}}
+    </style></head><body>
+    <button class="btn-pdf" onclick="window.print()">🖨️ Guardar como PDF</button>
+    <h1>📋 Resumen Semanal SMCV — MP1250</h1>
+    <h2>Semana: ${SEMANA} &nbsp;|&nbsp; Generado: ${new Date().toLocaleString('es-PE')}</h2>
+
+    <h3>🔄 Estado de Chancadoras</h3>
+    <table>
+        <thead><tr>
+            <th>Chancadora</th><th>Head instalado</th><th>Bowl instalado</th>
+            <th>Último servicio</th><th>Observaciones</th>
+        </tr></thead>
+        <tbody>${filasCh}</tbody>
+    </table>
+
+    <h3>⚙️ Head & Bowl Armados</h3>
+    <table>
+        <thead><tr>
+            <th>Línea</th><th>Head armado</th><th>Bowl armado</th>
+            <th colspan="2">Observaciones</th>
+        </tr></thead>
+        <tbody>${filasL}</tbody>
+    </table>
+
+    <div style="margin-top:30px;font-size:10px;color:#aaa;text-align:right;">Protocolo MP1250 — Metso Perú S.A.</div>
+    </body></html>`;
+
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Resumen_SMCV_${SEMANA}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

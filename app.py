@@ -1339,6 +1339,130 @@ def gantt_guardar():
         print(f'Error guardando gantt: {e}')
         return {'error': str(e)}, 500
 
+# ══════════════════════════════════════════════════════════════
+# MÓDULO RESUMEN SEMANAL — pegar en app.py antes de if __name__
+# ══════════════════════════════════════════════════════════════
+
+def init_resumen_db():
+    """Crea tabla para Head/Bowl armados y sus observaciones editables"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS resumen_semanal (
+                id SERIAL PRIMARY KEY,
+                semana TEXT NOT NULL,
+                linea TEXT NOT NULL,
+                head TEXT,
+                bowl TEXT,
+                observaciones TEXT,
+                fecha_registro TIMESTAMP DEFAULT NOW(),
+                UNIQUE(semana, linea)
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        print('✅ Tabla resumen_semanal lista')
+    except Exception as e:
+        print(f'❌ Error init_resumen_db: {e}')
+
+with app.app_context():
+    init_resumen_db()
+
+
+@app.route('/resumen')
+def resumen_semanal():
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    from datetime import datetime, timedelta
+
+    # Semana seleccionada (default: semana actual)
+    semana = request.args.get('semana', '')
+    if not semana:
+        hoy = datetime.now()
+        semana = f"{hoy.year}-W{hoy.isocalendar()[1]:02d}"
+
+    chancadoras = ['CR011', 'CR012', 'CR013', 'CR014', 'CR021', 'CR022', 'CR023', 'CR024']
+
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
+        c = conn.cursor()
+
+        # Último protocolo de cambio por chancadora
+        datos_chancadoras = {}
+        for ch in chancadoras:
+            c.execute('''
+                SELECT chancadora, fecha_inicio, head_entrante, bowl_entrante,
+                       recomendaciones, supervisor_metso
+                FROM cambio_hb
+                WHERE chancadora = %s
+                ORDER BY fecha_registro DESC
+                LIMIT 1
+            ''', (ch,))
+            row = c.fetchone()
+            datos_chancadoras[ch] = dict(row) if row else {
+                'chancadora': ch,
+                'fecha_inicio': None,
+                'head_entrante': '-',
+                'bowl_entrante': '-',
+                'recomendaciones': '',
+                'supervisor_metso': ''
+            }
+
+        # Head/Bowl armados (Línea 1 y 2) — editables por semana
+        c.execute('''
+            SELECT linea, head, bowl, observaciones
+            FROM resumen_semanal
+            WHERE semana = %s
+        ''', (semana,))
+        lineas_rows = c.fetchall()
+        lineas = {r['linea']: dict(r) for r in lineas_rows}
+        conn.close()
+
+    except Exception as e:
+        print(f'Error resumen: {e}')
+        datos_chancadoras = {ch: {'chancadora': ch, 'head_entrante': '-', 'bowl_entrante': '-', 'recomendaciones': '', 'fecha_inicio': None} for ch in chancadoras}
+        lineas = {}
+
+    return render_template('resumen.html',
+                           semana=semana,
+                           chancadoras=chancadoras,
+                           datos=datos_chancadoras,
+                           lineas=lineas)
+
+
+@app.route('/resumen/guardar', methods=['POST'])
+def resumen_guardar():
+    import psycopg2
+    data = request.get_json()
+    semana = data.get('semana')
+    linea = data.get('linea')
+    head = data.get('head') or None
+    bowl = data.get('bowl') or None
+    observaciones = data.get('observaciones') or None
+
+    if not (semana and linea):
+        return {'error': 'Datos incompletos'}, 400
+
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO resumen_semanal (semana, linea, head, bowl, observaciones)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (semana, linea)
+            DO UPDATE SET head=EXCLUDED.head, bowl=EXCLUDED.bowl,
+                observaciones=EXCLUDED.observaciones,
+                fecha_registro=NOW()
+        ''', (semana, linea, head, bowl, observaciones))
+        conn.commit()
+        conn.close()
+        return {'ok': True}
+    except Exception as e:
+        print(f'Error guardando resumen: {e}')
+        return {'error': str(e)}, 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
