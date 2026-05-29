@@ -731,7 +731,10 @@ def descargar_informe(chancadora):
         ]))
         return t
     
-def grafico_lineas(valores, etiquetas, titulo, ancho=15*cm, alto=7*cm, vmin=None, vmax=None, limite_min=None, limite_max=None):
+def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None, vmax=None, limite_min=None, limite_max=None):
+    from reportlab.lib.units import cm
+    if ancho is None: ancho = 15*cm
+    if alto is None: alto = 7*cm
     try:
         from reportlab.graphics.shapes import Drawing, String, Line, PolyLine
         from reportlab.graphics.charts.lineplots import LinePlot
