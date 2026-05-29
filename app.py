@@ -953,6 +953,41 @@ def descargar_informe(chancadora):
                      download_name=f'Informe_{chancadora}_{str(d.get("fecha_registro",""))[:10]}.pdf',
                      mimetype='application/pdf')
 
+@app.route('/alturas', methods=['GET', 'POST'])
+def alturas():
+    import psycopg2
+    from datetime import datetime
+    
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    if request.method == 'POST':
+        chancadora = request.form.get('chancadora')
+        fecha = request.form.get('fecha')
+        altura = request.form.get('altura')
+        operador = request.form.get('operador')
+        dias_parada = int(request.form.get('dias_parada') or 0)
+        fecha_registro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        c.execute('''INSERT INTO altura_bowl (chancadora, fecha, altura, operador, dias_parada, fecha_registro)
+                     VALUES (%s, %s, %s, %s, %s, %s)''',
+                  (chancadora, fecha, altura, operador, dias_parada, fecha_registro))
+        conn.commit()
+    
+    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+    chancadora_sel = request.args.get('chancadora', request.form.get('chancadora', 'CR011'))
+    
+    c.execute('''SELECT fecha, altura, operador, dias_parada FROM altura_bowl
+             WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
+             ORDER BY fecha ASC''', (chancadora_sel,))
+    registros = c.fetchall()
+    conn.close()
+    
+    return render_template('alturas.html',
+                           registros=registros,
+                           chancadora_sel=chancadora_sel,
+                           chancadoras=chancadoras)
+
+
 @app.route('/alturas/nuevo_ciclo', methods=['POST'])
 def alturas_nuevo_ciclo():
     import psycopg2
