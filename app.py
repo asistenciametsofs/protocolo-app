@@ -1499,7 +1499,7 @@ def generar_ppt():
     script_path = os.path.join(os.path.dirname(__file__), 'generar_ppt_metso.js')
     result = subprocess.run(
         ['node', script_path],
-        input=json.dumps(payload, ensure_ascii=False, default=str),
+        input=json.dumps(payload, ensure_ascii=False, default=str).encode('utf-8'),
         capture_output=True, timeout=60
     )
 
