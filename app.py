@@ -7,6 +7,7 @@ import uuid
 import threading
 import cloudinary
 import cloudinary.uploader
+from reportlab.graphics.widgets.markers import makeMarker
 
 cloudinary.config(
     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
@@ -730,30 +731,76 @@ def descargar_informe(chancadora):
         ]))
         return t
     
-    def grafico_barras(valores, etiquetas, titulo, ancho=15*cm, alto=7*cm):
-        try:
-            from reportlab.graphics.shapes import Drawing, String
-            from reportlab.graphics.charts.barcharts import VerticalBarChart
-            d_graf = Drawing(ancho, alto)
-            bc = VerticalBarChart()
-            bc.x = 30
-            bc.y = 20
-            bc.width = ancho - 50
-            bc.height = alto - 40
-            vals_limpios = [float(v) if v is not None else 0 for v in valores]
-            bc.data = [vals_limpios]
-            bc.categoryAxis.categoryNames = [str(e)[:8] for e in etiquetas]
-            bc.bars[0].fillColor = colors.HexColor('#0f5132')
-            bc.valueAxis.valueMin = min(vals_limpios) * 0.95 if vals_limpios else 0
-            bc.valueAxis.valueMax = max(vals_limpios) * 1.05 if vals_limpios else 1
-            bc.barLabels.nudge = 7
-            bc.barLabelFormat = '%.2f'
-            bc.barLabels.fontName = 'Helvetica'
-            bc.barLabels.fontSize = 7
-            d_graf.add(bc)
-            return d_graf
-        except:
+def grafico_lineas(valores, etiquetas, titulo, ancho=15*cm, alto=7*cm, vmin=None, vmax=None, limite_min=None, limite_max=None):
+    try:
+        from reportlab.graphics.shapes import Drawing, String, Line, PolyLine
+        from reportlab.graphics.charts.lineplots import LinePlot
+        d_graf = Drawing(ancho, alto)
+        vals_limpios = [float(v) if v is not None and v != 0 else None for v in valores]
+        vals_num = [v for v in vals_limpios if v is not None]
+        if not vals_num:
             return None
+        
+        lp = LinePlot()
+        lp.x = 35
+        lp.y = 25
+        lp.width = ancho - 55
+        lp.height = alto - 45
+
+        # Datos como pares (x, y)
+        data = [(i, v) for i, v in enumerate(vals_limpios) if v is not None]
+        lp.data = [data]
+        lp.lines[0].strokeColor = colors.HexColor('#1a3a5c')
+        lp.lines[0].strokeWidth = 1.5
+        lp.lines[0].symbol = makeMarker('FilledCircle')
+        lp.lines[0].symbol.size = 4
+        lp.lines[0].symbol.fillColor = colors.HexColor('#1a3a5c')
+
+        # Ejes
+        auto_min = min(vals_num) * 0.9
+        auto_max = max(vals_num) * 1.1
+        lp.xValueAxis.valueMin = 0
+        lp.xValueAxis.valueMax = len(vals_limpios) - 1
+        lp.xValueAxis.valueSteps = list(range(len(vals_limpios)))
+        lp.xValueAxis.labelTextFormat = lambda x: str(etiquetas[int(x)])[:7] if 0 <= int(x) < len(etiquetas) else ''
+        lp.xValueAxis.labels.angle = 30
+        lp.xValueAxis.labels.fontSize = 6
+
+        y_min = vmin if vmin is not None else auto_min
+        y_max = vmax if vmax is not None else auto_max
+        if limite_min is not None: y_min = min(y_min, limite_min * 0.9)
+        if limite_max is not None: y_max = max(y_max, limite_max * 1.1)
+        lp.yValueAxis.valueMin = y_min
+        lp.yValueAxis.valueMax = y_max
+        lp.yValueAxis.labels.fontSize = 7
+
+        d_graf.add(lp)
+
+        # Líneas de límite mínimo (rojo) y máximo (naranja)
+        def y_to_px(val):
+            return lp.y + (val - y_min) / (y_max - y_min) * lp.height
+
+        if limite_min is not None:
+            y_px = y_to_px(limite_min)
+            d_graf.add(Line(lp.x, y_px, lp.x + lp.width, y_px,
+                           strokeColor=colors.red, strokeWidth=1, strokeDashArray=[4,2]))
+            d_graf.add(String(lp.x + lp.width + 2, y_px - 3,
+                             f'Mín:{limite_min}', fontSize=6, fillColor=colors.red))
+
+        if limite_max is not None:
+            y_px = y_to_px(limite_max)
+            d_graf.add(Line(lp.x, y_px, lp.x + lp.width, y_px,
+                           strokeColor=colors.HexColor('#e67e00'), strokeWidth=1, strokeDashArray=[4,2]))
+            d_graf.add(String(lp.x + lp.width + 2, y_px - 3,
+                             f'Máx:{limite_max}', fontSize=6, fillColor=colors.HexColor('#e67e00')))
+
+        # Título
+        d_graf.add(String(lp.x, alto - 10, titulo, fontSize=8,
+                         fontName='Helvetica-Bold', fillColor=colors.HexColor('#1a3a5c')))
+        return d_graf
+    except Exception as e:
+        print(f'Error grafico: {e}')
+        return None
 
     story = []
 
@@ -818,7 +865,7 @@ def descargar_informe(chancadora):
             promedios_sl.append(round(sum(vals)/len(vals), 2) if vals else 0)
         cambios_sl = [str(h[0])[:7] for h in historial if len(h) > 35 and h[35] == 'SI']
         texto_sl = f'Cambios: {", ".join(cambios_sl)}' if cambios_sl else 'Sin cambios registrados'
-        g = grafico_barras(promedios_sl, fechas, 'Promedio Socket Liner')
+        g = grafico_lineas(promedios_sl, fechas, 'Promedio Socket Liner', limite_min=5, limite_max=10)
         if g:
             story.append(Paragraph('Historial promedio metrología Socket Liner', normal_style))
             story.append(Paragraph(texto_sl, ParagraphStyle('cambio_sl', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
@@ -849,7 +896,7 @@ def descargar_informe(chancadora):
             gaps_prom.append(round(sum(gv)/len(gv), 2) if gv else 0)
         cambios_socket = [str(h[0])[:7] for h in historial if len(h) > 36 and h[36] == 'SI']
         texto_socket = f'Cambios: {", ".join(cambios_socket)}' if cambios_socket else 'Sin cambios registrados'
-        g = grafico_barras(gaps_prom, fechas, 'GAP Socket Mainshaft')
+        g = grafico_lineas(gaps_prom, fechas, 'GAP Socket Mainshaft')
         if g:
             story.append(Paragraph('Historial promedio GAP Socket-Mainshaft', normal_style))
             story.append(Paragraph(texto_socket, ParagraphStyle('cambio_socket', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
@@ -888,7 +935,7 @@ def descargar_informe(chancadora):
             promedios_mfl.append(round(sum(mv)/len(mv), 2) if mv else 0)
         cambios_mfl = [str(h[0])[:7] for h in historial if len(h) > 37 and h[37] == 'SI']
         texto_mfl = f'Cambios: {", ".join(cambios_mfl)}' if cambios_mfl else 'Sin cambios registrados'
-        g = grafico_barras(promedios_mfl, fechas, 'Promedio MFL')
+        g = grafico_lineas(promedios_mfl, fechas, 'Promedio MFL', limite_min=9, limite_max=70)
         if g:
             story.append(Paragraph('Historial promedio MFL', normal_style))
             story.append(Paragraph(texto_mfl, ParagraphStyle('cambio_mfl', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
@@ -935,7 +982,7 @@ def descargar_informe(chancadora):
             gp_vals_hist = [safe_float(h[25+gp_idx]) if h[25+gp_idx] is not None else 0 for h in historial] 
 
             if any(v > 0 for v in gp_vals_hist):
-                g = grafico_barras(gp_vals_hist, fechas, f'GP{gp_idx}')
+                g = grafico_lineas(gp_vals_hist, fechas, f'Guard Pin {gp_idx}')
                 if g:
                     story.append(Paragraph(f'Historial Guard Pin {gp_idx}', normal_style))
                     story.append(g)
