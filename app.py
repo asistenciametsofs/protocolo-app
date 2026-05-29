@@ -1496,6 +1496,11 @@ def generar_ppt():
     }
 
     # Llamar al script Node.js
+    # Instalar pptxgenjs si no está
+    node_modules = os.path.join(os.path.dirname(__file__), 'node_modules', 'pptxgenjs')
+    if not os.path.exists(node_modules):
+        subprocess.run(['npm', 'install', 'pptxgenjs'], 
+                   cwd=os.path.dirname(__file__), capture_output=True)
     script_path = os.path.join(os.path.dirname(__file__), 'generar_ppt_metso.js')
     env = os.environ.copy()
     env['NODE_PATH'] = '/opt/render/project/src/node_modules'
