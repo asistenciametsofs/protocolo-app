@@ -1397,7 +1397,7 @@ def resumen_semanal():
                        recomendaciones, supervisor_metso
                 FROM cambio_hb
                 WHERE chancadora = %s
-                ORDER BY fecha_registro DESC
+                ORDER BY fecha_inicio DESC
                 LIMIT 1
             ''', (ch,))
             row = c.fetchone()
