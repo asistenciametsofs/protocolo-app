@@ -454,8 +454,12 @@ async function generarPPT(payload) {
 
             const realSeries = allLabels.map(l => realMap[l] !== undefined ? realMap[l] : null);
             const proyeSeries = allLabels.map(l => proyMap[l] !== undefined ? proyMap[l] : null);
-
-            slide.addText(`Altura Bowl + proyección próx. cambio: ${proy.semana}`, { x: gx + gw + 0.2, y: 3.35, w: gw, h: 0.2, fontSize: 9, color: '888888', fontFace: 'Arial', margin: 0 });
+            
+            const diasRest = Math.ceil((new Date(proy.fechas[0].getTime() + proy.diaLimite * 86400000) - new Date()) / 86400000);
+            const colorDias = diasRest <= 3 ? ROJO : diasRest <= 7 ? AMARILLO : VERDE;
+            slide.addText(`Altura Bowl — próx. cambio: ${proy.semana}  ·  ${proy.fecha}`, { x: gx + gw + 0.2, y: 3.35, w: gw - 0.8, h: 0.2, fontSize: 9, color: '888888', fontFace: 'Arial', margin: 0 });
+            slide.addText(`${diasRest} días restantes`, { x: gx + gw + gw - 0.4, y: 3.35, w: 1.0, h: 0.2, fontSize: 9, bold: true, color: colorDias, fontFace: 'Arial', margin: 0, align: 'right' });
+            
             addLineChart(slide, allLabels,
                 [
                     { name: 'Real', values: realSeries, color: NARANJA, lineSize: 2, symbol: 'circle', symbolSize: 4 },
