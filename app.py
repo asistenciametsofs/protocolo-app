@@ -652,24 +652,17 @@ def descargar_informe(chancadora):
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-    from reportlab.graphics.shapes import Drawing as RLDrawing, Rect, String, Line
-    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics.shapes import Drawing, String, Line
     from reportlab.graphics.charts.lineplots import LinePlot
-    from reportlab.graphics import renderPDF
     from reportlab.lib.units import cm
     import io
 
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
-    
-    # Último registro
     c.execute('''SELECT * FROM cambio_hb WHERE chancadora = %s 
                  ORDER BY fecha_inicio DESC LIMIT 1''', (chancadora,))
-    
     cols = [desc[0] for desc in c.description]
     row = c.fetchone()
-    
-    # Historial completo para gráficos
     c.execute('''SELECT fecha_inicio, 
                  socket_b1, socket_a1, socket_b2, socket_a2,
                  socket_b3, socket_a3, socket_b4, socket_a4,
@@ -693,10 +686,10 @@ def descargar_informe(chancadora):
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4,
-                           leftMargin=2*cm, rightMargin=2*cm,
-                           topMargin=2*cm, bottomMargin=2*cm)
-
+                            leftMargin=2*cm, rightMargin=2*cm,
+                            topMargin=2*cm, bottomMargin=2*cm)
     styles = getSampleStyleSheet()
+
     titulo_style = ParagraphStyle('titulo', parent=styles['Heading1'],
                                   fontSize=16, fontName='Helvetica-Bold',
                                   textColor=colors.black, spaceAfter=6)
@@ -707,19 +700,6 @@ def descargar_informe(chancadora):
     normal_style = ParagraphStyle('normal', parent=styles['Normal'],
                                   fontSize=10, spaceAfter=4)
 
-    def tabla_simple(datos_tabla):
-        t = Table(datos_tabla, colWidths=[10*cm, 7*cm])
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0,0), (-1,-1), 9),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
-            ('PADDING', (0,0), (-1,-1), 6),
-        ]))
-        return t
-    
     def tabla_datos(datos_tabla):
         t = Table(datos_tabla, colWidths=[10*cm, 7*cm])
         t.setStyle(TableStyle([
@@ -730,81 +710,66 @@ def descargar_informe(chancadora):
             ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
         ]))
         return t
-    
-def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None, vmax=None, limite_min=None, limite_max=None):
-    from reportlab.lib.units import cm
-    if ancho is None: ancho = 15*cm
-    if alto is None: alto = 7*cm
-    try:
-        from reportlab.graphics.shapes import Drawing, String, Line, PolyLine
-        from reportlab.graphics.charts.lineplots import LinePlot
-        d_graf = Drawing(ancho, alto)
-        vals_limpios = [float(v) if v is not None and v != 0 else None for v in valores]
-        vals_num = [v for v in vals_limpios if v is not None]
-        if not vals_num:
+
+    def grafico_lineas(valores, etiquetas, titulo, vmin=None, vmax=None, limite_min=None, limite_max=None):
+        ancho = 15*cm
+        alto = 7*cm
+        try:
+            from reportlab.graphics.widgets.markers import makeMarker
+            d_graf = Drawing(ancho, alto)
+            vals_limpios = [float(v) if v is not None and v != 0 else None for v in valores]
+            vals_num = [v for v in vals_limpios if v is not None]
+            if not vals_num:
+                return None
+            lp = LinePlot()
+            lp.x = 35
+            lp.y = 25
+            lp.width = ancho - 55
+            lp.height = alto - 45
+            data = [(i, v) for i, v in enumerate(vals_limpios) if v is not None]
+            lp.data = [data]
+            lp.lines[0].strokeColor = colors.HexColor('#1a3a5c')
+            lp.lines[0].strokeWidth = 1.5
+            lp.lines[0].symbol = makeMarker('FilledCircle')
+            lp.lines[0].symbol.size = 4
+            lp.lines[0].symbol.fillColor = colors.HexColor('#1a3a5c')
+            auto_min = min(vals_num) * 0.9
+            auto_max = max(vals_num) * 1.1
+            lp.xValueAxis.valueMin = 0
+            lp.xValueAxis.valueMax = max(len(vals_limpios) - 1, 1)
+            lp.xValueAxis.valueSteps = list(range(len(vals_limpios)))
+            lp.xValueAxis.labelTextFormat = lambda x: str(etiquetas[int(x)])[:7] if 0 <= int(x) < len(etiquetas) else ''
+            lp.xValueAxis.labels.angle = 30
+            lp.xValueAxis.labels.fontSize = 6
+            y_min = vmin if vmin is not None else auto_min
+            y_max = vmax if vmax is not None else auto_max
+            if limite_min is not None: y_min = min(y_min, limite_min * 0.9)
+            if limite_max is not None: y_max = max(y_max, limite_max * 1.1)
+            if y_min == y_max: y_max = y_min + 1
+            lp.yValueAxis.valueMin = y_min
+            lp.yValueAxis.valueMax = y_max
+            lp.yValueAxis.labels.fontSize = 7
+            d_graf.add(lp)
+            def y_to_px(val):
+                return lp.y + (val - y_min) / (y_max - y_min) * lp.height
+            if limite_min is not None:
+                y_px = y_to_px(limite_min)
+                d_graf.add(Line(lp.x, y_px, lp.x + lp.width, y_px,
+                                strokeColor=colors.red, strokeWidth=1, strokeDashArray=[4,2]))
+                d_graf.add(String(lp.x + lp.width + 2, y_px - 3,
+                                  f'Min:{limite_min}', fontSize=6, fillColor=colors.red))
+            if limite_max is not None:
+                y_px = y_to_px(limite_max)
+                d_graf.add(Line(lp.x, y_px, lp.x + lp.width, y_px,
+                                strokeColor=colors.HexColor('#e67e00'), strokeWidth=1, strokeDashArray=[4,2]))
+                d_graf.add(String(lp.x + lp.width + 2, y_px - 3,
+                                  f'Max:{limite_max}', fontSize=6, fillColor=colors.HexColor('#e67e00')))
+            d_graf.add(String(lp.x, alto - 10, titulo, fontSize=8,
+                              fontName='Helvetica-Bold', fillColor=colors.HexColor('#1a3a5c')))
+            return d_graf
+        except Exception as e:
+            print(f'Error grafico_lineas: {e}')
             return None
-        
-        lp = LinePlot()
-        lp.x = 35
-        lp.y = 25
-        lp.width = ancho - 55
-        lp.height = alto - 45
-
-        # Datos como pares (x, y)
-        data = [(i, v) for i, v in enumerate(vals_limpios) if v is not None]
-        lp.data = [data]
-        lp.lines[0].strokeColor = colors.HexColor('#1a3a5c')
-        lp.lines[0].strokeWidth = 1.5
-        from reportlab.graphics.widgets.markers import makeMarker
-        lp.lines[0].symbol = makeMarker('FilledCircle')
-        lp.lines[0].symbol.size = 4
-        lp.lines[0].symbol.fillColor = colors.HexColor('#1a3a5c')
-
-        # Ejes
-        auto_min = min(vals_num) * 0.9
-        auto_max = max(vals_num) * 1.1
-        lp.xValueAxis.valueMin = 0
-        lp.xValueAxis.valueMax = len(vals_limpios) - 1
-        lp.xValueAxis.valueSteps = list(range(len(vals_limpios)))
-        lp.xValueAxis.labelTextFormat = lambda x: str(etiquetas[int(x)])[:7] if 0 <= int(x) < len(etiquetas) else ''
-        lp.xValueAxis.labels.angle = 30
-        lp.xValueAxis.labels.fontSize = 6
-
-        y_min = vmin if vmin is not None else auto_min
-        y_max = vmax if vmax is not None else auto_max
-        if limite_min is not None: y_min = min(y_min, limite_min * 0.9)
-        if limite_max is not None: y_max = max(y_max, limite_max * 1.1)
-        lp.yValueAxis.valueMin = y_min
-        lp.yValueAxis.valueMax = y_max
-        lp.yValueAxis.labels.fontSize = 7
-
-        d_graf.add(lp)
-
-        # Líneas de límite mínimo (rojo) y máximo (naranja)
-        def y_to_px(val):
-            return lp.y + (val - y_min) / (y_max - y_min) * lp.height
-
-        if limite_min is not None:
-            y_px = y_to_px(limite_min)
-            d_graf.add(Line(lp.x, y_px, lp.x + lp.width, y_px,
-                           strokeColor=colors.red, strokeWidth=1, strokeDashArray=[4,2]))
-            d_graf.add(String(lp.x + lp.width + 2, y_px - 3,
-                             f'Mín:{limite_min}', fontSize=6, fillColor=colors.red))
-
-        if limite_max is not None:
-            y_px = y_to_px(limite_max)
-            d_graf.add(Line(lp.x, y_px, lp.x + lp.width, y_px,
-                           strokeColor=colors.HexColor('#e67e00'), strokeWidth=1, strokeDashArray=[4,2]))
-            d_graf.add(String(lp.x + lp.width + 2, y_px - 3,
-                             f'Máx:{limite_max}', fontSize=6, fillColor=colors.HexColor('#e67e00')))
-
-        # Título
-        d_graf.add(String(lp.x, alto - 10, titulo, fontSize=8,
-                         fontName='Helvetica-Bold', fillColor=colors.HexColor('#1a3a5c')))
-        return d_graf
-    except Exception as e:
-        print(f'Error grafico: {e}')
-        return None
 
     story = []
 
@@ -812,7 +777,7 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
     story.append(Paragraph('METSO', ParagraphStyle('metso', parent=styles['Normal'],
                             fontSize=20, fontName='Helvetica-Bold', spaceAfter=4)))
     story.append(Paragraph(f'Informe Estado Chancadora {chancadora}', titulo_style))
-    story.append(Paragraph(f'Última intervención: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")} | Cliente: {d.get("cliente", "-")}', normal_style))
+    story.append(Paragraph(f'Ultima intervencion: {d.get("fecha_registro", "-")} | Supervisor: {d.get("supervisor_metso", "-")} | Cliente: {d.get("cliente", "-")}', normal_style))
     story.append(tabla_datos([
         ['Altura Bowl Saliente', str(d.get('altura_bowl_saliente') or '-') + ' pulg'],
         ['Altura Final Bowl', str(d.get('altura_final_bowl') or '-') + ' pulg'],
@@ -820,48 +785,30 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
     story.append(Spacer(1, 0.5*cm))
 
     # 0. Anillo de ajuste
-    story.append(Paragraph('0. Inspección Anillo de Ajuste', subtitulo_style))
+    story.append(Paragraph('0. Inspeccion Anillo de Ajuste', subtitulo_style))
     story.append(tabla_datos([
-        ['Roscas anillo de fijación', str(d.get('anillo_roscas_estado') or '-')],
+        ['Roscas anillo de fijacion', str(d.get('anillo_roscas_estado') or '-')],
         ['Observaciones', str(d.get('anillo_roscas_obs') or '-')],
     ]))
 
     # 1. Socket Liner
     story.append(Paragraph('1. Estado de Socket Liner', subtitulo_style))
-    
-    # Metrología
-    sl_data = [['Punto', 'Medida (mm)']]
-    vals_sl = []
-    for letra, campo in [('A','socket_med_a'),('B','socket_med_b'),('C','socket_med_c'),('D','socket_med_d')]:
-        v = d.get(campo)
-        sl_data.append([letra, str(v or '-')])
-        if v: vals_sl.append(float(v))
-    
-    promedio_sl = round(sum(vals_sl)/len(vals_sl), 2) if vals_sl else '-'
-
-    t = Table(sl_data, colWidths=[8*cm, 9*cm])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,-1), 9),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
-        ('PADDING', (0,0), (-1,-1), 6),
-    ]))
-    story.append(t)
-    story.append(Spacer(1, 0.3*cm))
+    sl_vals = []
+    for i in range(1, 7):
+        b = d.get(f'socket_b{i}')
+        a = d.get(f'socket_a{i}')
+        if b: sl_vals.append(float(b))
+        if a: sl_vals.append(float(a))
+    promedio_sl = round(sum(sl_vals)/len(sl_vals), 2) if sl_vals else '-'
     story.append(tabla_datos([
-        ['Promedio canales de lubricación', str(promedio_sl) + ' mm'],
+        ['Promedio canales de lubricacion', str(promedio_sl) + ' mm'],
         ['GAP Interior', str(d.get('sl_gap_interior') or '-') + ' mm'],
         ['GAP Exterior', str(d.get('sl_gap_exterior') or '-') + ' mm'],
         ['Presencia de fisuras', str(d.get('sl_fisuras_estado') or '-')],
         ['Observaciones fisuras', str(d.get('sl_fisuras_obs') or '-')],
-        ['¿Se cambió en esta intervención?', str(d.get('sl_cambio_ahora') or '-')],
-        ['¿Se recomienda cambio?', str(d.get('sl_cambio_siguiente') or '-')],
+        ['Se cambio en esta intervencion?', str(d.get('sl_cambio_ahora') or '-')],
+        ['Se recomienda cambio?', str(d.get('sl_cambio_siguiente') or '-')],
     ]))
-
-    # Gráfico historial promedio SL
     if len(historial) > 1:
         promedios_sl = []
         for h in historial:
@@ -871,8 +818,8 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
         texto_sl = f'Cambios: {", ".join(cambios_sl)}' if cambios_sl else 'Sin cambios registrados'
         g = grafico_lineas(promedios_sl, fechas, 'Promedio Socket Liner', limite_min=5, limite_max=10)
         if g:
-            story.append(Paragraph('Historial promedio metrología Socket Liner', normal_style))
-            story.append(Paragraph(texto_sl, ParagraphStyle('cambio_sl', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
+            story.append(Paragraph('Historial promedio metrologia Socket Liner', normal_style))
+            story.append(Paragraph(texto_sl, ParagraphStyle('sl', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
             story.append(g)
 
     # 2. Socket
@@ -880,19 +827,16 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
     gap_vals = [d.get('socket_gap_0'), d.get('socket_gap_90'), d.get('socket_gap_180'), d.get('socket_gap_270')]
     gap_nums = [float(v) for v in gap_vals if v is not None]
     promedio_gap = round(sum(gap_nums)/len(gap_nums), 2) if gap_nums else '-'
-    
     story.append(tabla_datos([
         ['Observaciones fisuras', str(d.get('socket_fisuras_obs') or '-')],
-        ['GAP 0°', str(d.get('socket_gap_0') or '-') + ' mm'],
-        ['GAP 90°', str(d.get('socket_gap_90') or '-') + ' mm'],
-        ['GAP 180°', str(d.get('socket_gap_180') or '-') + ' mm'],
-        ['GAP 270°', str(d.get('socket_gap_270') or '-') + ' mm'],
+        ['GAP 0', str(d.get('socket_gap_0') or '-') + ' mm'],
+        ['GAP 90', str(d.get('socket_gap_90') or '-') + ' mm'],
+        ['GAP 180', str(d.get('socket_gap_180') or '-') + ' mm'],
+        ['GAP 270', str(d.get('socket_gap_270') or '-') + ' mm'],
         ['Promedio GAP', str(promedio_gap) + ' mm'],
-        ['¿Se cambió?', str(d.get('socket_cambio_ahora') or '-')],
-        ['¿Se recomienda cambio?', str(d.get('socket_cambio_siguiente') or '-')],
+        ['Se cambio?', str(d.get('socket_cambio_ahora') or '-')],
+        ['Se recomienda cambio?', str(d.get('socket_cambio_siguiente') or '-')],
     ]))
-
-    # Gráfico GAP Socket
     if len(historial) > 1:
         gaps_prom = []
         for h in historial:
@@ -900,10 +844,10 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
             gaps_prom.append(round(sum(gv)/len(gv), 2) if gv else 0)
         cambios_socket = [str(h[0])[:7] for h in historial if len(h) > 36 and h[36] == 'SI']
         texto_socket = f'Cambios: {", ".join(cambios_socket)}' if cambios_socket else 'Sin cambios registrados'
-        g = grafico_lineas(gaps_prom, fechas, 'GAP Socket Mainshaft')
+        g = grafico_lineas(gaps_prom, fechas, 'GAP Socket Mainshaft', limite_min=0)
         if g:
             story.append(Paragraph('Historial promedio GAP Socket-Mainshaft', normal_style))
-            story.append(Paragraph(texto_socket, ParagraphStyle('cambio_socket', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
+            story.append(Paragraph(texto_socket, ParagraphStyle('sk', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
             story.append(g)
 
     # 3. MFL
@@ -911,11 +855,10 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
     mfl_vals = [d.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g']]
     mfl_nums = [float(v) for v in mfl_vals if v is not None]
     promedio_mfl = round(sum(mfl_nums)/len(mfl_nums), 2) if mfl_nums else '-'
-    
-    mfl_data = [['A', 'B', 'C', 'D', 'E', 'F', 'G', 'Promedio']]
+    mfl_data = [['A','B','C','D','E','F','G','Promedio']]
     mfl_data.append([str(d.get(f'mfl_med_{x}') or '-') for x in ['a','b','c','d','e','f','g']] + [str(promedio_mfl)])
-    t = Table(mfl_data, colWidths=[2*cm]*7 + [2.8*cm])
-    t.setStyle(TableStyle([
+    t_mfl = Table(mfl_data, colWidths=[2*cm]*7 + [2.8*cm])
+    t_mfl.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
@@ -924,14 +867,12 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
         ('ALIGN', (0,0), (-1,-1), 'CENTER'),
         ('PADDING', (0,0), (-1,-1), 5),
     ]))
-    story.append(t)
+    story.append(t_mfl)
     story.append(Spacer(1, 0.3*cm))
     story.append(tabla_datos([
-        ['¿Se cambió?', str(d.get('mfl_cambio_ahora') or '-')],
-        ['¿Se recomienda cambio?', str(d.get('mfl_cambio_siguiente') or '-')],
+        ['Se cambio?', str(d.get('mfl_cambio_ahora') or '-')],
+        ['Se recomienda cambio?', str(d.get('mfl_cambio_siguiente') or '-')],
     ]))
-
-    # Gráfico historial MFL
     if len(historial) > 1:
         promedios_mfl = []
         for h in historial:
@@ -942,29 +883,30 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
         g = grafico_lineas(promedios_mfl, fechas, 'Promedio MFL', limite_min=9, limite_max=70)
         if g:
             story.append(Paragraph('Historial promedio MFL', normal_style))
-            story.append(Paragraph(texto_mfl, ParagraphStyle('cambio_mfl', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
+            story.append(Paragraph(texto_mfl, ParagraphStyle('mfl', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
             story.append(g)
 
     # 4. Monturas
     story.append(Paragraph('4. Monturas', subtitulo_style))
     cambios_montura = [str(h[0])[:7] for h in historial if len(h) > 38 and h[38] == 'SI']
-    texto_montura = f'Cambios realizados: {", ".join(cambios_montura)}' if cambios_montura else 'Sin cambios registrados'
-    story.append(Paragraph(texto_montura, ParagraphStyle('cambio_montura', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
+    texto_montura = f'Cambios: {", ".join(cambios_montura)}' if cambios_montura else 'Sin cambios registrados'
+    story.append(Paragraph(texto_montura, ParagraphStyle('mont', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#0f5132'), spaceAfter=4)))
     story.append(tabla_datos([
-        ['Estado de barras de soporte de la montura del contraeje', str(d.get('montura_barras_estado') or '-')],
-        ['Estado de Chocky Bar', str(d.get('montura_chocky_estado') or '-')],
-        ['¿Se cambió?', str(d.get('montura_cambio_ahora') or '-')],
-        ['¿Se recomienda cambio?', str(d.get('montura_cambio_siguiente') or '-')],
+        ['Estado barras de soporte montura contraeje', str(d.get('montura_barras_estado') or '-')],
+        ['Estado Chocky Bar', str(d.get('montura_chocky_estado') or '-')],
+        ['Se cambio?', str(d.get('montura_cambio_ahora') or '-')],
+        ['Se recomienda cambio?', str(d.get('montura_cambio_siguiente') or '-')],
     ]))
+
     # 5. Guard Pins
     story.append(Paragraph('5. Guard Pins', subtitulo_style))
-    gp_data = [['Guard Pin', 'Medida', '¿Se cambió?', 'Observaciones']]
+    gp_data = [['Guard Pin', 'Medida', 'Se cambio?', 'Observaciones']]
     for i in range(1, 7):
-        gp_data.append([f'GP {i}', str(d.get(f'gp{i}_medida') or '-'), 
+        gp_data.append([f'GP {i}', str(d.get(f'gp{i}_medida') or '-'),
                         str(d.get(f'gp{i}_cambio') or '-'),
                         str(d.get(f'gp{i}_obs') or '-')])
-    t = Table(gp_data, colWidths=[3*cm, 3.5*cm, 3.5*cm, 7*cm])
-    t.setStyle(TableStyle([
+    t_gp = Table(gp_data, colWidths=[3*cm, 3.5*cm, 3.5*cm, 7*cm])
+    t_gp.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
@@ -973,82 +915,43 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
         ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f9f9f9')]),
         ('PADDING', (0,0), (-1,-1), 6),
     ]))
-    story.append(t)
-
-    # Gráfico historial Guard Pins
+    story.append(t_gp)
     if len(historial) > 1:
         for gp_idx in range(1, 7):
             def safe_float(v):
-                try:
-                    return float(str(v).replace('mm','').replace('cm','').strip())
-                except:
-                    return 0
-            gp_vals_hist = [safe_float(h[25+gp_idx]) if h[25+gp_idx] is not None else 0 for h in historial] 
-
+                try: return float(str(v).replace('mm','').replace('cm','').strip())
+                except: return 0
+            gp_vals_hist = [safe_float(h[25+gp_idx]) if h[25+gp_idx] is not None else 0 for h in historial]
             if any(v > 0 for v in gp_vals_hist):
                 g = grafico_lineas(gp_vals_hist, fechas, f'Guard Pin {gp_idx}')
                 if g:
                     story.append(Paragraph(f'Historial Guard Pin {gp_idx}', normal_style))
                     story.append(g)
 
-    # 6. Protector Estático
-    story.append(Paragraph('6. Protector Estático', subtitulo_style))
+    # 6. Protector Estatico
+    story.append(Paragraph('6. Protector Estatico', subtitulo_style))
     story.append(tabla_datos([
-        ['Estado protector estático', str(d.get('prot_estatico_estado') or '-')],
-        ['Observaciones de protector estático', str(d.get('prot_estatico_obs') or '-')],
+        ['Estado protector estatico', str(d.get('prot_estatico_estado') or '-')],
+        ['Observaciones', str(d.get('prot_estatico_obs') or '-')],
     ]))
 
-    # 7. Protector Dinámico
-    story.append(Paragraph('7. Protector Dinámico', subtitulo_style))
+    # 7. Protector Dinamico
+    story.append(Paragraph('7. Protector Dinamico', subtitulo_style))
     story.append(tabla_datos([
-        ['Estado protector dinámico', str(d.get('prot_dinamico_estado') or '-')],
-        ['¿Hay presencia de fuga de aceite?', str(d.get('prot_din_fuga') or '-')],
-        ['Observaciones de protector dinámico', str(d.get('prot_dinamico_obs') or '-')],
+        ['Estado protector dinamico', str(d.get('prot_dinamico_estado') or '-')],
+        ['Hay presencia de fuga de aceite?', str(d.get('prot_din_fuga') or '-')],
+        ['Observaciones', str(d.get('prot_dinamico_obs') or '-')],
     ]))
 
     # 8. Recomendaciones
-    story.append(Paragraph('8. Recomendaciones para la siguiente intervención', subtitulo_style))
+    story.append(Paragraph('8. Recomendaciones para la siguiente intervencion', subtitulo_style))
     story.append(Paragraph(str(d.get('recomendaciones') or 'Sin recomendaciones.'), normal_style))
 
     doc.build(story)
     buffer.seek(0)
     return send_file(buffer, as_attachment=True,
-                    download_name=f'Informe_{chancadora}_{str(d.get("fecha_registro",""))[:10]}.pdf',
-                    mimetype='application/pdf')
-
-@app.route('/alturas', methods=['GET', 'POST'])
-def alturas():
-    import psycopg2
-    from datetime import datetime
-    
-    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
-    c = conn.cursor()
-    
-    if request.method == 'POST':
-        chancadora = request.form.get('chancadora')
-        fecha = request.form.get('fecha')
-        altura = request.form.get('altura')
-        operador = request.form.get('operador')
-        dias_parada = int(request.form.get('dias_parada') or 0)
-        fecha_registro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        c.execute('''INSERT INTO altura_bowl (chancadora, fecha, altura, operador, dias_parada, fecha_registro)
-                     VALUES (%s, %s, %s, %s, %s, %s)''',
-                  (chancadora, fecha, altura, operador, dias_parada, fecha_registro))
-        conn.commit()
-    
-    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
-    chancadora_sel = request.args.get('chancadora', request.form.get('chancadora', 'CR011'))
-    
-    c.execute('''SELECT fecha, altura, operador, dias_parada FROM altura_bowl
-             WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
-             ORDER BY fecha ASC''', (chancadora_sel,))
-    registros = c.fetchall()
-    conn.close()
-    
-    return render_template('alturas.html',
-                           registros=registros,
-                           chancadora_sel=chancadora_sel,
-                           chancadoras=chancadoras)
+                     download_name=f'Informe_{chancadora}_{str(d.get("fecha_registro",""))[:10]}.pdf',
+                     mimetype='application/pdf')
 
 @app.route('/alturas/nuevo_ciclo', methods=['POST'])
 def alturas_nuevo_ciclo():
