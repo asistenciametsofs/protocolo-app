@@ -8,3 +8,5 @@ cloudinary
 pdfplumber
 requests
 reportlab
+python-pptx
+matplotlib
