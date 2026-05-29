@@ -1417,6 +1417,103 @@ def resumen_guardar():
         print(f'Error guardando resumen: {e}')
         return {'error': str(e)}, 500
 
+# ══════════════════════════════════════════════════════════════
+# MÓDULO PPT GERENCIAL — pegar en app.py antes de if __name__
+# ══════════════════════════════════════════════════════════════
+
+@app.route('/informe/ppt')
+def generar_ppt():
+    """Genera PPT gerencial estilo Metso con estado de las 8 chancadoras"""
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    import subprocess, json, tempfile, os
+    from datetime import datetime
+
+    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
+        c = conn.cursor()
+
+        datos_ch = {}
+        for ch in chancadoras:
+            # Último registro
+            c.execute('''SELECT * FROM cambio_hb WHERE chancadora = %s
+                         ORDER BY fecha_inicio DESC LIMIT 1''', (ch,))
+            ultimo = c.fetchone()
+
+            # Historial para gráficos
+            c.execute('''SELECT fecha_inicio,
+                         socket_b1, socket_a1, socket_b2, socket_a2,
+                         socket_b3, socket_a3, socket_b4, socket_a4,
+                         socket_b5, socket_a5, socket_b6, socket_a6,
+                         sl_gap_interior, sl_gap_exterior,
+                         socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
+                         mfl_med_a, mfl_med_b, mfl_med_c, mfl_med_d,
+                         mfl_med_e, mfl_med_f, mfl_med_g,
+                         sl_cambio_ahora, socket_cambio_ahora, mfl_cambio_ahora, montura_cambio_ahora,
+                         head_entrante, bowl_entrante, altura_final_bowl
+                         FROM cambio_hb WHERE chancadora = %s
+                         ORDER BY fecha_inicio ASC''', (ch,))
+            historial = c.fetchall()
+
+            # Alturas de bowl para proyección
+            c.execute('''SELECT fecha, altura, dias_parada FROM altura_bowl
+                         WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
+                         ORDER BY fecha ASC''', (ch,))
+            alturas = c.fetchall()
+
+            # Último cambio por componente
+            c.execute('''SELECT fecha_inicio, sl_cambio_ahora, socket_cambio_ahora,
+                         mfl_cambio_ahora, montura_cambio_ahora
+                         FROM cambio_hb WHERE chancadora = %s
+                         AND (sl_cambio_ahora = 'SI' OR socket_cambio_ahora = 'SI'
+                              OR mfl_cambio_ahora = 'SI' OR montura_cambio_ahora = 'SI')
+                         ORDER BY fecha_inicio DESC LIMIT 10''', (ch,))
+            cambios = c.fetchall()
+
+            datos_ch[ch] = {
+                'ultimo': dict(ultimo) if ultimo else None,
+                'historial': [dict(r) for r in historial],
+                'alturas': [dict(r) for r in alturas],
+                'cambios': [dict(r) for r in cambios],
+                'total': len(historial)
+            }
+
+        conn.close()
+    except Exception as e:
+        return f'Error BD: {e}', 500
+
+    # Semana actual
+    semana = f"W{datetime.now().isocalendar()[1]:02d} · {datetime.now().strftime('%B %Y')}"
+
+    # Preparar datos para Node.js
+    payload = {
+        'chancadoras': chancadoras,
+        'datos': datos_ch,
+        'semana': semana,
+        'fecha': datetime.now().strftime('%d/%m/%Y')
+    }
+
+    # Llamar al script Node.js
+    script_path = os.path.join(os.path.dirname(__file__), 'generar_ppt_metso.js')
+    result = subprocess.run(
+        ['node', script_path],
+        input=json.dumps(payload, ensure_ascii=False, default=str),
+        capture_output=True, timeout=60
+    )
+
+    if result.returncode != 0:
+        return f'Error generando PPT: {result.stderr.decode()}', 500
+
+    import base64
+    pptx_bytes = base64.b64decode(result.stdout.decode().strip())
+    buf = io.BytesIO(pptx_bytes)
+    buf.seek(0)
+    nombre = f'Metso_Estado_Chancadoras_{datetime.now().strftime("%Y%m%d")}.pptx'
+    return send_file(buf, as_attachment=True, download_name=nombre,
+                     mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
