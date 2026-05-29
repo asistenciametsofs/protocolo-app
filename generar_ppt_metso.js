@@ -217,7 +217,18 @@ async function generarPPT(payload) {
         slide.addShape('rect', { x: 0, y: 0, w: 10, h: 0.85, fill: { color: '1A1A1A' }, line: { color: '1A1A1A' } });
         slide.addShape('rect', { x: 0, y: 0.85, w: 10, h: 0.04, fill: { color: NARANJA }, line: { color: NARANJA } });
 
+        // Calcular estado general anticipado
+        const _mflP = promedio(['a','b','c','d','e','f','g'].map(x => safeNum(u[`mfl_med_${x}`])));
+        const _slP  = promedio([1,2,3,4,5,6].flatMap(i => [safeNum(u[`socket_b${i}`]), safeNum(u[`socket_a${i}`])]));
+        const _gapP = promedio([safeNum(u.socket_gap_0), safeNum(u.socket_gap_90), safeNum(u.socket_gap_180), safeNum(u.socket_gap_270)]);
+        const _hayAmar = (_mflP !== null && _mflP < 18) || (_slP !== null && (_slP < 6 || _slP > 9.5)) || (_gapP !== null && _gapP > 0.3) || u.montura_barras_estado === 'Malo' || u.prot_estatico_estado === 'Malo';
+        const _hayRojo = (_mflP !== null && _mflP < 12) || (_slP !== null && _slP < 5) || u.prot_estatico_estado === 'Malo';
+        const _estadoG = _hayRojo ? 'URGENTE' : _hayAmar ? 'ATENCIÓN' : 'BUEN ESTADO';
+        const _colorG  = _hayRojo ? ROJO : _hayAmar ? AMARILLO : VERDE;
+
         slide.addText(ch, { x: 0.3, y: 0.05, w: 2, h: 0.5, fontSize: 24, bold: true, color: BLANCO, fontFace: 'Arial', margin: 0 });
+        slide.addShape('rect', { x: 2.4, y: 0.12, w: 1.1, h: 0.28, fill: { color: _colorG }, line: { color: _colorG } });
+        slide.addText(_estadoG, { x: 2.4, y: 0.12, w: 1.1, h: 0.28, fontSize: 8, bold: true, color: NEGRO, align: 'center', valign: 'middle', fontFace: 'Arial', margin: 0 });
 
         if (u) {
             const fechaI = safe(u.fecha_inicio).substring(0, 10);
