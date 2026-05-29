@@ -755,6 +755,7 @@ def grafico_lineas(valores, etiquetas, titulo, ancho=None, alto=None, vmin=None,
         lp.data = [data]
         lp.lines[0].strokeColor = colors.HexColor('#1a3a5c')
         lp.lines[0].strokeWidth = 1.5
+        from reportlab.graphics.widgets.markers import makeMarker
         lp.lines[0].symbol = makeMarker('FilledCircle')
         lp.lines[0].symbol.size = 4
         lp.lines[0].symbol.fillColor = colors.HexColor('#1a3a5c')
