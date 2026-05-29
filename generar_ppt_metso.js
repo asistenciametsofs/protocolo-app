@@ -122,46 +122,6 @@ function addLineChart(slide, labels, series, x, y, w, h, opts = {}) {
         lineSize: series.map(s => s.lineSize || 2),
         lineDataSymbol: series.map(s => s.symbol || 'circle'),
         lineDataSymbolSize: series.map(s => s.symbolSize || 4),
-        showValue: true,
-        dataLabelFontSize: 7,
-        dataLabelColor: BLANCO,
-        showLegend: opts.showLegend || false,
-        legendPos: 'b',
-        legendFontSize: 7,
-        legendColor: BLANCO,
-        showTitle: false,
-        valAxisMinVal: opts.valMin,
-        valAxisMaxVal: opts.valMax,
-        ...opts.extra
-    };
-
-    if (opts.refLines) {
-        opts.refLines.forEach(ref => {
-            chartData.push({ name: ref.label, labels, values: labels.map(() => ref.val) });
-            chartOpts.chartColors.push(ref.color || ROJO);
-            chartOpts.lineSize.push(1.5);
-            chartOpts.lineDataSymbol.push('dash');
-            chartOpts.lineDataSymbolSize.push(0);
-        });
-        // Ocultar valores de las líneas de referencia
-        chartOpts.showValue = true;
-    }
-
-    slide.addChart('line', chartData, chartOpts);
-}
-    const chartOpts = {
-        x, y, w, h,
-        chartColors: series.map(s => s.color || NARANJA),
-        chartArea: { fill: { color: '1A1A1A' } },
-        catAxisLabelColor: '888888',
-        valAxisLabelColor: '888888',
-        catAxisLabelFontSize: 7,
-        valAxisLabelFontSize: 7,
-        valGridLine: { color: '333333', size: 0.3 },
-        catGridLine: { style: 'none' },
-        lineSize: series.map(s => s.lineSize || 2),
-        lineDataSymbol: series.map(s => s.symbol || 'circle'),
-        lineDataSymbolSize: series.map(s => s.symbolSize || 4),
         showLegend: opts.showLegend || false,
         legendPos: 'b',
         legendFontSize: 7,
