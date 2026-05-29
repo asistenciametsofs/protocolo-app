@@ -1426,7 +1426,7 @@ def generar_ppt():
     """Genera PPT gerencial estilo Metso con estado de las 8 chancadoras"""
     import psycopg2
     from psycopg2.extras import RealDictCursor
-    import subprocess, json, tempfile, os
+    import subprocess, json, tempfile, os, io
     from datetime import datetime
 
     chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
