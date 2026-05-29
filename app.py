@@ -1497,8 +1497,11 @@ def generar_ppt():
 
     # Llamar al script Node.js
     script_path = os.path.join(os.path.dirname(__file__), 'generar_ppt_metso.js')
+    env = os.environ.copy()
+    env['NODE_PATH'] = '/opt/render/project/src/node_modules'
     result = subprocess.run(
         ['node', script_path],
+        env=env,
         input=json.dumps(payload, ensure_ascii=False, default=str).encode('utf-8'),
         capture_output=True, timeout=60
     )
