@@ -122,6 +122,46 @@ function addLineChart(slide, labels, series, x, y, w, h, opts = {}) {
         lineSize: series.map(s => s.lineSize || 2),
         lineDataSymbol: series.map(s => s.symbol || 'circle'),
         lineDataSymbolSize: series.map(s => s.symbolSize || 4),
+        showValue: true,
+        dataLabelFontSize: 7,
+        dataLabelColor: BLANCO,
+        showLegend: opts.showLegend || false,
+        legendPos: 'b',
+        legendFontSize: 7,
+        legendColor: BLANCO,
+        showTitle: false,
+        valAxisMinVal: opts.valMin,
+        valAxisMaxVal: opts.valMax,
+        ...opts.extra
+    };
+
+    if (opts.refLines) {
+        opts.refLines.forEach(ref => {
+            chartData.push({ name: ref.label, labels, values: labels.map(() => ref.val) });
+            chartOpts.chartColors.push(ref.color || ROJO);
+            chartOpts.lineSize.push(1.5);
+            chartOpts.lineDataSymbol.push('dash');
+            chartOpts.lineDataSymbolSize.push(0);
+        });
+        // Ocultar valores de las líneas de referencia
+        chartOpts.showValue = true;
+    }
+
+    slide.addChart('line', chartData, chartOpts);
+}
+    const chartOpts = {
+        x, y, w, h,
+        chartColors: series.map(s => s.color || NARANJA),
+        chartArea: { fill: { color: '1A1A1A' } },
+        catAxisLabelColor: '888888',
+        valAxisLabelColor: '888888',
+        catAxisLabelFontSize: 7,
+        valAxisLabelFontSize: 7,
+        valGridLine: { color: '333333', size: 0.3 },
+        catGridLine: { style: 'none' },
+        lineSize: series.map(s => s.lineSize || 2),
+        lineDataSymbol: series.map(s => s.symbol || 'circle'),
+        lineDataSymbolSize: series.map(s => s.symbolSize || 4),
         showLegend: opts.showLegend || false,
         legendPos: 'b',
         legendFontSize: 7,
@@ -175,9 +215,14 @@ async function generarPPT(payload) {
     chancadoras.forEach(ch => {
         const d = datos[ch];
         if (!d.ultimo) return;
-        const mflProm = promedio(['a','b','c','d','e','f','g'].map(x => d.ultimo[`mfl_med_${x}`]));
-        if (mflProm !== null && mflProm < 12) totalUrg++;
-        else if (mflProm !== null && mflProm < 18) totalAtenc++;
+        const u = d.ultimo;
+        const mflProm = promedio(['a','b','c','d','e','f','g'].map(x => safeNum(u[`mfl_med_${x}`])));
+        const slProm  = promedio([1,2,3,4,5,6].flatMap(i => [safeNum(u[`socket_b${i}`]), safeNum(u[`socket_a${i}`])]));
+        const gapProm = promedio([safeNum(u.socket_gap_0), safeNum(u.socket_gap_90), safeNum(u.socket_gap_180), safeNum(u.socket_gap_270)]);
+        const hayRojo = (mflProm !== null && mflProm < 12) || (slProm !== null && slProm < 5) || u.prot_estatico_estado === 'Malo';
+        const hayAmar = (mflProm !== null && mflProm < 18) || (slProm !== null && (slProm < 6 || slProm > 9.5)) || (gapProm !== null && gapProm > 0.3) || u.montura_barras_estado === 'Malo';
+        if (hayRojo) totalUrg++;
+        else if (hayAmar) totalAtenc++;
         else totalNormal++;
     });
 
