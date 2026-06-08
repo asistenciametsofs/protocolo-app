@@ -72,7 +72,7 @@
 </div>
 <div class="container">
     <a href="/" class="btn-back">← Volver al inicio</a>
-    <form action="/cambio/guardar" method="POST" enctype="multipart/form-data">
+    <form action="/cambio/guardar" method="POST" enctype="multipart/form-data" id="form-cambio"></form>
 
     <!-- 1. DATOS GENERALES -->
     <div class="seccion">
@@ -823,6 +823,39 @@ function eliminarFoto(inputId) {
     preview.src = '';
     preview.style.display = 'none';
 }
+// ── Auto-guardado en localStorage ──────────────────────────
+const FORM_KEY_CAMBIO = 'protocolo_cambio_borrador';
+
+function guardarBorrador() {
+    const form = document.getElementById('form-cambio');
+    const data = {};
+    form.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=email], select, textarea').forEach(el => {
+        if (el.name) data[el.name] = el.value;
+    });
+    form.querySelectorAll('input[type=checkbox]').forEach(el => {
+        if (el.name) data[el.name] = el.checked ? el.value : '';
+    });
+    localStorage.setItem(FORM_KEY_CAMBIO, JSON.stringify(data));
+}
+
+function recuperarBorrador() {
+    const saved = localStorage.getItem(FORM_KEY_CAMBIO);
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    const form = document.getElementById('form-cambio');
+    Object.keys(data).forEach(name => {
+        const el = form.querySelector(`[name="${name}"]`);
+        if (el && data[name] !== '') el.value = data[name];
+    });
+}
+
+function limpiarBorrador() {
+    localStorage.removeItem(FORM_KEY_CAMBIO);
+}
+
+window.addEventListener('load', recuperarBorrador);
+setInterval(guardarBorrador, 5000);
+document.getElementById('form-cambio').addEventListener('submit', limpiarBorrador);
 </script>
 </body>
 </html>
