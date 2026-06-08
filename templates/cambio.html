@@ -577,37 +577,188 @@
             <img src="/static/imagenes/SelloUT.png" class="img-tecnica" alt="Sello UT" style="max-width:175px;">
         </div>
     </div>
-
-    <!-- CIERRE -->
+     
+    <!-- INSPECCIÓN DE SISTEMAS AUXILIARES -->
     <div class="seccion">
-        <div class="seccion-titulo">Cierre del Protocolo</div>
-        <div class="grid2">
+        <div class="seccion-titulo">Inspección de Sistemas Auxiliares</div>
+        <div class="grid2" style="margin-bottom:10px">
             <div>
-                <label>Hora Fin</label>
-                <div class="hora-group">
-                    <select name="hora_fin_h">
-                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>0</option>
-                    </select>
-                    <span class="hora-sep">:</span>
-                    <select name="hora_fin_m"><option>00</option><option>15</option><option>30</option><option>45</option></select>
-                </div>
+                <label>¿Se inspeccionará los sistemas auxiliares?</label>
+                <select name="sistemas_aux_inspeccion" class="estado-select" onchange="toggleCondicional(this,'sistemas_aux_sec')">
+                    <option value="NO">NO</option>
+                    <option value="SI">SÍ</option>
+                </select>
             </div>
         </div>
-        <div class="grid2">
-            <div><label>Head Entrante</label><input type="text" name="head_entrante" placeholder="Ej: H3" maxlength="4"></div>
-            <div><label>Bowl Entrante</label><input type="text" name="bowl_entrante" placeholder="Ej: B4A" maxlength="4"></div>
-        </div>
-        <div class="grid2">
-            <div><label>Altura Final Bowl (pulgadas)</label><input type="number" step="0.01" name="altura_final_bowl" placeholder="Ej: 21.53"></div>
-        </div>
-        <label>Recomendaciones para la siguiente intervención</label>
-        <textarea class="obs-grande" name="recomendaciones" placeholder="Escribir observaciones y recomendaciones..."></textarea>
     </div>
 
-    <button type="submit" class="btn-submit">💾 Guardar protocolo y enviar reporte</button>
-    </form>
-    <br>
-</div>
+    <div class="condicional" id="sistemas_aux_sec">
+        <div class="seccion" style="margin:0">
+
+            <!-- SISTEMA DE TRANSMISIÓN -->
+            <div class="subseccion-titulo">Sistema de Transmisión</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr>
+                    <td class="paso-desc">Verificar frecuencia (Hz) del tensado de las correas del sistema de transmisión</td>
+                    <td></td>
+                    <td><input class="obs-input" name="trans_frecuencia" placeholder="Frecuencia en Hz"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Estado de polea conducida (fisuras, daño u otro)</td>
+                    <td><select name="trans_polea_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="trans_polea_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_trans1')">📷 Foto</button><input type="file" name="foto_trans1" id="foto_trans1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_trans1"></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Estado de radiador (fisuras, daño u otro)</td>
+                    <td><select name="trans_radiador_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="trans_radiador_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_trans2')">📷 Foto</button><input type="file" name="foto_trans2" id="foto_trans2" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_trans2"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- SISTEMA HIDRÁULICO -->
+            <div class="subseccion-titulo">Sistema Hidráulico</div>
+            <label>Medición de presión de acumuladores (Presión mínima 950 PSI — máximo 1050 PSI)</label>
+            <div class="grid2" style="margin-top:8px; gap:16px">
+                <div>
+                    <div class="metro-label" style="margin-bottom:6px">Presión encontrada (PSI)</div>
+                    <table class="metro-tabla">
+                        <tr><th>N°</th><th>Presión (PSI)</th></tr>
+                        <tr><td class="metro-label">1</td><td><input type="number" step="0.1" name="acum_pres_1" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">2</td><td><input type="number" step="0.1" name="acum_pres_2" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">3</td><td><input type="number" step="0.1" name="acum_pres_3" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">4</td><td><input type="number" step="0.1" name="acum_pres_4" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">5</td><td><input type="number" step="0.1" name="acum_pres_5" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">6</td><td><input type="number" step="0.1" name="acum_pres_6" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">7</td><td><input type="number" step="0.1" name="acum_pres_7" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">8</td><td><input type="number" step="0.1" name="acum_pres_8" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">Consola</td><td><input type="number" step="0.1" name="acum_pres_consola" placeholder="PSI"></td></tr>
+                    </table>
+                </div>
+                <div>
+                    <div class="metro-label" style="margin-bottom:6px">Presión final tras recarga N₂ (PSI)</div>
+                    <table class="metro-tabla">
+                        <tr><th>N°</th><th>Presión final (PSI)</th></tr>
+                        <tr><td class="metro-label">1</td><td><input type="number" step="0.1" name="acum_final_1" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">2</td><td><input type="number" step="0.1" name="acum_final_2" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">3</td><td><input type="number" step="0.1" name="acum_final_3" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">4</td><td><input type="number" step="0.1" name="acum_final_4" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">5</td><td><input type="number" step="0.1" name="acum_final_5" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">6</td><td><input type="number" step="0.1" name="acum_final_6" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">7</td><td><input type="number" step="0.1" name="acum_final_7" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">8</td><td><input type="number" step="0.1" name="acum_final_8" placeholder="PSI"></td></tr>
+                        <tr><td class="metro-label">Consola</td><td><input type="number" step="0.1" name="acum_final_consola" placeholder="PSI"></td></tr>
+                    </table>
+                </div>
+            </div>
+            <table class="tabla-pasos" style="margin-top:10px">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr>
+                    <td class="paso-desc">Inspección visual del bloque hidráulico</td>
+                    <td><select name="hidra_bloque_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="hidra_bloque_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hid1')">📷 Foto</button><input type="file" name="foto_hid1" id="foto_hid1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hid1"></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Inspección visual de bomba y acople del sistema hidráulico</td>
+                    <td><select name="hidra_bomba_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="hidra_bomba_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hid2')">📷 Foto</button><input type="file" name="foto_hid2" id="foto_hid2" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hid2"></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Inspección visual del motor hidráulico 1</td>
+                    <td><select name="hidra_motor1_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="hidra_motor1_obs" placeholder="Hallazgos..."></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Inspección visual del motor hidráulico 2</td>
+                    <td><select name="hidra_motor2_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="hidra_motor2_obs" placeholder="Hallazgos..."></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Inspección visual del motor hidráulico 3</td>
+                    <td><select name="hidra_motor3_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="hidra_motor3_obs" placeholder="Hallazgos..."></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- SISTEMA BLOWER -->
+            <div class="subseccion-titulo">Sistema Blower</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr>
+                    <td class="paso-desc">Inspección / Limpieza de Filtro de Sistema Blower</td>
+                    <td><select name="blower_filtro_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="blower_filtro_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_blow1')">📷 Foto</button><input type="file" name="foto_blow1" id="foto_blow1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_blow1"></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">¿Se cambió filtro?</td>
+                    <td><select name="blower_cambio_filtro" class="estado-select"><option value="NO">NO</option><option value="SI">SÍ</option></select></td>
+                    <td><input class="obs-input" name="blower_cambio_obs" placeholder="Observaciones..."></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- SISTEMA DE LUBRICACIÓN -->
+            <div class="subseccion-titulo">Sistema de Lubricación</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr>
+                    <td class="paso-desc">Inspección de cedazo de tanque de lubricación</td>
+                    <td><select name="lubri_cedazo_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="lubri_cedazo_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lub1')">📷 Foto</button><input type="file" name="foto_lub1" id="foto_lub1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lub1"></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+        <!-- CIERRE -->
+        <div class="seccion">
+            <div class="seccion-titulo">Cierre del Protocolo</div>
+            <div class="grid2">
+                <div>
+                    <label>Hora Fin</label>
+                    <div class="hora-group">
+                        <select name="hora_fin_h">
+                            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>0</option>
+                        </select>
+                        <span class="hora-sep">:</span>
+                        <select name="hora_fin_m"><option>00</option><option>15</option><option>30</option><option>45</option></select>
+                    </div>
+                </div>
+            </div>
+            <div class="grid2">
+                <div><label>Head Entrante</label><input type="text" name="head_entrante" placeholder="Ej: H3" maxlength="4"></div>
+                <div><label>Bowl Entrante</label><input type="text" name="bowl_entrante" placeholder="Ej: B4A" maxlength="4"></div>
+            </div>
+            <div class="grid2">
+                <div><label>Altura Final Bowl (pulgadas)</label><input type="number" step="0.01" name="altura_final_bowl" placeholder="Ej: 21.53"></div>
+            </div>
+            <label>Recomendaciones para la siguiente intervención</label>
+            <textarea class="obs-grande" name="recomendaciones" placeholder="Escribir observaciones y recomendaciones..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">💾 Guardar protocolo y enviar reporte</button>
+        </form>
+        <br>
+    </div>
 
 <script>
 function actualizarFolio() {

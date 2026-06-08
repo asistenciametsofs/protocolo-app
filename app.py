@@ -170,7 +170,18 @@ def guardar_cambio_route():
         'contrapeso_estado','contrapeso_obs',
         'sello_ut_estado','sello_ut_obs',
         'head_entrante','bowl_entrante','altura_bowl_entrante','altura_final_bowl',
-        'hora_fin_h','hora_fin_m','recomendaciones']
+        'hora_fin_h','hora_fin_m','recomendaciones',
+        'sistemas_aux_inspeccion','trans_frecuencia',
+        'trans_polea_estado','trans_polea_obs','trans_radiador_estado','trans_radiador_obs',
+        'acum_pres_1','acum_pres_2','acum_pres_3','acum_pres_4','acum_pres_5',
+        'acum_pres_6','acum_pres_7','acum_pres_8','acum_pres_consola',
+        'acum_final_1','acum_final_2','acum_final_3','acum_final_4','acum_final_5',
+        'acum_final_6','acum_final_7','acum_final_8','acum_final_consola',
+        'hidra_bloque_estado','hidra_bloque_obs','hidra_bomba_estado','hidra_bomba_obs',
+        'hidra_motor1_estado','hidra_motor1_obs','hidra_motor2_estado','hidra_motor2_obs',
+        'hidra_motor3_estado','hidra_motor3_obs',
+        'blower_filtro_estado','blower_filtro_obs','blower_cambio_filtro','blower_cambio_obs',
+        'lubri_cedazo_estado','lubri_cedazo_obs']
     for campo in campos:
         valor = request.form.get(campo, '')
         try:

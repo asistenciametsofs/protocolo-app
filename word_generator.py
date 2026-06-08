@@ -642,6 +642,52 @@ def generar_word_cambio(datos):
             ('Realizar inspección de sellos U-T', datos.get('sello_ut_estado',''), datos.get('sello_ut_obs','')),
         ], header_color='0F5132')
         add_imagen(doc, 'static/imagenes/SelloUT.png')
+    # ── SISTEMAS AUXILIARES ──────────────────────────────────
+    if datos.get('sistemas_aux_inspeccion') == 'SI':
+        add_section_title_green(doc, 'INSPECCIÓN DE SISTEMAS AUXILIARES')
+
+        add_section_title_green(doc, 'Sistema de Transmisión')
+        add_inspeccion_table(doc, [
+            ('Frecuencia tensado de correas (Hz)', '', str(datos.get('trans_frecuencia') or '-')),
+            ('Estado de polea conducida', datos.get('trans_polea_estado',''), datos.get('trans_polea_obs','')),
+            ('Estado de radiador', datos.get('trans_radiador_estado',''), datos.get('trans_radiador_obs','')),
+        ], header_color='0F5132')
+
+        add_section_title_green(doc, 'Sistema Hidráulico — Presión de Acumuladores (950-1050 PSI)')
+        tabla_ac = doc.add_table(rows=1, cols=3)
+        tabla_ac.style = 'Table Grid'
+        bold_cell(tabla_ac.cell(0,0), 'N°', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+        bold_cell(tabla_ac.cell(0,1), 'Presión encontrada (PSI)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+        bold_cell(tabla_ac.cell(0,2), 'Presión final tras recarga N₂ (PSI)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+        for i in range(1, 9):
+            row = tabla_ac.add_row()
+            normal_cell(row.cells[0], str(i), align=WD_ALIGN_PARAGRAPH.CENTER)
+            normal_cell(row.cells[1], str(datos.get(f'acum_pres_{i}') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+            normal_cell(row.cells[2], str(datos.get(f'acum_final_{i}') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+        row = tabla_ac.add_row()
+        normal_cell(row.cells[0], 'Consola', bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+        normal_cell(row.cells[1], str(datos.get('acum_pres_consola') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+        normal_cell(row.cells[2], str(datos.get('acum_final_consola') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+        doc.add_paragraph()
+
+        add_inspeccion_table(doc, [
+            ('Bloque hidráulico', datos.get('hidra_bloque_estado',''), datos.get('hidra_bloque_obs','')),
+            ('Bomba y acople hidráulico', datos.get('hidra_bomba_estado',''), datos.get('hidra_bomba_obs','')),
+            ('Motor hidráulico 1', datos.get('hidra_motor1_estado',''), datos.get('hidra_motor1_obs','')),
+            ('Motor hidráulico 2', datos.get('hidra_motor2_estado',''), datos.get('hidra_motor2_obs','')),
+            ('Motor hidráulico 3', datos.get('hidra_motor3_estado',''), datos.get('hidra_motor3_obs','')),
+        ], header_color='0F5132')
+
+        add_section_title_green(doc, 'Sistema Blower')
+        add_inspeccion_table(doc, [
+            ('Inspección / Limpieza de filtro', datos.get('blower_filtro_estado',''), datos.get('blower_filtro_obs','')),
+            ('¿Se cambió el filtro?', datos.get('blower_cambio_filtro','NO'), datos.get('blower_cambio_obs','')),
+        ], header_color='0F5132')
+
+        add_section_title_green(doc, 'Sistema de Lubricación')
+        add_inspeccion_table(doc, [
+            ('Cedazo de tanque de lubricación', datos.get('lubri_cedazo_estado',''), datos.get('lubri_cedazo_obs','')),
+        ], header_color='0F5132')
 
     # ── FOTOS ────────────────────────────────────────────────
     fotos = [k for k in datos.keys() if k.startswith('foto_path_')]
