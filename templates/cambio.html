@@ -827,12 +827,11 @@ function eliminarFoto(inputId) {
 const FORM_KEY_CAMBIO = 'protocolo_cambio_borrador';
 
 function guardarBorrador() {
-    const form = document.getElementById('form-cambio');
     const data = {};
-    form.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=email], select, textarea').forEach(el => {
+    document.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=email], select, textarea').forEach(el => {
         if (el.name) data[el.name] = el.value;
     });
-    form.querySelectorAll('input[type=checkbox]').forEach(el => {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => {
         if (el.name) data[el.name] = el.checked ? el.value : '';
     });
     localStorage.setItem(FORM_KEY_CAMBIO, JSON.stringify(data));
