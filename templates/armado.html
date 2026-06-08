@@ -563,6 +563,44 @@ function eliminarFoto(inputId) {
     preview.src = '';
     preview.style.display = 'none';
 }
+// ── Auto-guardado en localStorage ──────────────────────────
+const FORM_KEY_ARMADO = 'protocolo_armado_borrador';
+
+function guardarBorrador() {
+    const form = document.getElementById('form-armado');
+    const data = {};
+    form.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=email], select, textarea').forEach(el => {
+        if (el.name) data[el.name] = el.value;
+    });
+    form.querySelectorAll('input[type=checkbox]').forEach(el => {
+        if (el.name) data[el.name] = el.checked ? el.value : '';
+    });
+    localStorage.setItem(FORM_KEY_ARMADO, JSON.stringify(data));
+}
+
+function recuperarBorrador() {
+    const saved = localStorage.getItem(FORM_KEY_ARMADO);
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    const form = document.getElementById('form-armado');
+    Object.keys(data).forEach(name => {
+        const el = form.querySelector(`[name="${name}"]`);
+        if (el && data[name] !== '') el.value = data[name];
+    });
+}
+
+function limpiarBorrador() {
+    localStorage.removeItem(FORM_KEY_ARMADO);
+}
+
+// Recuperar al cargar
+window.addEventListener('load', recuperarBorrador);
+
+// Guardar cada 5 segundos
+setInterval(guardarBorrador, 5000);
+
+// Limpiar al enviar
+document.getElementById('form-armado').addEventListener('submit', limpiarBorrador);
 </script>
 </body>
 </html>
