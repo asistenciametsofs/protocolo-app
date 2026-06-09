@@ -1617,7 +1617,7 @@ def plan_mantenimiento():
 
             # ── Socket Liner: medir cada 2 intervenciones ──
             # Si en el último se midió (hay valores), en el próximo se omite y viceversa
-            sl_vals = [historial[0].get(f'socket_med_{x}') for x in ['a','b','c','d']]
+            sl_vals = [ultimo.get(f'socket_med_{x}') for x in ['a','b','c','d']]
             sl_midio_ultimo = any(v is not None for v in sl_vals)
             sl_proxima = 'omitir' if sl_midio_ultimo else 'medir'
 
