@@ -1568,6 +1568,134 @@ def generar_ppt():
     return send_file(buf, as_attachment=True, download_name=nombre,
                      mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation')
 
+# ══════════════════════════════════════════════════════════════
+# MÓDULO PLAN DE MANTENIMIENTO — pegar en app.py antes de if __name__
+# ══════════════════════════════════════════════════════════════
+
+@app.route('/plan')
+def plan_mantenimiento():
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    from datetime import datetime
+
+    chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
+        c = conn.cursor()
+
+        plan = {}
+        for ch in chancadoras:
+            # Historial completo ordenado DESC
+            c.execute('''
+                SELECT id, fecha_inicio, fecha_registro,
+                       sl_cambio_ahora, socket_cambio_ahora, mfl_cambio_ahora, montura_cambio_ahora,
+                       sl_gap_interior, sl_gap_exterior,
+                       socket_b1, socket_a1, socket_b2, socket_a2,
+                       socket_b3, socket_a3, socket_b4, socket_a4,
+                       socket_b5, socket_a5, socket_b6, socket_a6,
+                       socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
+                       mfl_med_a, mfl_med_b, mfl_med_c, mfl_med_d,
+                       mfl_med_e, mfl_med_f, mfl_med_g, mfl_cambio_ahora,
+                       montura_barras_estado, montura_chocky_estado,
+                       prot_estatico_estado, prot_dinamico_estado,
+                       gp1_medida, gp1_cambio,
+                       recomendaciones, supervisor_metso,
+                       head_entrante, bowl_entrante, altura_final_bowl
+                FROM cambio_hb WHERE chancadora = %s
+                ORDER BY fecha_inicio DESC
+            ''', (ch,))
+            historial = c.fetchall()
+
+            if not historial:
+                plan[ch] = {'sin_datos': True, 'total': 0}
+                continue
+
+            ultimo = dict(historial[0])
+            total = len(historial)
+
+            # ── Socket Liner: medir cada 2 intervenciones ──
+            # Si en el último se midió (hay valores), en el próximo se omite y viceversa
+            sl_vals = [historial[0].get(f'socket_{"b" if j%2==0 else "a"}{j//2+1}') for j in range(12)]
+            sl_midio_ultimo = any(v is not None for v in sl_vals)
+            sl_proxima = 'omitir' if sl_midio_ultimo else 'medir'
+
+            # Promedio SL último
+            sl_nums = [float(v) for v in sl_vals if v is not None]
+            sl_promedio = round(sum(sl_nums)/len(sl_nums), 2) if sl_nums else None
+
+            # ── MFL: verificar si hay nuevos instalados en los últimos 5 meses ──
+            mfl_nuevo_fecha = None
+            meses_mfl_nuevo = None
+            for h in historial:
+                if h.get('mfl_cambio_ahora') == 'SI' and h.get('fecha_inicio'):
+                    fecha_cambio = h['fecha_inicio']
+                    if hasattr(fecha_cambio, 'date'):
+                        fecha_cambio = fecha_cambio
+                    else:
+                        from datetime import date
+                        fecha_cambio = date.fromisoformat(str(fecha_cambio)[:10])
+                    hoy = datetime.now().date()
+                    diff_meses = (hoy.year - fecha_cambio.year) * 12 + (hoy.month - fecha_cambio.month)
+                    mfl_nuevo_fecha = str(fecha_cambio)
+                    meses_mfl_nuevo = diff_meses
+                    break
+
+            if meses_mfl_nuevo is not None and meses_mfl_nuevo < 5:
+                mfl_proxima = 'solo_estado'
+                mfl_restriccion = f'MFL nuevos hace {meses_mfl_nuevo} mes{"es" if meses_mfl_nuevo != 1 else ""} · solo inspección visual'
+            else:
+                mfl_proxima = 'medir'
+                mfl_restriccion = None
+
+            # Promedio MFL último
+            mfl_vals = [ultimo.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g']]
+            mfl_nums = [float(v) for v in mfl_vals if v is not None]
+            mfl_promedio = round(sum(mfl_nums)/len(mfl_nums), 2) if mfl_nums else None
+
+            # GAP Socket último promedio
+            gap_vals = [ultimo.get('socket_gap_0'), ultimo.get('socket_gap_90'),
+                        ultimo.get('socket_gap_180'), ultimo.get('socket_gap_270')]
+            gap_nums = [float(v) for v in gap_vals if v is not None]
+            gap_promedio = round(sum(gap_nums)/len(gap_nums), 2) if gap_nums else None
+
+            plan[ch] = {
+                'sin_datos': False,
+                'total': total,
+                'fecha_ultimo': str(ultimo.get('fecha_inicio',''))[:10],
+                'supervisor': ultimo.get('supervisor_metso',''),
+                'head': ultimo.get('head_entrante',''),
+                'bowl': ultimo.get('bowl_entrante',''),
+                'altura': ultimo.get('altura_final_bowl',''),
+                'recomendaciones': ultimo.get('recomendaciones',''),
+                # Socket Liner
+                'sl_proxima': sl_proxima,
+                'sl_midio_ultimo': sl_midio_ultimo,
+                'sl_promedio': sl_promedio,
+                'sl_gap_interior': ultimo.get('sl_gap_interior'),
+                'sl_gap_exterior': ultimo.get('sl_gap_exterior'),
+                # Socket GAP
+                'gap_promedio': gap_promedio,
+                # MFL
+                'mfl_proxima': mfl_proxima,
+                'mfl_restriccion': mfl_restriccion,
+                'mfl_promedio': mfl_promedio,
+                'meses_mfl_nuevo': meses_mfl_nuevo,
+                'mfl_nuevo_fecha': mfl_nuevo_fecha,
+                # Estado componentes
+                'montura_estado': ultimo.get('montura_barras_estado',''),
+                'prot_estatico': ultimo.get('prot_estatico_estado',''),
+                'prot_dinamico': ultimo.get('prot_dinamico_estado',''),
+            }
+
+        conn.close()
+    except Exception as e:
+        print(f'Error plan mantenimiento: {e}')
+        plan = {ch: {'sin_datos': True, 'total': 0} for ch in chancadoras}
+
+    return render_template('plan.html', chancadoras=chancadoras, plan=plan)
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
