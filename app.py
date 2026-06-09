@@ -1600,7 +1600,7 @@ def plan_mantenimiento():
                        mfl_med_e, mfl_med_f, mfl_med_g, mfl_cambio_ahora,
                        montura_barras_estado, montura_chocky_estado,
                        prot_estatico_estado, prot_dinamico_estado,
-                       gp1_medida, gp1_cambio,
+                       gp1_medida, gp2_medida, gp3_medida, gp4_medida, gp5_medida, gp6_medida, gp1_cambio,
                        recomendaciones, supervisor_metso,
                        head_entrante, bowl_entrante, altura_final_bowl
                 FROM cambio_hb WHERE chancadora = %s
@@ -1687,6 +1687,7 @@ def plan_mantenimiento():
                 'montura_estado': ultimo.get('montura_barras_estado',''),
                 'prot_estatico': ultimo.get('prot_estatico_estado',''),
                 'prot_dinamico': ultimo.get('prot_dinamico_estado',''),
+                **{f'gp{i}_medida': ultimo.get(f'gp{i}_medida') for i in range(1,7)},
             }
 
         conn.close()

@@ -123,7 +123,7 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
     </table>
     </div>
     <div style="padding:8px 16px;background:#f9f9f9;font-size:11px;color:#888;display:flex;gap:16px;flex-wrap:wrap;">
-      <span><span class="badge badge-hacer" style="font-size:10px;">hacer/medir</span> Realizar en esta intervención</span>
+      <span><span class="badge badge-hacer" style="font-size:10px;">medir/inspeccionar</span> Realizar en esta intervención</span>
       <span><span class="badge badge-omitir" style="font-size:10px;">omitir</span> No aplica esta vez</span>
       <span><span class="badge badge-estado" style="font-size:10px;">solo estado</span> Solo inspección visual, sin mediciones</span>
     </div>
@@ -246,16 +246,21 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
           </div>
         </div>
       </div>
-
-      <!-- Guard Pins -->
+     <!-- Guard Pins -->
       <div class="item">
         <div class="item-label"><span class="badge badge-hacer">inspeccionar</span></div>
         <div>
           <div class="item-title">Guard Pins 1–6</div>
           <div class="item-sub">Inspección y medida en cada intervención · Verificar desgaste</div>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+            {% for i in range(1,7) %}
+            {% if p['gp' ~ i ~ '_medida'] %}
+            <span style="background:#f0f0f0;border-radius:6px;padding:2px 8px;font-size:11px;color:#444;">GP{{ i }}: {{ p['gp' ~ i ~ '_medida'] }}</span>
+            {% endif %}
+            {% endfor %}
+          </div>
         </div>
       </div>
-
       <!-- Protectores -->
       <div class="item">
         <div class="item-label"><span class="badge badge-hacer">inspeccionar</span></div>
