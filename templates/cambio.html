@@ -841,10 +841,13 @@ function recuperarBorrador() {
     const saved = localStorage.getItem(FORM_KEY_CAMBIO);
     if (!saved) return;
     const data = JSON.parse(saved);
-    const form = document.getElementById('form-cambio');
     Object.keys(data).forEach(name => {
-        const el = form.querySelector(`[name="${name}"]`);
-        if (el && data[name] !== '') el.value = data[name];
+        const els = document.querySelectorAll(`[name="${name}"]`);
+        els.forEach(el => {
+            if (data[name] !== '' && data[name] !== undefined) {
+                el.value = data[name];
+            }
+        });
     });
 }
 
