@@ -1594,6 +1594,7 @@ def plan_mantenimiento():
                        socket_b1, socket_a1, socket_b2, socket_a2,
                        socket_b3, socket_a3, socket_b4, socket_a4,
                        socket_b5, socket_a5, socket_b6, socket_a6,
+                       socket_med_a, socket_med_b, socket_med_c, socket_med_d,
                        socket_gap_0, socket_gap_90, socket_gap_180, socket_gap_270,
                        mfl_med_a, mfl_med_b, mfl_med_c, mfl_med_d,
                        mfl_med_e, mfl_med_f, mfl_med_g, mfl_cambio_ahora,
