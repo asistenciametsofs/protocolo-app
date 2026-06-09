@@ -828,7 +828,7 @@ const FORM_KEY_CAMBIO = 'protocolo_cambio_borrador';
 
 function guardarBorrador() {
     const data = {};
-    document.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=email], select, textarea').forEach(el => {
+    document.querySelectorAll('input:not([type=file]), select, textarea').forEach(el => {
         if (el.name) data[el.name] = el.value;
     });
     document.querySelectorAll('input[type=checkbox]').forEach(el => {
