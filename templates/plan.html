@@ -205,11 +205,12 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
           </div>
         </div>
       </div>
-
       <!-- MFL -->
-      <div class="item {% if p.mfl_proxima == 'solo_estado' %}warning{% endif %}">
+      <div class="item {% if p.mfl_proxima == 'omitir' %}{% elif p.mfl_proxima == 'solo_estado' %}warning{% endif %}">
         <div class="item-label">
-          {% if p.mfl_proxima == 'solo_estado' %}
+          {% if p.mfl_proxima == 'omitir' %}
+            <span class="badge badge-omitir">omitir</span>
+          {% elif p.mfl_proxima == 'solo_estado' %}
             <span class="badge badge-estado">solo estado</span>
           {% else %}
             <span class="badge badge-hacer">medir</span>
@@ -218,7 +219,9 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
         <div>
           <div class="item-title">
             Main Frame Liners —
-            {% if p.mfl_proxima == 'solo_estado' %}
+            {% if p.mfl_proxima == 'omitir' %}
+              no toca esta intervención
+            {% elif p.mfl_proxima == 'solo_estado' %}
               solo inspección visual, sin mediciones
             {% else %}
               medición completa A-G
@@ -226,7 +229,7 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
           </div>
           <div class="item-sub">
             {% if p.mfl_restriccion %}
-              {{ p.mfl_restriccion }} · Restricción se levanta al cumplir 5 meses
+              {{ p.mfl_restriccion }}
             {% else %}
               Medición completa en cada intervención
             {% endif %}

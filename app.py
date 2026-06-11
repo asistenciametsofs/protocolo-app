@@ -1633,6 +1633,18 @@ def plan_mantenimiento():
             sl_nums = [float(v) for v in sl_vals if v is not None]
             sl_promedio = round(sum(sl_nums)/len(sl_nums), 2) if sl_nums else None
 
+            # Fechas de último cambio MFL (históricas + BD)
+            MFL_FECHA_BASE = {
+                'CR011': '2025-08-01',
+                'CR012': '2025-12-08',
+                'CR013': '2025-12-10',
+                'CR014': '2026-04-21',
+                'CR021': '2026-01-08',
+                'CR022': '2025-09-01',
+                'CR023': '2025-09-11',
+                'CR024': '2026-02-25',
+            }
+
             # ── MFL: lógica por tipo de chancadora ──
             MFL_TIPO = {
                 'CR011': {'tipo': 'Metso Full Solution', 'cada': 4, 'desde_siempre': 20},
@@ -1668,6 +1680,7 @@ def plan_mantenimiento():
 
             mfl_nuevo_fecha = None
             meses_mfl_nuevo = None
+            # Primero buscar en BD
             for h in historial:
                 if dict(h).get('mfl_cambio_ahora') == 'SI' and h.get('fecha_inicio'):
                     fecha_cambio = h['fecha_inicio']
@@ -1678,6 +1691,13 @@ def plan_mantenimiento():
                     meses_mfl_nuevo = (hoy.year - fecha_cambio.year)*12 + (hoy.month - fecha_cambio.month)
                     mfl_nuevo_fecha = str(fecha_cambio)
                     break
+            # Si no hay en BD, usar fecha histórica
+            if mfl_nuevo_fecha is None and ch in MFL_FECHA_BASE:
+                from datetime import date
+                fecha_cambio = date.fromisoformat(MFL_FECHA_BASE[ch])
+                hoy = datetime.now().date()
+                meses_mfl_nuevo = (hoy.year - fecha_cambio.year)*12 + (hoy.month - fecha_cambio.month)
+                mfl_nuevo_fecha = str(fecha_cambio) + ' (histórico)'
 
             # Promedio MFL último
             mfl_vals = [ultimo.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g']]
