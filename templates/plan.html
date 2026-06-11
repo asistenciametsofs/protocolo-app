@@ -106,7 +106,9 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
           </td>
           <td><span class="badge badge-hacer">medir</span></td>
           <td>
-            {% if p.mfl_proxima == 'solo_estado' %}
+            {% if p.mfl_proxima == 'omitir' %}
+              <span class="badge badge-omitir">omitir</span>
+            {% elif p.mfl_proxima == 'solo_estado' %}
               <span class="badge badge-estado">solo estado</span>
             {% else %}
               <span class="badge badge-hacer">medir</span>
@@ -234,6 +236,11 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
               Medición completa en cada intervención
             {% endif %}
             {% if p.mfl_promedio %} · Último promedio: {{ p.mfl_promedio }} mm (mín 9 mm){% endif %}
+          </div>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:#666;">
+            <span style="background:#f0f0f0;border-radius:6px;padding:2px 8px;">Tipo: {{ p.mfl_tipo }}</span>
+            {% if p.mfl_nuevo_fecha %}<span style="background:#f0f0f0;border-radius:6px;padding:2px 8px;">Último cambio: {{ p.mfl_nuevo_fecha }}</span>{% endif %}
+            {% if p.meses_mfl_nuevo is not none %}<span style="background:#f0f0f0;border-radius:6px;padding:2px 8px;">Hace {{ p.meses_mfl_nuevo }} meses</span>{% endif %}
           </div>
         </div>
       </div>
