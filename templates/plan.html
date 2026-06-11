@@ -299,6 +299,60 @@ tr.fila-chancadora.activa td { background:#e8f5e9; }
 
 </div>
 
+<!-- TABLA MFL -->
+  <div class="card">
+    <div class="card-title">Estado de Main Frame Liners por chancadora</div>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Chancadora</th>
+          <th>Tipo MFL</th>
+          <th>Último cambio</th>
+          <th>Duración (meses)</th>
+          <th>Fecha aprox. próximo cambio</th>
+          <th>Meses restantes</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for ch in chancadoras %}
+      {% set p = plan[ch] %}
+      <tr>
+        <td>{{ ch }}</td>
+        <td>{{ p.mfl_tipo if not p.sin_datos else '—' }}</td>
+        <td>{{ p.mfl_nuevo_fecha or '—' }}</td>
+        <td style="text-align:center;">
+          {% if not p.sin_datos %}
+            {% if 'Metálico' in (p.mfl_tipo or '') %}6{% else %}24{% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          {% if not p.sin_datos and p.mfl_nuevo_fecha %}
+            {% set duracion = 6 if 'Metálico' in (p.mfl_tipo or '') else 24 %}
+            {% set meses_rest = duracion - (p.meses_mfl_nuevo or 0) %}
+            {{ p.mfl_nuevo_fecha[:7] }} + {{ duracion }}m
+          {% else %}—{% endif %}
+        </td>
+        <td style="text-align:center;">
+          {% if not p.sin_datos and p.meses_mfl_nuevo is not none %}
+            {% set duracion = 6 if 'Metálico' in (p.mfl_tipo or '') else 24 %}
+            {% set meses_rest = duracion - p.meses_mfl_nuevo %}
+            {% if meses_rest <= 0 %}
+              <span class="badge" style="background:#ffebee;color:#b71c1c;">vencido</span>
+            {% elif meses_rest <= 2 %}
+              <span class="badge" style="background:#fff3e0;color:#e65100;">{{ meses_rest }} mes{{ 'es' if meses_rest > 1 }}</span>
+            {% else %}
+              <span class="badge badge-hacer">{{ meses_rest }} meses</span>
+            {% endif %}
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
 <script>
 function mostrarDetalle(ch) {
   document.querySelectorAll('.detalle').forEach(d => d.classList.remove('visible'));
