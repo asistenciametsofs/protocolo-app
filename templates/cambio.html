@@ -857,7 +857,9 @@ function limpiarBorrador() {
 
 window.addEventListener('load', recuperarBorrador);
 setInterval(guardarBorrador, 5000);
-document.getElementById('form-cambio').addEventListener('submit', limpiarBorrador);
+document.getElementById('form-cambio').addEventListener('submit', function() {
+    setTimeout(limpiarBorrador, 1000);
+});
 </script>
 </body>
 </html>
