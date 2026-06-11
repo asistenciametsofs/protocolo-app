@@ -1586,7 +1586,6 @@ def plan_mantenimiento():
 
         plan = {}
         for ch in chancadoras:
-            # Historial completo ordenado DESC
             c.execute('''
                 SELECT id, fecha_inicio, fecha_registro,
                        sl_cambio_ahora, socket_cambio_ahora, mfl_cambio_ahora, montura_cambio_ahora,
@@ -1615,39 +1614,70 @@ def plan_mantenimiento():
             ultimo = dict(historial[0])
             total = len(historial)
 
-            # ── Socket Liner: medir cada 2 intervenciones ──
-            # Si en el último se midió (hay valores), en el próximo se omite y viceversa
-            sl_vals = [ultimo.get(f'socket_med_{x}') for x in ['a','b','c','d']]
-            sl_midio_ultimo = any(v is not None for v in sl_vals)
-            sl_proxima = 'omitir' if sl_midio_ultimo else 'medir'
+            # ── Socket Liner: medir cada 3 intervenciones ──
+            sl_ultima_medicion = None
+            for idx, h in enumerate(historial):
+                vals = [dict(h).get(f'socket_med_{x}') for x in ['a','b','c','d']]
+                if any(v is not None for v in vals):
+                    sl_ultima_medicion = idx
+                    break
 
-            # Promedio SL último
+            if sl_ultima_medicion is None:
+                sl_proxima = 'medir'
+                sl_desde = None
+            else:
+                sl_proxima = 'medir' if sl_ultima_medicion >= 2 else 'omitir'
+                sl_desde = sl_ultima_medicion
+
+            sl_vals = [ultimo.get(f'socket_med_{x}') for x in ['a','b','c','d']]
             sl_nums = [float(v) for v in sl_vals if v is not None]
             sl_promedio = round(sum(sl_nums)/len(sl_nums), 2) if sl_nums else None
 
-            # ── MFL: verificar si hay nuevos instalados en los últimos 5 meses ──
+            # ── MFL: lógica por tipo de chancadora ──
+            MFL_TIPO = {
+                'CR011': {'tipo': 'Metso Full Solution', 'cada': 4, 'desde_siempre': 20},
+                'CR012': {'tipo': 'Yahle',               'cada': 4, 'desde_siempre': 20},
+                'CR013': {'tipo': 'Yahle',               'cada': 4, 'desde_siempre': 20},
+                'CR014': {'tipo': 'Metálico',            'cada': 2, 'desde_siempre': None},
+                'CR021': {'tipo': 'Metálico',            'cada': 2, 'desde_siempre': None},
+                'CR022': {'tipo': 'Yahle Mejorado',      'cada': 4, 'desde_siempre': 20},
+                'CR023': {'tipo': 'Yahle Mejorado',      'cada': 4, 'desde_siempre': 20},
+                'CR024': {'tipo': 'Metálico',            'cada': 2, 'desde_siempre': None},
+            }
+            cfg = MFL_TIPO.get(ch, {'tipo': 'Desconocido', 'cada': 2, 'desde_siempre': None})
+
+            interv_desde_nuevo = 0
+            for h in historial:
+                if dict(h).get('mfl_cambio_ahora') == 'SI':
+                    break
+                interv_desde_nuevo += 1
+
+            cada = cfg['cada']
+            desde_siempre = cfg['desde_siempre']
+
+            if desde_siempre is not None and interv_desde_nuevo >= desde_siempre:
+                mfl_proxima = 'medir'
+                mfl_restriccion = f'{cfg["tipo"]} · intervención {interv_desde_nuevo} → siempre medir'
+            elif interv_desde_nuevo % cada == 0:
+                mfl_proxima = 'medir'
+                mfl_restriccion = f'{cfg["tipo"]} · intervención {interv_desde_nuevo} → toca medir (cada {cada})'
+            else:
+                proxima_medicion = cada - (interv_desde_nuevo % cada)
+                mfl_proxima = 'omitir'
+                mfl_restriccion = f'{cfg["tipo"]} · próxima medición en {proxima_medicion} intervención{"es" if proxima_medicion > 1 else ""}'
+
             mfl_nuevo_fecha = None
             meses_mfl_nuevo = None
             for h in historial:
-                if h.get('mfl_cambio_ahora') == 'SI' and h.get('fecha_inicio'):
+                if dict(h).get('mfl_cambio_ahora') == 'SI' and h.get('fecha_inicio'):
                     fecha_cambio = h['fecha_inicio']
-                    if hasattr(fecha_cambio, 'date'):
-                        fecha_cambio = fecha_cambio
-                    else:
+                    if not hasattr(fecha_cambio, 'year'):
                         from datetime import date
                         fecha_cambio = date.fromisoformat(str(fecha_cambio)[:10])
                     hoy = datetime.now().date()
-                    diff_meses = (hoy.year - fecha_cambio.year) * 12 + (hoy.month - fecha_cambio.month)
+                    meses_mfl_nuevo = (hoy.year - fecha_cambio.year)*12 + (hoy.month - fecha_cambio.month)
                     mfl_nuevo_fecha = str(fecha_cambio)
-                    meses_mfl_nuevo = diff_meses
                     break
-
-            if meses_mfl_nuevo is not None and meses_mfl_nuevo < 5:
-                mfl_proxima = 'solo_estado'
-                mfl_restriccion = f'MFL nuevos hace {meses_mfl_nuevo} mes{"es" if meses_mfl_nuevo != 1 else ""} · solo inspección visual'
-            else:
-                mfl_proxima = 'medir'
-                mfl_restriccion = None
 
             # Promedio MFL último
             mfl_vals = [ultimo.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g']]
@@ -1671,7 +1701,7 @@ def plan_mantenimiento():
                 'recomendaciones': ultimo.get('recomendaciones',''),
                 # Socket Liner
                 'sl_proxima': sl_proxima,
-                'sl_midio_ultimo': sl_midio_ultimo,
+                'sl_desde': sl_desde,
                 'sl_promedio': sl_promedio,
                 'sl_gap_interior': ultimo.get('sl_gap_interior'),
                 'sl_gap_exterior': ultimo.get('sl_gap_exterior'),
@@ -1680,7 +1710,9 @@ def plan_mantenimiento():
                 # MFL
                 'mfl_proxima': mfl_proxima,
                 'mfl_restriccion': mfl_restriccion,
+                'mfl_tipo': cfg['tipo'],
                 'mfl_promedio': mfl_promedio,
+                'interv_desde_nuevo': interv_desde_nuevo,
                 'meses_mfl_nuevo': meses_mfl_nuevo,
                 'mfl_nuevo_fecha': mfl_nuevo_fecha,
                 # Estado componentes
@@ -1696,7 +1728,6 @@ def plan_mantenimiento():
         plan = {ch: {'sin_datos': True, 'total': 0} for ch in chancadoras}
 
     return render_template('plan.html', chancadoras=chancadoras, plan=plan)
-
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
