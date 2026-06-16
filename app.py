@@ -164,6 +164,8 @@ def guardar_cambio_route():
         'gp4_cambio','gp4_medida','gp4_obs',
         'gp5_cambio','gp5_medida','gp5_obs',
         'gp6_cambio','gp6_medida','gp6_obs',
+        'gp1_medida_nueva','gp2_medida_nueva','gp3_medida_nueva',
+        'gp4_medida_nueva','gp5_medida_nueva','gp6_medida_nueva',
         'prot_estatico_estado','prot_estatico_obs',
         'prot_dinamico_estado','prot_dinamico_obs',
         'prot_din_fuga','prot_din_fuga_obs',
