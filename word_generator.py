@@ -440,9 +440,10 @@ def generar_word_cambio(datos):
 
     # ── DATOS GENERALES ──────────────────────────────────────
     add_section_title_green(doc, '1. DATOS DEL EQUIPO')
-    tabla_dg = doc.add_table(rows=4, cols=4)
+    tabla_dg = doc.add_table(rows=5, cols=4)
     tabla_dg.style = 'Table Grid'
     campos_dg = [
+        ('EQUIPO', 'MP1250'),
         ('CHANCADORA', datos.get('chancadora','')),
         ('SUPERVISOR METSO', datos.get('supervisor_metso','')),
         ('CLIENTE', datos.get('cliente','')),
@@ -463,14 +464,8 @@ def generar_word_cambio(datos):
     add_section_title_green(doc, '2. INSPECCIÓN DE ANILLO DE AJUSTE')
     add_section_title_green(doc, '2.1.Inspección de las roscas del conjunto del anillo de ajuste')
     add_inspeccion_table(doc, [
-        ('Inspeccionar roscas del anillo de fijación, aro de ajuste verificando suciedad, óxido y grasa',
+        ('Inspeccionar roscas del anillo de fijación, anillo de ajuste verificando suciedad, óxido y grasa',
          datos.get('anillo_roscas_estado',''), datos.get('anillo_roscas_obs','')),
-    ], header_color='0F5132')
-
-    add_section_title_green(doc, '2.2.Inspección de motores hidráulicos de regulación del setting')
-    add_inspeccion_table(doc, [
-        ('Realizar medición de Gap entre Aro de transmisión y piñón (7-8 mm)',
-         '', f"Motor 1= {datos.get('gap_aro_v1','-')}\nMotor 2= {datos.get('gap_aro_v2','-')}\nMotor 3= {datos.get('gap_aro_v3','-')}"),
     ], header_color='0F5132')
 
     add_section_title_green(doc, '2.3. Inspección de Clamping Cylinders')
@@ -574,7 +569,7 @@ def generar_word_cambio(datos):
     add_imagen(doc, 'static/imagenes/MFLIns.png')
     add_inspeccion_table(doc, [
         ('Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m', datos.get('mfl_pernos_estado',''), datos.get('mfl_pernos_obs','')),
-        ('Medida de MFL promedio (Mínimo 9mm)', '', str(datos.get('mfl_medida',''))),
+        ('Medida de MFL promedio', '', str(datos.get('mfl_medida',''))),
         ('Medición A/B/C/D/E/F/G/H (mm)', '', f"A:{datos.get('mfl_med_A','-')} B:{datos.get('mfl_med_B','-')} C:{datos.get('mfl_med_C','-')} D:{datos.get('mfl_med_D','-')} E:{datos.get('mfl_med_E','-')} F:{datos.get('mfl_med_F','-')} G:{datos.get('mfl_med_G','-')} H:{datos.get('mfl_med_H','-')}"),
         ('¿Se cambiará en esta inspección los MFL?', datos.get('mfl_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('mfl_cambio_siguiente','NO'), ''),
@@ -593,7 +588,7 @@ def generar_word_cambio(datos):
     add_imagen(doc, 'static/imagenes/MonturasIns.png')
     add_inspeccion_table(doc, [
         ('Verificar estado de las barras de soporte de la montura del contraeje', datos.get('montura_barras_estado',''), datos.get('montura_barras_obs','')),
-        ('Verificar que no se tenga acumulación en las monturas', datos.get('montura_acumulacion_estado',''), datos.get('montura_acumulacion_obs','')),
+        ('Verificar que no se tenga acumulación de material en guarda de contraeje', datos.get('montura_acumulacion_estado',''), datos.get('montura_acumulacion_obs','')),
         ('Verificar si los chocky bar están en buen o se requiere reforzar', datos.get('montura_chocky_estado',''), datos.get('montura_chocky_obs','')),
         ('¿Se cambiará en esta inspección las monturas?', datos.get('montura_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('montura_cambio_siguiente','NO'), ''),
@@ -626,14 +621,14 @@ def generar_word_cambio(datos):
         normal_cell(row.cells[4], datos.get(f'gp{i}_obs',''))
     doc.add_paragraph()
 
-    add_section_title_green(doc, '14. MONTAJE DE PROTECTOR ESTÁTICO')
+    add_section_title_green(doc, '14. INSPECCIÓN DE PROTECTOR ESTÁTICO')
     add_inspeccion_table(doc, [
-        ('Realizar inspección de protector estático', datos.get('prot_estatico_estado',''), datos.get('prot_estatico_obs','')),
+        ('Realizar inspección visual de protector estático', datos.get('prot_estatico_estado',''), datos.get('prot_estatico_obs','')),
     ], header_color='0F5132')
 
-    add_section_title_green(doc, '15. MONTAJE DE PROTECTOR DINÁMICO')
+    add_section_title_green(doc, '15. INSPECCIÓN DE PROTECTOR DINÁMICO')
     add_inspeccion_table(doc, [
-        ('Realizar inspección de protector dinámico', datos.get('prot_dinamico_estado',''), datos.get('prot_dinamico_obs','')),
+        ('Realizar inspección visual de protector dinámico', datos.get('prot_dinamico_estado',''), datos.get('prot_dinamico_obs','')),
         ('¿Hay presencia de fuga de aceite?', datos.get('prot_din_fuga',''), datos.get('prot_din_fuga_obs','')),
     ], header_color='0F5132')
 
