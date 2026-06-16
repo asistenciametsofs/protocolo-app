@@ -575,7 +575,7 @@ def generar_word_cambio(datos):
     add_inspeccion_table(doc, [
         ('Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m', datos.get('mfl_pernos_estado',''), datos.get('mfl_pernos_obs','')),
         ('Medida de MFL promedio (Mínimo 9mm)', '', str(datos.get('mfl_medida',''))),
-        ('Medición A/B/C/D/E/F/G (mm)', '', f"A:{datos.get('mfl_med_A','-')} B:{datos.get('mfl_med_B','-')} C:{datos.get('mfl_med_C','-')} D:{datos.get('mfl_med_D','-')} E:{datos.get('mfl_med_E','-')} F:{datos.get('mfl_med_F','-')} G:{datos.get('mfl_med_G','-')}"),
+        ('Medición A/B/C/D/E/F/G/H (mm)', '', f"A:{datos.get('mfl_med_A','-')} B:{datos.get('mfl_med_B','-')} C:{datos.get('mfl_med_C','-')} D:{datos.get('mfl_med_D','-')} E:{datos.get('mfl_med_E','-')} F:{datos.get('mfl_med_F','-')} G:{datos.get('mfl_med_G','-')} H:{datos.get('mfl_med_H','-')}"),
         ('¿Se cambiará en esta inspección los MFL?', datos.get('mfl_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('mfl_cambio_siguiente','NO'), ''),
     ], header_color='0F5132')
@@ -585,7 +585,7 @@ def generar_word_cambio(datos):
         add_section_title_green(doc, '11. MONTAJE DE MAIN FRAME LINERS NUEVO')
         add_inspeccion_table(doc, [
             ('Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m', datos.get('mfl_mont_pernos',''), datos.get('mfl_mont_pernos_obs','')),
-            ('Medición MFL Nuevos A/B/C/D/E/F/G (mm)', '', f"A:{datos.get('mfl_new_A','-')} B:{datos.get('mfl_new_B','-')} C:{datos.get('mfl_new_C','-')} D:{datos.get('mfl_new_D','-')} E:{datos.get('mfl_new_E','-')} F:{datos.get('mfl_new_F','-')} G:{datos.get('mfl_new_G','-')}"),
+            ('Medición MFL Nuevos A/B/C/D/E/F/G/H (mm)', '', f"A:{datos.get('mfl_new_A','-')} B:{datos.get('mfl_new_B','-')} C:{datos.get('mfl_new_C','-')} D:{datos.get('mfl_new_D','-')} E:{datos.get('mfl_new_E','-')} F:{datos.get('mfl_new_F','-')} G:{datos.get('mfl_new_G','-')} H:{datos.get('mfl_new_H','-')}"),
         ], header_color='0F5132')
 
     # ── SECCIÓN 12 - MONTURAS ────────────────────────────────
@@ -1091,19 +1091,19 @@ def generar_informe_metso(datos):
 
     # 5.3 MFL
     add_para(doc, '5.3 MAIN FRAME LINERS', bold=True, size=10, color=NARANJA, space_before=6)
-    mfl_vals = [d.get(f'mfl_med_{x}') for x in ['A','B','C','D','E','F','G']]
+    mfl_vals = [d.get(f'mfl_med_{x}') for x in ['A','B','C','D','E','F','G','H']]
     mfl_nums = [float(v) for v in mfl_vals if v is not None]
     prom_mfl = round(sum(mfl_nums)/len(mfl_nums), 2) if mfl_nums else '-'
 
-    t_mfl = doc.add_table(rows=2, cols=8)
+    t_mfl = doc.add_table(rows=2, cols=9)
     t_mfl.style = 'Table Grid'
-    for i, h in enumerate(['A','B','C','D','E','F','G','Promedio']):
+    for i, h in enumerate(['A','B','C','D','E','F','G','H','Promedio']):
         cell_write(t_mfl.cell(0,i), h, bold=True, size=9,
                    color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.CENTER)
-    for i, x in enumerate(['A','B','C','D','E','F','G']):
+    for i, x in enumerate(['A','B','C','D','E','F','G','H']):
         cell_write(t_mfl.cell(1,i), str(d.get(f'mfl_med_{x}','') or '-'),
                    size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
-    cell_write(t_mfl.cell(1,7), str(prom_mfl),
+    cell_write(t_mfl.cell(1,8), str(prom_mfl),
                bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER, bg='FFF3CD')
     doc.add_paragraph().paragraph_format.space_after = Pt(2)
 

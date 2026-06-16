@@ -147,11 +147,11 @@ def guardar_cambio_route():
         'ms_F1', 'ms_F2', 'ms_F3', 'ms_F4',
         'mfl_pernos_estado','mfl_pernos_obs','mfl_medida',
         'mfl_med_A','mfl_med_B','mfl_med_C','mfl_med_D',
-        'mfl_med_E','mfl_med_F','mfl_med_G',
+        'mfl_med_E','mfl_med_F','mfl_med_G', 'mfl_med_H',
         'mfl_cambio_ahora','mfl_cambio_siguiente',
         'mfl_mont_pernos','mfl_mont_pernos_obs',
         'mfl_new_A','mfl_new_B','mfl_new_C','mfl_new_D',
-        'mfl_new_E','mfl_new_F','mfl_new_G',
+        'mfl_new_E','mfl_new_F','mfl_new_G', 'mfl_new_H',
         'montura_barras_estado','montura_barras_obs',
         'montura_acumulacion_estado','montura_acumulacion_obs',
         'montura_chocky_estado','montura_chocky_obs',
@@ -863,12 +863,12 @@ def descargar_informe(chancadora):
 
     # 3. MFL
     story.append(Paragraph('3. Main Frame Liners', subtitulo_style))
-    mfl_vals = [d.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g']]
+    mfl_vals = [d.get(f'mfl_med_{x}') for x in ['a','b','c','d','e','f','g','h']]
     mfl_nums = [float(v) for v in mfl_vals if v is not None]
     promedio_mfl = round(sum(mfl_nums)/len(mfl_nums), 2) if mfl_nums else '-'
-    mfl_data = [['A','B','C','D','E','F','G','Promedio']]
-    mfl_data.append([str(d.get(f'mfl_med_{x}') or '-') for x in ['a','b','c','d','e','f','g']] + [str(promedio_mfl)])
-    t_mfl = Table(mfl_data, colWidths=[2*cm]*7 + [2.8*cm])
+    mfl_data = [['A','B','C','D','E','F','G','H','Promedio']]
+    mfl_data.append([str(d.get(f'mfl_med_{x}') or '-') for x in ['a','b','c','d','e','f','g','h']] + [str(promedio_mfl)])
+    t_mfl = Table(mfl_data, colWidths=[1.8*cm]*8 + [2.6*cm])
     t_mfl.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f5132')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
