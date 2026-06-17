@@ -207,7 +207,7 @@ def generar_word_armado(datos):
     tabla_enc.style = 'Table Grid'
     bold_cell(tabla_enc.cell(0,0), 'Metso', size=18, color='000000', bg='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
     bold_cell(tabla_enc.cell(0,1), 'PROTOCOLO ARMADO DE HEAD Y BOWL', size=12, color='FFFFFF', bg='1A3A5C', align=WD_ALIGN_PARAGRAPH.CENTER)
-    fecha = datos.get('fecha_inicio','').replace('-','') if datos.get('fecha_inicio') else ''
+    fecha = str(datos.get('fecha_inicio','')).replace('-','') if datos.get('fecha_inicio') else ''
     folio = f"HB-{fecha}{str(hash(str(datos)))[-5:]}"
     normal_cell(tabla_enc.cell(0,2), folio, size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
     doc.add_paragraph()
