@@ -461,11 +461,17 @@ def generar_word_cambio(datos):
     doc.add_paragraph()
 
     # ── SECCIÓN 2 - ANILLO DE AJUSTE ────────────────────────
-    add_section_title_green(doc, '2. INSPECCIÓN DE ANILLO DE AJUSTE')
-    add_section_title_green(doc, '2.1.Inspección de las roscas del conjunto del anillo de ajuste')
+    add_section_title_green(doc, '2. INSPECCIÓN DE ANILLO DE AJUSTE Y ANILLO DE SUJECIÓN')
+    add_section_title_green(doc, '2.1.Inspección de las roscas del conjunto del anillo de ajuste y sujeción')
     add_inspeccion_table(doc, [
-        ('Inspeccionar roscas del anillo de fijación, anillo de ajuste verificando suciedad, óxido y grasa',
+        ('Realizar inspección del estado de las roscas del anillo de ajuste y anillo de sujeción',
          datos.get('anillo_roscas_estado',''), datos.get('anillo_roscas_obs','')),
+        ('De encontrar algún defecto, aplicar NDT y mostrar evidencia fotográfica',
+         '', datos.get('anillo_ndt_obs','')),
+        ('Gap de los hilos del anillo de ajuste y anillo de sujeción - peineta (mm)',
+         '', str(datos.get('anillo_gap_peineta','') or '-')),
+        ('Inspección del estado y conexionado de los cilindros de sujeción',
+         datos.get('anillo_cilindros_estado',''), datos.get('anillo_cilindros_obs','')),
     ], header_color='0F5132')
 
     add_section_title_green(doc, '2.3. Inspección de Clamping Cylinders')
@@ -477,8 +483,14 @@ def generar_word_cambio(datos):
     # ── SECCIÓN 3 - SOCKET LINER ─────────────────────────────
     add_section_title_green(doc, '3. INSPECCIÓN DE SOCKET LINER')
     add_inspeccion_table(doc, [
-        ('Inspección de ranuras de aceite del Socket Liner',
+        ('Verificar el estado del socket liner',
          datos.get('sl_ranuras_estado',''), datos.get('sl_ranuras_obs','')),
+    ], header_color='0F5132')
+
+    add_inspeccion_table(doc, [
+        ('Verificar presencia de fisuras en el socket liner', datos.get('sl_fisuras_estado',''), datos.get('sl_fisuras_obs','')),
+        ('Verificar presencia de deformaciones en el socket liner', datos.get('sl_deformaciones_estado',''), datos.get('sl_deformaciones_obs','')),
+        ('Verificar que los canales se encuentren libres sin obstrucción', datos.get('sl_canales_estado',''), datos.get('sl_canales_obs','')),
     ], header_color='0F5132')
     add_imagen(doc, 'static/imagenes/socket_liner1.png')
 
@@ -489,19 +501,9 @@ def generar_word_cambio(datos):
         ('D', datos.get('socket_med_d','')),
     ], header_color='D1E7DD')
 
-    add_inspeccion_table(doc, [
-        ('El asentamiento de la bola del Head en el socket liner es correcto',
-         datos.get('sl_asentamiento_estado',''), datos.get('sl_asentamiento_obs','')),
-        ('GAP Interior entre Socket y Socket Liner (mm)', '', str(datos.get('sl_gap_interior',''))),
-        ('GAP Exterior entre Socket y Socket Liner (mm)', '', str(datos.get('sl_gap_exterior',''))),
-    ], header_color='0F5132')
-
     add_imagen(doc, 'static/imagenes/gap_socket_liner1.png')
 
     add_inspeccion_table(doc, [
-        ('Verificar presencia de fisuras en el socket liner', datos.get('sl_fisuras_estado',''), datos.get('sl_fisuras_obs','')),
-        ('Verificar presencia de deformaciones en el socket liner', datos.get('sl_deformaciones_estado',''), datos.get('sl_deformaciones_obs','')),
-        ('Verificar que los canales se encuentren libres sin obstrucción', datos.get('sl_canales_estado',''), datos.get('sl_canales_obs','')),
         ('¿Se cambiará en esta intervención el Socket Liner?', datos.get('sl_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('sl_cambio_siguiente','NO'), ''),
     ], header_color='0F5132')
@@ -527,11 +529,8 @@ def generar_word_cambio(datos):
     add_section_title_green(doc, '6. INSPECCIÓN DE SOCKET')
     add_imagen(doc, 'static/imagenes/InspeccionSocket.png')
     add_inspeccion_table(doc, [
-        ('Inspeccionar estado de socket (fisuras)', datos.get('socket_fisuras_estado',''), datos.get('socket_fisuras_obs','')),
+        ('Realizar inspección visual del socket (fisuras, golpes, rayones, sin obstrucciones, sin desprendimientos, sin deformaciones, etc)', datos.get('socket_fisuras_estado',''), datos.get('socket_fisuras_obs','')),
         ('Inspeccionar los pernos del Socket', datos.get('socket_pernos_estado',''), datos.get('socket_pernos_obs','')),
-        ('Inspeccionar ranuras sin obstrucciones', datos.get('socket_ranuras_estado',''), datos.get('socket_ranuras_obs','')),
-        ('Inspeccionar si presenta deformaciones (zona de los pines)', datos.get('socket_deform_estado',''), datos.get('socket_deform_obs','')),
-        ('Inspeccionar si presenta fisuras u otro daño en los canales de lubricación', datos.get('socket_canales_estado',''), datos.get('socket_canales_obs','')),
         ('GAP Socket-Mainshaft 0°', '', str(datos.get('socket_gap_0',''))),
         ('GAP Socket-Mainshaft 90°', '', str(datos.get('socket_gap_90',''))),
         ('GAP Socket-Mainshaft 180°', '', str(datos.get('socket_gap_180',''))),
@@ -569,6 +568,7 @@ def generar_word_cambio(datos):
     add_imagen(doc, 'static/imagenes/MFLIns.png')
     add_inspeccion_table(doc, [
         ('Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m', datos.get('mfl_pernos_estado',''), datos.get('mfl_pernos_obs','')),
+        ('¿Se aplicó wearing compound en las paredes de los MFL?', datos.get('mfl_wearing_estado',''), datos.get('mfl_wearing_obs','')),
         ('Medida de MFL promedio', '', str(datos.get('mfl_medida',''))),
         ('Medición A/B/C/D/E/F/G/H (mm)', '', f"A:{datos.get('mfl_med_A','-')} B:{datos.get('mfl_med_B','-')} C:{datos.get('mfl_med_C','-')} D:{datos.get('mfl_med_D','-')} E:{datos.get('mfl_med_E','-')} F:{datos.get('mfl_med_F','-')} G:{datos.get('mfl_med_G','-')} H:{datos.get('mfl_med_H','-')}"),
         ('¿Se cambiará en esta inspección los MFL?', datos.get('mfl_cambio_ahora','NO'), ''),
@@ -589,7 +589,7 @@ def generar_word_cambio(datos):
     add_inspeccion_table(doc, [
         ('Verificar estado de las barras de soporte de la montura del contraeje', datos.get('montura_barras_estado',''), datos.get('montura_barras_obs','')),
         ('Verificar que no se tenga acumulación de material en guarda de contraeje', datos.get('montura_acumulacion_estado',''), datos.get('montura_acumulacion_obs','')),
-        ('Verificar si los chocky bar están en buen o se requiere reforzar', datos.get('montura_chocky_estado',''), datos.get('montura_chocky_obs','')),
+        ('Verificar el estado de los choky bar. ¿Necesitan refuerzo?', datos.get('montura_chocky_estado',''), datos.get('montura_chocky_obs','')),
         ('¿Se cambiará en esta inspección las monturas?', datos.get('montura_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('montura_cambio_siguiente','NO'), ''),
     ], header_color='0F5132')
@@ -603,8 +603,15 @@ def generar_word_cambio(datos):
     
 
     # ── SECCIÓN 13-15 - EXCÉNTRICA ───────────────────────────
-    add_section_title_green(doc, 'INSPECCIÓN DE CONJUNTO DE EXCÉNTRICA')
-    add_section_title_green(doc, '13. INSPECCIÓN DE GUARD PIN')
+    add_section_title_green(doc, 'INSPECCIÓN DE GUARDA ESTÁTICA / GUARDA DINÁMICA / GUARD PIN')
+    
+    add_section_title_green(doc, '13. INSPECCIÓN DE PROTECTOR ESTÁTICO')
+    add_inspeccion_table(doc, [
+        ('Verificar el estado de la protección estática', datos.get('prot_estatico_estado',''), datos.get('prot_estatico_obs','')),
+        ('Medida promedio espesor protección estática (mm)', '', str(datos.get('prot_estatico_espesor','') or '-')),
+    ], header_color='0F5132')
+
+    add_section_title_green(doc, '14. INSPECCIÓN DE GUARD PIN')
     tabla_gp = doc.add_table(rows=1, cols=5)
     tabla_gp.style = 'Table Grid'
     bold_cell(tabla_gp.cell(0,0), 'Guard Pin', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
@@ -621,14 +628,10 @@ def generar_word_cambio(datos):
         normal_cell(row.cells[4], datos.get(f'gp{i}_obs',''))
     doc.add_paragraph()
 
-    add_section_title_green(doc, '14. INSPECCIÓN DE PROTECTOR ESTÁTICO')
-    add_inspeccion_table(doc, [
-        ('Realizar inspección visual de protector estático', datos.get('prot_estatico_estado',''), datos.get('prot_estatico_obs','')),
-    ], header_color='0F5132')
-
     add_section_title_green(doc, '15. INSPECCIÓN DE PROTECTOR DINÁMICO')
     add_inspeccion_table(doc, [
-        ('Realizar inspección visual de protector dinámico', datos.get('prot_dinamico_estado',''), datos.get('prot_dinamico_obs','')),
+        ('Verificar el estado de la protección dinámica', datos.get('prot_dinamico_estado',''), datos.get('prot_dinamico_obs','')),
+        ('Medida desgaste protección dinámica (mm)', '', str(datos.get('prot_dinamico_desgaste','') or '-')),
         ('¿Hay presencia de fuga de aceite?', datos.get('prot_din_fuga',''), datos.get('prot_din_fuga_obs','')),
     ], header_color='0F5132')
 
@@ -639,6 +642,34 @@ def generar_word_cambio(datos):
             ('Realizar inspección de sellos U-T', datos.get('sello_ut_estado',''), datos.get('sello_ut_obs','')),
         ], header_color='0F5132')
         add_imagen(doc, 'static/imagenes/SelloUT.png')
+    
+    # ── CAMBIO DE EXCÉNTRICA ─────────────────────────────────
+    if datos.get('excentrica_cambio') == 'SI':
+        add_section_title_green(doc, 'CAMBIO DE EXCÉNTRICA')
+        add_banner(doc, 'SI SE CAMBIA EXCÉNTRICA', 'FFC107')
+        add_inspeccion_table(doc, [
+            ('Verificar el estado del protector dinámico', datos.get('exc_prot_din_estado',''), datos.get('exc_prot_din_obs','')),
+            ('Verificar el estado de los 10 pernos M20 del protector dinámico', datos.get('exc_pernos_prot_estado',''), datos.get('exc_pernos_prot_obs','')),
+            ('Verificar el estado de los sellos U-T', datos.get('exc_sellos_estado',''), datos.get('exc_sellos_obs','')),
+            ('Distancia vertical entre caras superiores de la excéntrica y main shaft (mm)', '', str(datos.get('exc_distancia_vertical','') or '-')),
+            ('Realizar inspección de la bocina de la excéntrica', datos.get('exc_bocina_estado',''), datos.get('exc_bocina_obs','')),
+        ], header_color='0F5132')
+        add_metro_tabla(doc, 'Metrología superficie interior excéntrica (mm) — cada 150mm o 6"', [
+            ('1', f"A:{datos.get('exc_metro_a1','-')} C:{datos.get('exc_metro_c1','-')}", f"B:{datos.get('exc_metro_b1','-')} D:{datos.get('exc_metro_d1','-')}"),
+            ('2', f"A:{datos.get('exc_metro_a2','-')} C:{datos.get('exc_metro_c2','-')}", f"B:{datos.get('exc_metro_b2','-')} D:{datos.get('exc_metro_d2','-')}"),
+            ('3', f"A:{datos.get('exc_metro_a3','-')} C:{datos.get('exc_metro_c3','-')}", f"B:{datos.get('exc_metro_b3','-')} D:{datos.get('exc_metro_d3','-')}"),
+        ])
+        add_inspeccion_table(doc, [
+            ('Realizar inspección del lower thrust bearing', datos.get('exc_lower_tb_estado',''), datos.get('exc_lower_tb_obs','')),
+            ('Verificar estado de los 08 pernos M20 del lower thrust bearing', datos.get('exc_pernos_lower_estado',''), datos.get('exc_pernos_lower_obs','')),
+            ('Realizar inspección del upper thrust bearing', datos.get('exc_upper_tb_estado',''), datos.get('exc_upper_tb_obs','')),
+            ('Verificar estado de los 08 pernos M20 del upper thrust bearing', datos.get('exc_pernos_upper_estado',''), datos.get('exc_pernos_upper_obs','')),
+            ('Verificar estado de las 08 rampas de lubricación del lower thrust bearing', datos.get('exc_rampas_estado',''), datos.get('exc_rampas_obs','')),
+            ('Verificar estado de los 02 tornillos tensores M36 excéntrica-engranaje', datos.get('exc_tornillos_estado',''), datos.get('exc_tornillos_obs','')),
+            ('Medición del back lash (mm)', '', str(datos.get('exc_backlash','') or '-')),
+            ('Medidas de las lainas instaladas', '', datos.get('exc_lainas','')),
+        ], header_color='0F5132')
+
     # ── SISTEMAS AUXILIARES ──────────────────────────────────
     if datos.get('sistemas_aux_inspeccion') == 'SI':
         add_section_title_green(doc, 'INSPECCIÓN DE SISTEMAS AUXILIARES')
@@ -684,6 +715,17 @@ def generar_word_cambio(datos):
         add_section_title_green(doc, 'Sistema de Lubricación')
         add_inspeccion_table(doc, [
             ('Cedazo de tanque de lubricación', datos.get('lubri_cedazo_estado',''), datos.get('lubri_cedazo_obs','')),
+            ('Inspección de la junta de expansión', datos.get('lubri_junta_estado',''), datos.get('lubri_junta_obs','')),
+            ('Inspección de líneas de lubricación del motor hidráulico', datos.get('lubri_lineas_estado',''), datos.get('lubri_lineas_obs','')),
+            ('Diferencia de presión del banco de filtros (psi)', '', str(datos.get('lubri_presion_filtros','') or '-')),
+        ], header_color='0F5132')
+
+        # ── CHUTE DE ALIMENTACIÓN ────────────────────────────────
+        add_section_title_green(doc, 'INSPECCIÓN DE CHUTE DE ALIMENTACIÓN')
+        add_inspeccion_table(doc, [
+            ('Inspección del estado del faldón del chute', datos.get('chute_faldon_estado',''), datos.get('chute_faldon_obs','')),
+            ('Inspección del estado de los liners del chute', datos.get('chute_liners_estado',''), datos.get('chute_liners_obs','')),
+            ('Inspección del estado de la placa base del chute', datos.get('chute_placa_estado',''), datos.get('chute_placa_obs','')),
         ], header_color='0F5132')
 
     # ── FOTOS ────────────────────────────────────────────────

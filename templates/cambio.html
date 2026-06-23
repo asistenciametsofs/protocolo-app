@@ -79,7 +79,6 @@
         <div class="seccion-titulo">1. Datos Generales</div>
         <div class="grid2">
             <div><label>Fecha inicio</label><input type="date" name="fecha_inicio" onchange="actualizarFolio()"></div>
-            <div><label>Fecha fin</label><input type="date" name="fecha_termino"></div>
         </div>
         <div class="grid2">
             <div><label>Supervisor Cliente</label><input type="text" name="supervisor_cliente" placeholder="Nombre"></div>
@@ -172,16 +171,33 @@
 
     <!-- 2. INSPECCIÓN DE ANILLO DE AJUSTE -->
     <div class="seccion">
-        <div class="seccion-titulo">2. Inspección de Anillo de Ajuste</div>
-        <div class="subseccion-titulo">2.1.Inspección de las roscas del conjunto del anillo de ajuste</div>
+        <div class="seccion-titulo">2. Inspección de anillo de ajuste y anillo de sujeción</div>
+        <div class="subseccion-titulo">2.1.Inspección de las roscas del conjunto del anillo de ajuste y sujeción</div>
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
             <tr>
-                <td class="paso-desc">Inspeccionar roscas del anillo de fijación, aro de ajuste verificando suciedad, óxido y grasa</td>
+                <td class="paso-desc">Realizar inspección del estado de las roscas del anillo de ajuste y anillo de sujeción</td>
                 <td><select name="anillo_roscas_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option><option>No se inspecciono</option></select></td>
                 <td><input class="obs-input" name="anillo_roscas_obs" placeholder="Aquí los hallazgos encontrados"></td>
-                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_anillo1')">📷 Foto</button><input type="file" name="foto_anillo1" id="foto_anillo1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_anillo1"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc">De encontrar algún defecto, aplicar NDT y mostrar la evidencia fotográfica de las dimensiones (alto, largo, profundidad)</td>
+                <td></td>
+                <td><input class="obs-input" name="anillo_ndt_obs" placeholder="Hallazgos..."></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_anillo2')">📷 Foto</button><input type="file" name="foto_anillo2" id="foto_anillo2" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_anillo2"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc">Gap de los hilos del anillo de ajuste y anillo de sujeción usando el patrón (peineta) - Ref. 1 punto</td>
+                <td></td>
+                <td><input type="number" step="0.01" class="obs-input" name="anillo_gap_peineta" placeholder="0"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_anillo3')">📷 Foto</button><input type="file" name="foto_anillo3" id="foto_anillo3" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_anillo3"></td>
+            </tr>
+            <tr>
+                <td class="paso-desc">Realizar inspección del estado y conexionado de los cilindros de sujeción</td>
+                <td><select name="anillo_cilindros_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td>
+                <td><input class="obs-input" name="anillo_cilindros_obs" placeholder="Aquí los hallazgos encontrados"></td>
+                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_anillo4')">📷 Foto</button><input type="file" name="foto_anillo4" id="foto_anillo4" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_anillo4"></td>
             </tr>
             </tbody>
         </table>
@@ -208,11 +224,19 @@
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
             <tr>
-                <td class="paso-desc">Inspección de ranuras de aceite del Socket Liner</td>
+                <td class="paso-desc">Verificar el estado del socket liner</td>
                 <td><select name="sl_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td>
                 <td><input class="obs-input" name="sl_ranuras_obs" placeholder="Aquí los hallazgos encontrados"></td>
                 <td></td>
             </tr>
+            </tbody>
+        </table>
+        <table class="tabla-pasos" style="margin-top:10px">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Verificar presencia de fisuras en el socket liner</td><td><select name="sl_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_fisuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl3')">📷 Foto</button><input type="file" name="foto_sl3" id="foto_sl3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl3"></td></tr>         
+            <tr><td class="paso-desc">Verificar presencia de deformaciones en el socket liner</td><td><select name="sl_deformaciones_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_deformaciones_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            <tr><td class="paso-desc">Verificar que los canales se encuentren libres sin obstrucción</td><td><select name="sl_canales_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_canales_obs" placeholder="Hallazgos..."></td><td></td></tr>
             </tbody>
         </table>
         <img src="/static/imagenes/socket_liner1.png" class="img-tecnica" alt="socket liner">
@@ -223,17 +247,6 @@
             <tr><td class="metro-label">B</td><td><input type="number" step="0.01" name="socket_med_b"></td></tr>
             <tr><td class="metro-label">C</td><td><input type="number" step="0.01" name="socket_med_c"></td></tr>
             <tr><td class="metro-label">D</td><td><input type="number" step="0.01" name="socket_med_d"></td></tr>
-        </table>
-        <table class="tabla-pasos" style="margin-top:10px">
-            <thead><tr><th>Verificaciones</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr>
-                <td class="paso-desc">El asentamiento de la bola del Head en el socket liner es correcto</td>
-                <td><select name="sl_asentamiento_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td>
-                <td><input class="obs-input" name="sl_asentamiento_obs" placeholder="Aquí los hallazgos encontrados"></td>
-                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl2')">📷 Foto</button><input type="file" name="foto_sl2" id="foto_sl2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl2"></td>
-            </tr>
-            </tbody>
         </table>
         <div class="grid2" style="margin-top:8px">
             <div>
@@ -252,14 +265,6 @@
             </div>
         </div>
         <img src="/static/imagenes/gap_socket_liner1.png" class="img-tecnica" alt="GAP Socket Liner">
-        <table class="tabla-pasos" style="margin-top:10px">
-            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr><td class="paso-desc">Verificar presencia de fisuras en el socket liner</td><td><select name="sl_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_fisuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl3')">📷 Foto</button><input type="file" name="foto_sl3" id="foto_sl3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl3"></td></tr>         
-            <tr><td class="paso-desc">Verificar presencia de deformaciones en el socket liner</td><td><select name="sl_deformaciones_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_deformaciones_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            <tr><td class="paso-desc">Verificar que los canales se encuentren libres sin obstrucción</td><td><select name="sl_canales_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_canales_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            </tbody>
-        </table>
         <div class="grid2" style="margin-top:10px">
             <div>
                 <label>¿Se cambiará en esta intervención el Socket Liner?</label>
@@ -323,11 +328,8 @@
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
-            <tr><td class="paso-desc">Inspeccionar estado de socket (fisuras)</td><td><select name="socket_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_fisuras_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk1')">📷 Foto</button><input type="file" name="foto_sk1" id="foto_sk1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk1"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección visual del socket (fisuras, golpes, rayones, sin obstrucciones, sin desprendimientos, sin deformaciones, etc)</td><td><select name="socket_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_fisuras_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk1')">📷 Foto</button><input type="file" name="foto_sk1" id="foto_sk1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk1"></td></tr>
             <tr><td class="paso-desc">Inspeccionar los pernos del Socket</td><td><select name="socket_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_pernos_obs" placeholder="Cantidad: 04 pernos M36 x 110"></td><td></td></tr>
-            <tr><td class="paso-desc">Inspeccionar ranuras sin obstrucciones</td><td><select name="socket_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_ranuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sk3')">📷 Foto</button><input type="file" name="foto_sk3" id="foto_sk3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sk3"></td></tr>
-            <tr><td class="paso-desc">Inspeccionar si presenta deformaciones (zona de los pines)</td><td><select name="socket_deform_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_deform_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            <tr><td class="paso-desc">Inspeccionar si presenta fisuras y otro daño en los canales de lubricación</td><td><select name="socket_canales_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_canales_obs" placeholder="Hallazgos..."></td><td></td></tr>
             </tbody>
         </table>
         <img src="/static/imagenes/MedidaSocket.png" class="img-tecnica" alt="Medida Socket GAP">
@@ -436,6 +438,7 @@
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
             <tr><td class="paso-desc">Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m</td><td><select name="mfl_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="mfl_pernos_obs" placeholder="Indicar medidas de fisura"></td><td>
+            <tr><td class="paso-desc">¿Se aplicó wearing compound en las paredes de los MFL?</td><td><select name="mfl_wearing_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="mfl_wearing_obs" placeholder="Observaciones..."></td><td></td></tr>
             <tr><td class="paso-desc">Medida de MFL promedio (Mínimo 9mm)</td><td></td><td><input class="obs-input" name="mfl_medida" placeholder="Medida en mm"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mfl2')">📷 Foto</button><input type="file" name="foto_mfl2" id="foto_mfl2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mfl2"></td></tr>
             </tbody>
         </table>
@@ -496,7 +499,7 @@
             <tbody>
             <tr><td class="paso-desc">Verificar estado de las barras de soporte de la montura del contraeje</td><td><select name="montura_barras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_barras_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont1')">📷 Foto</button><input type="file" name="foto_mont1" id="foto_mont1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont1"></td></tr>
             <tr><td class="paso-desc">Verificar que no se tenga acumulación de material en guarda de contraeje</td><td><select name="montura_acumulacion_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_acumulacion_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont2')">📷 Foto</button><input type="file" name="foto_mont2" id="foto_mont2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont2"></td></tr>
-            <tr><td class="paso-desc">Verificar si los chocky bar están en buen o realizar refuerzo</td><td><select name="montura_chocky_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_chocky_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont3')">📷 Foto</button><input type="file" name="foto_mont3" id="foto_mont3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont3"></td></tr>
+            <tr><td class="paso-desc">Verificar el estado de los choky bar. ¿Necesitan refuerzo?</td><td><select name="montura_chocky_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="montura_chocky_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mont3')">📷 Foto</button><input type="file" name="foto_mont3" id="foto_mont3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mont3"></td></tr>
             </tbody>
         </table>
         <div class="grid2" style="margin-top:10px">
@@ -527,8 +530,17 @@
 
     <!-- INSPECCIÓN DE CONJUNTO DE EXCÉNTRICA -->
     <div class="seccion">
-        <div class="seccion-titulo">Inspección de Conjunto de Excéntrica</div>
-        <div class="subseccion-titulo">13. Inspección de Guard Pin</div>
+        <div class="seccion-titulo">Inspección de Guarda dinámica / Guarda estática / Guard Pin</div>
+        <div class="subseccion-titulo">13. Inspección de Protector Estático</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Verificar el estado de la protección estática</td><td><select name="prot_estatico_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="prot_estatico_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_pe1')">📷 Foto</button><input type="file" name="foto_pe1" id="foto_pe1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_pe1"></td></tr>
+            <tr><td class="paso-desc">Indicar la medida promedio del espesor de la protección estática</td><td></td><td><input type="number" step="0.01" class="obs-input" name="prot_estatico_espesor" placeholder="mm"></td><td></td></tr>
+            </tbody>
+        </table>
+
+        <div class="subseccion-titulo">14. Inspección de Guard Pin</div>
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>¿Se cambió?</th><th>Medida guard pin actual o saliente(mm)</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
@@ -556,18 +568,12 @@
             </table>
         </div>
         
-        <div class="subseccion-titulo">14. Inspección de Protector Estático</div>
-        <table class="tabla-pasos">
-            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr><td class="paso-desc">Realizar inspección visual de protector estático</td><td><select name="prot_estatico_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="prot_estatico_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_pe1')">📷 Foto</button><input type="file" name="foto_pe1" id="foto_pe1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_pe1"></td></tr>
-            </tbody>
-        </table>
         <div class="subseccion-titulo">15. Inspección de Protector Dinámico</div>
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
-            <tr><td class="paso-desc">Realizar inspección visual de protector dinámico</td><td><select name="prot_dinamico_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="prot_dinamico_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_pd1')">📷 Foto</button><input type="file" name="foto_pd1" id="foto_pd1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_pd1"></td></tr>
+            <tr><td class="paso-desc">Verificar el estado de la protección dinámica</td><td><select name="prot_dinamico_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="prot_dinamico_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_pd1')">📷 Foto</button><input type="file" name="foto_pd1" id="foto_pd1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_pd1"></td></tr>
+            <tr><td class="paso-desc">Indicar la medida de desgaste de la protección dinámica (ref. superficie existente)</td><td></td><td><input type="number" step="0.01" class="obs-input" name="prot_dinamico_desgaste" placeholder="mm"></td><td></td></tr>
             <tr><td class="paso-desc">¿Hay presencia de fuga de aceite?</td><td><select name="prot_din_fuga" class="estado-select" onchange="toggleCondicional(this,'contrapeso_sec')"><option value="NO">NO</option><option value="SI">SÍ</option></select></td><td><input class="obs-input" name="prot_din_fuga_obs" placeholder="Hallazgos..."></td><td></td></tr>
             </tbody>
         </table>
@@ -585,6 +591,53 @@
                 </tbody>
             </table>
             <img src="/static/imagenes/SelloUT.png" class="img-tecnica" alt="Sello UT" style="max-width:175px;">
+        </div>
+    </div>
+
+
+    <!-- CAMBIO DE EXCÉNTRICA -->
+    <div class="seccion">
+        <div class="seccion-titulo">17. Cambio de Excéntrica</div>
+        <div class="grid2" style="margin-bottom:10px">
+            <div>
+                <label>¿Se cambiará la excéntrica en esta intervención?</label>
+                <select name="excentrica_cambio" class="estado-select" onchange="toggleCondicional(this,'excentrica_sec')">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
+        </div>
+        <div class="condicional" id="excentrica_sec">
+            <div class="banner-amarillo">SI SE CAMBIA EXCÉNTRICA</div>
+            <table class="tabla-pasos">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Verificar el estado del protector dinámico</td><td><select name="exc_prot_din_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_prot_din_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_exc1')">📷 Foto</button><input type="file" name="foto_exc1" id="foto_exc1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_exc1"></td></tr>
+                <tr><td class="paso-desc">Verificar el estado de los 10 pernos M20 del protector dinámico</td><td><select name="exc_pernos_prot_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_pernos_prot_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc">Verificar el estado de los sellos U-T</td><td><select name="exc_sellos_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_sellos_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc">Verificar la distancia vertical entre las caras superiores de la excéntrica y el main shaft</td><td></td><td><input type="number" step="0.01" class="obs-input" name="exc_distancia_vertical" placeholder="Medida mm"></td><td></td></tr>
+                <tr><td class="paso-desc">Realizar inspección de la bocina de la excéntrica</td><td><select name="exc_bocina_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_bocina_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_exc2')">📷 Foto</button><input type="file" name="foto_exc2" id="foto_exc2" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_exc2"></td></tr>
+                </tbody>
+            </table>
+            <div class="metro-label" style="margin-top:10px">Metrología superficie interior de la excéntrica (mm) — 0° / 90° / 180° / 270° cada 150mm o 6"</div>
+            <table class="metro-tabla">
+                <tr><th>Punto</th><th>A (0°)</th><th>B (90°)</th><th>C (180°)</th><th>D (270°)</th></tr>
+                <tr><td class="metro-label">1</td><td><input type="number" step="0.01" name="exc_metro_a1"></td><td><input type="number" step="0.01" name="exc_metro_b1"></td><td><input type="number" step="0.01" name="exc_metro_c1"></td><td><input type="number" step="0.01" name="exc_metro_d1"></td></tr>
+                <tr><td class="metro-label">2</td><td><input type="number" step="0.01" name="exc_metro_a2"></td><td><input type="number" step="0.01" name="exc_metro_b2"></td><td><input type="number" step="0.01" name="exc_metro_c2"></td><td><input type="number" step="0.01" name="exc_metro_d2"></td></tr>
+                <tr><td class="metro-label">3</td><td><input type="number" step="0.01" name="exc_metro_a3"></td><td><input type="number" step="0.01" name="exc_metro_b3"></td><td><input type="number" step="0.01" name="exc_metro_c3"></td><td><input type="number" step="0.01" name="exc_metro_d3"></td></tr>
+            </table>
+            <table class="tabla-pasos" style="margin-top:10px">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc">Realizar inspección del lower thrust bearing</td><td><select name="exc_lower_tb_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_lower_tb_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_exc3')">📷 Foto</button><input type="file" name="foto_exc3" id="foto_exc3" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_exc3"></td></tr>
+                <tr><td class="paso-desc">Verificar el estado de los 08 pernos M20 del lower thrust bearing</td><td><select name="exc_pernos_lower_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_pernos_lower_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc">Realizar inspección del upper thrust bearing</td><td><select name="exc_upper_tb_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_upper_tb_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_exc4')">📷 Foto</button><input type="file" name="foto_exc4" id="foto_exc4" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_exc4"></td></tr>
+                <tr><td class="paso-desc">Verificar el estado de los 08 pernos M20 del upper thrust bearing</td><td><select name="exc_pernos_upper_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_pernos_upper_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc">Verificar el estado de las 08 rampas de lubricación del lower thrust bearing</td><td><select name="exc_rampas_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_rampas_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc">Verificar el estado de los 02 tornillos tensores M36 entre la excéntrica y el engranaje</td><td><select name="exc_tornillos_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="exc_tornillos_obs" placeholder="Hallazgos..."></td><td></td></tr>
+                <tr><td class="paso-desc">Medición del back lash</td><td></td><td><input type="number" step="0.01" class="obs-input" name="exc_backlash" placeholder="Medida mm"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_exc5')">📷 Foto</button><input type="file" name="foto_exc5" id="foto_exc5" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_exc5"></td></tr>
+                <tr><td class="paso-desc">¿Cuáles son las medidas de las lainas instaladas?</td><td></td><td><input class="obs-input" name="exc_lainas" placeholder="Hallazgos..."></td><td></td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
      
@@ -728,10 +781,28 @@
                 <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
                 <tbody>
                 <tr>
-                    <td class="paso-desc">Inspección de cedazo de tanque de lubricación</td>
+                    <td class="paso-desc">Realizar inspección de tanque de lubricación</td>
                     <td><select name="lubri_cedazo_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
-                    <td><input class="obs-input" name="lubri_cedazo_obs" placeholder="Hallazgos..."></td>
+                    <td><input class="obs-input" name="lubri_cedazo_obs" placeholder="Se identifica rastros de polvo y sedimentos en las estructura interna del tanque..."></td>
                     <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lub1')">📷 Foto</button><input type="file" name="foto_lub1" id="foto_lub1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lub1"></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Realizar una inspección de la junta de expansión</td>
+                    <td><select name="lubri_junta_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="lubri_junta_obs" placeholder="Hallazgos..."></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Realizar inspección de las líneas de lubricación del motor hidráulico</td>
+                    <td><select name="lubri_lineas_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td>
+                    <td><input class="obs-input" name="lubri_lineas_obs" placeholder="Hallazgos..."></td>
+                    <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_lub2')">📷 Foto</button><input type="file" name="foto_lub2" id="foto_lub2" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_lub2"></td>
+                </tr>
+                <tr>
+                    <td class="paso-desc">Diferencia de presión del banco de filtros</td>
+                    <td></td>
+                    <td><input type="number" step="0.1" class="obs-input" name="lubri_presion_filtros" placeholder="psi"></td>
+                    <td></td>
                 </tr>
                 </tbody>
             </table>
@@ -739,6 +810,19 @@
         </div>
     </div>
 
+    <!-- INSPECCIÓN DE CHUTE DE ALIMENTACIÓN -->
+    <div class="seccion">
+        <div class="seccion-titulo">Inspección de Chute de Alimentación</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc">Realizar inspección del estado del faldón del chute</td><td><select name="chute_faldon_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="chute_faldon_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_chute1')">📷 Foto</button><input type="file" name="foto_chute1" id="foto_chute1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_chute1"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección del estado de los liners del chute</td><td><select name="chute_liners_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="chute_liners_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_chute2')">📷 Foto</button><input type="file" name="foto_chute2" id="foto_chute2" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_chute2"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección del estado de la placa base del chute</td><td><select name="chute_placa_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="chute_placa_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_chute3')">📷 Foto</button><input type="file" name="foto_chute3" id="foto_chute3" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_chute3"></td></tr>
+            </tbody>
+        </table>
+    </div>
+    
         <!-- CIERRE -->
         <div class="seccion">
             <div class="seccion-titulo">Cierre del Protocolo</div>
@@ -760,6 +844,7 @@
             </div>
             <div class="grid2">
                 <div><label>Altura Final Bowl (pulgadas)</label><input type="number" step="0.01" name="altura_final_bowl" placeholder="Ej: 21.53"></div>
+                <div><label>Fecha fin</label><input type="date" name="fecha_termino"></div>
             </div>
             <label>Recomendaciones para la siguiente intervención</label>
             <textarea class="obs-grande" name="recomendaciones" placeholder="Escribir observaciones y recomendaciones..."></textarea>
