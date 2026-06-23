@@ -254,9 +254,7 @@ def generar_word_armado(datos):
         ('07.Verificar el estado del seguro alambre de los pernos', datos.get('ub_paso5_estado',''), datos.get('ub_paso5_obs','')),
         ('¿Requiere cambio de Upper Bushing?', datos.get('upper_bushing_cambio','NO'), ''),
     ])
-    if datos.get('upper_bushing_cambio','NO') == 'NO':
-        add_banner(doc, 'NO REQUIERE CAMBIO (REALIZAR METROLOGÍA)', '28A745')
-    else:
+    if datos.get('upper_bushing_cambio','NO') == 'SI':
         add_banner(doc, 'SI REQUIERE CAMBIO (ENVIAR A REPARACIÓN)', 'FFC107')
     add_metro_tabla(doc, '08. Control de Mediciones Upper Bushing', [
         ('A1/B1', datos.get('upper_A1',''), datos.get('upper_B1','')),
@@ -264,15 +262,6 @@ def generar_word_armado(datos):
         ('A3/B3', datos.get('upper_A3',''), datos.get('upper_B3','')),
     ])
     add_imagen(doc, 'static/imagenes/upper_bushing.png')
-    if datos.get('upper_bushing_cambio','NO') == 'SI':
-        add_inspeccion_table(doc, [
-            ('08. Control dimensional del upper bushing  instalado', '', datos.get('ub_paso15_obs','')),
-        ])
-        add_metro_tabla(doc, '08.Control de Mediciones Upper Bushing Nuevo', [
-            ('A1/B1', datos.get('upper_A1',''), datos.get('upper_B1','')),
-            ('A2/B2', datos.get('upper_A2',''), datos.get('upper_B2','')),
-            ('A3/B3', datos.get('upper_A3',''), datos.get('upper_B3','')),
-        ])
 
     add_section_title(doc, 'INSPECCIÓN DE LOWER BUSHING')
     add_inspeccion_table(doc, [
@@ -281,10 +270,8 @@ def generar_word_armado(datos):
         ('17. Inspeccionar el estado de los 16 pernos de fijación M20 x 70 — 325 N.m (240 Lb.ft)', datos.get('lb_paso17_estado',''), datos.get('lb_paso17_obs','')),
         ('18. ¿Requiere cambio de Lower Bushing?', datos.get('lower_bushing_cambio','NO'), ''),
     ])
-    if datos.get('lower_bushing_cambio','NO') == 'NO':
-        add_banner(doc, 'NO REQUIERE CAMBIO (REALIZAR METROLOGÍA)', '28A745')
-    else:
-        add_banner(doc, 'SI REQUIERE CAMBIO (REALIZAR MONTAJE Y METROLOGÍA)', 'FFC107')
+    if datos.get('lower_bushing_cambio','NO') == 'SI':
+        add_banner(doc, 'SI REQUIERE CAMBIO (ENVIAR A REPARACIÓN)', 'FFC107')
     add_metro_tabla(doc, 'Control de Mediciones Bocina de la Excéntrica', [
         ('A1/B1', datos.get('lower_A1',''), datos.get('lower_B1','')),
         ('A2/B2', datos.get('lower_A2',''), datos.get('lower_B2','')),
@@ -294,17 +281,6 @@ def generar_word_armado(datos):
         ('A6/B6', datos.get('lower_A6',''), datos.get('lower_B6','')),
     ])
     add_imagen(doc, 'static/imagenes/lower_bushing.png')
-    if datos.get('lower_bushing_cambio','NO') == 'SI':
-        add_subsection_title(doc, 'Montaje de Lower Bushing')
-
-        add_metro_tabla(doc, 'Control de Mediciones Lower Bushing Nuevo', [
-            ('A1/B1', datos.get('lower_A1',''), datos.get('lower_B1','')),
-            ('A2/B2', datos.get('lower_A2',''), datos.get('lower_B2','')),
-            ('A3/B3', datos.get('lower_A3',''), datos.get('lower_B3','')),
-            ('A4/B4', datos.get('lower_A4',''), datos.get('lower_B4','')),
-            ('A5/B5', datos.get('lower_A5',''), datos.get('lower_B5','')),
-            ('A6/B6', datos.get('lower_A6',''), datos.get('lower_B6','')),
-        ])
 
     add_section_title(doc, 'CARTER')
     add_inspeccion_table(doc, [
