@@ -234,43 +234,44 @@ def generar_word_armado(datos):
     doc.add_paragraph()
 
     add_section_title(doc, 'SECCIÓN 1 - HEAD')
+    add_section_title(doc, 'HEAD BALL')
+    add_inspeccion_table(doc, [
+        ('01. Inspección visual de la superficie del Head Ball (golpes, rayones, huellas, etc.)', datos.get('hb_paso28_estado',''), datos.get('hb_paso28_obs','')),
+        ('02. Inspeccionar estado de la cabeza de pernos de sujeción cuando el Head esté desarmado', datos.get('hb_paso29_estado',''), datos.get('hb_paso29_obs','')),
+        ('03. ¿Requiere cambio de Head Ball?', datos.get('head_ball_cambio','NO'), ''),
+    ])
+    if datos.get('head_ball_cambio','NO') == 'NO':
+        add_banner(doc, 'NO REQUIERE CAMBIO', '28A745')
+    else:
+        add_banner(doc, 'SI REQUIERE CAMBIO (ENVIAR A REPARACIÓN)', 'FFC107')
+
     add_section_title(doc, 'INSPECCIÓN DE UPPER BUSHING')
     add_inspeccion_table(doc, [
-        ('1. Realizar la inspección visual de la superficie del upper bushing (golpes, rayones, huellas, etc.)', datos.get('ub_paso1_estado',''), datos.get('ub_paso1_obs','')),
-        ('1.1.1. De encontrar desprendimiento de material, fisuras u otro similar aplicar NDT y evidenciar mediante imágenes', '', datos.get('ub_paso2_obs','')),
-        ('Inspeccionar el estado de las 4 chavetas y los 6 pernos M16 de fijación de cada una.', datos.get('ub_paso3_estado',''), datos.get('ub_paso3_obs','')),
-        ('Verificar el Torque de los pernos a 260 N.m (192 Lb.ft), y evidenciar con el serial number de la herramienta.', datos.get('ub_paso4_estado',''), datos.get('ub_paso4_obs','')),
-        ('Verificar el estado del seguro alambre de los pernos', datos.get('ub_paso5_estado',''), datos.get('ub_paso5_obs','')),
+        ('04. Realizar la inspección visual de la superficie del upper bushing (golpes, rayones, huellas, etc.)', datos.get('ub_paso1_estado',''), datos.get('ub_paso1_obs','')),
+        ('04.1. De encontrar desprendimiento de material, fisuras u otro similar aplicar NDT y evidenciar mediante imágenes', '', datos.get('ub_paso2_obs','')),
+        ('05.Inspeccionar el estado de las 4 chavetas y los 6 pernos M16 de fijación de cada una.', datos.get('ub_paso3_estado',''), datos.get('ub_paso3_obs','')),
+        ('06.Verificar el Torque de los pernos a 260 N.m (192 Lb.ft), y evidenciar con el serial number de la herramienta.', datos.get('ub_paso4_estado',''), datos.get('ub_paso4_obs','')),
+        ('07.Verificar el estado del seguro alambre de los pernos', datos.get('ub_paso5_estado',''), datos.get('ub_paso5_obs','')),
         ('¿Requiere cambio de Upper Bushing?', datos.get('upper_bushing_cambio','NO'), ''),
     ])
     if datos.get('upper_bushing_cambio','NO') == 'NO':
         add_banner(doc, 'NO REQUIERE CAMBIO (REALIZAR METROLOGÍA)', '28A745')
     else:
-        add_banner(doc, 'SI REQUIERE CAMBIO (REALIZAR MONTAJE Y METROLOGÍA)', 'FFC107')
-    add_metro_tabla(doc, 'Control de Mediciones Upper Bushing', [
+        add_banner(doc, 'SI REQUIERE CAMBIO (ENVIAR A REPARACIÓN)', 'FFC107')
+    add_metro_tabla(doc, '08. Control de Mediciones Upper Bushing', [
         ('A1/B1', datos.get('upper_A1',''), datos.get('upper_B1','')),
         ('A2/B2', datos.get('upper_A2',''), datos.get('upper_B2','')),
         ('A3/B3', datos.get('upper_A3',''), datos.get('upper_B3','')),
     ])
     add_imagen(doc, 'static/imagenes/upper_bushing.png')
     if datos.get('upper_bushing_cambio','NO') == 'SI':
-        add_subsection_title(doc, 'Montaje de Upper Bushing')
         add_inspeccion_table(doc, [
-            ('7. Indicar si durante el retiro de la bocina se encontraron pernos cizallados u otros', '', datos.get('ub_paso7_obs','')),
-            ('8. Inspección visual del estado de la superficie del alojamiento de la bocina - upper hd bsh', '', datos.get('ub_paso8_obs','')),
-            ('9. De encontrar alguna anomalía como rajaduras aplicar NDT - líquidos penetrantes y evidenciar', '', datos.get('ub_paso9_obs','')),
-            ('10. Control dimensional del alojamiento del upper bushing', '', datos.get('ub_paso10_obs','')),
-            ('11. Enfriar la bocina al menos 20°C debajo de la T. ambiente', '', datos.get('ub_paso11_obs','')),
-            ('12. Realizar el centrado de las 04 chavetas tipo "L" durante el montaje', '', datos.get('ub_paso12_obs','')),
-            ('13. Ajustar 06 pernos M16x60 en cada chaveta tipo "L" — Torque 260 N.m', '', datos.get('ub_paso13_obs','')),
-            ('14. Asegurar los pernos ajustados con el alambre de ajuste', '', datos.get('ub_paso14_obs','')),
-            ('15. Control dimensional del upper bushing nuevo instalado', '', datos.get('ub_paso15_obs','')),
+            ('08. Control dimensional del upper bushing  instalado', '', datos.get('ub_paso15_obs','')),
         ])
-        add_imagen(doc, 'static/imagenes/chavetas.png')
-        add_metro_tabla(doc, 'Control de Mediciones Upper Bushing Nuevo', [
-            ('A1/B1', datos.get('upper_nuevo_A1',''), datos.get('upper_nuevo_B1','')),
-            ('A2/B2', datos.get('upper_nuevo_A2',''), datos.get('upper_nuevo_B2','')),
-            ('A3/B3', datos.get('upper_nuevo_A3',''), datos.get('upper_nuevo_B3','')),
+        add_metro_tabla(doc, '08.Control de Mediciones Upper Bushing Nuevo', [
+            ('A1/B1', datos.get('upper_A1',''), datos.get('upper_B1','')),
+            ('A2/B2', datos.get('upper_A2',''), datos.get('upper_B2','')),
+            ('A3/B3', datos.get('upper_A3',''), datos.get('upper_B3','')),
         ])
 
     add_section_title(doc, 'INSPECCIÓN DE LOWER BUSHING')
@@ -295,37 +296,14 @@ def generar_word_armado(datos):
     add_imagen(doc, 'static/imagenes/lower_bushing.png')
     if datos.get('lower_bushing_cambio','NO') == 'SI':
         add_subsection_title(doc, 'Montaje de Lower Bushing')
-        add_inspeccion_table(doc, [
-            ('21. Realizar el corte de la bocina durante su desmontaje', '', datos.get('lb_paso21_obs','')),
-            ('22. Inspección visual del estado de la superficie del alojamiento de la bocina', '', datos.get('lb_paso22_obs','')),
-            ('22.1. De encontrar anomalías como rajaduras aplicar NDT - líquidos penetrantes', '', datos.get('lb_paso221_obs','')),
-            ('24. Enfriar la bocina al menos 18°C debajo de la T. ambiente', '', datos.get('lb_paso24_obs','')),
-            ('25. Cambiar pernos y arandelas a instalar', '', datos.get('lb_paso25_obs','')),
-            ('26. Reemplazar los 16 pernos M20x70 con sus arandelas y Loctite Threadlocker 325 N.m', '', datos.get('lb_paso26_obs','')),
-        ])
-        add_metro_tabla(doc, 'Control de Mediciones Lower Bushing Nuevo', [
-            ('A1/B1', datos.get('lower_nuevo_A1',''), datos.get('lower_nuevo_B1','')),
-            ('A2/B2', datos.get('lower_nuevo_A2',''), datos.get('lower_nuevo_B2','')),
-            ('A3/B3', datos.get('lower_nuevo_A3',''), datos.get('lower_nuevo_B3','')),
-            ('A4/B4', datos.get('lower_nuevo_A4',''), datos.get('lower_nuevo_B4','')),
-            ('A5/B5', datos.get('lower_nuevo_A5',''), datos.get('lower_nuevo_B5','')),
-            ('A6/B6', datos.get('lower_nuevo_A6',''), datos.get('lower_nuevo_B6','')),
-        ])
 
-    add_section_title(doc, 'HEAD BALL')
-    add_inspeccion_table(doc, [
-        ('28. Inspección visual de la superficie del Head Ball (golpes, rayones, huellas, etc.)', datos.get('hb_paso28_estado',''), datos.get('hb_paso28_obs','')),
-        ('29. Inspeccionar estado de la cabeza de pernos de sujeción cuando el Head esté desarmado', datos.get('hb_paso29_estado',''), datos.get('hb_paso29_obs','')),
-        ('30. ¿Requiere cambio de Head Ball?', datos.get('head_ball_cambio','NO'), ''),
-    ])
-    if datos.get('head_ball_cambio','NO') == 'NO':
-        add_banner(doc, 'NO REQUIERE CAMBIO', '28A745')
-    else:
-        add_banner(doc, 'SI REQUIERE CAMBIO (REALIZAR SIGUIENTES PASOS)', 'FFC107')
-        add_inspeccion_table(doc, [
-            ('31. Enfriar Head Ball hasta diferencia de 47°C con el Head', datos.get('hb_paso31_real',''), datos.get('hb_paso31_obs','')),
-            ('32. Ajuste de los 04 pernos M20 x 200 a 170 N.m (125 Lb.ft)', datos.get('hb_paso32_real',''), datos.get('hb_paso32_obs','')),
-            ('33. Aplicar Silastic - Dow Corning 732 en el conjunto perno arandela', datos.get('hb_paso33_real',''), datos.get('hb_paso33_obs','')),
+        add_metro_tabla(doc, 'Control de Mediciones Lower Bushing Nuevo', [
+            ('A1/B1', datos.get('lower_A1',''), datos.get('lower_B1','')),
+            ('A2/B2', datos.get('lower_A2',''), datos.get('lower_B2','')),
+            ('A3/B3', datos.get('lower_A3',''), datos.get('lower_B3','')),
+            ('A4/B4', datos.get('lower_A4',''), datos.get('lower_B4','')),
+            ('A5/B5', datos.get('lower_A5',''), datos.get('lower_B5','')),
+            ('A6/B6', datos.get('lower_A6',''), datos.get('lower_B6','')),
         ])
 
     add_section_title(doc, 'CARTER')
@@ -409,11 +387,14 @@ def generar_word_armado(datos):
     p_fecha.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     p_fecha.runs[0].font.size = Pt(8)
     p_fecha.runs[0].font.color.rgb = RGBColor(0x99, 0x99, 0x99)
-
+ 
     os.makedirs('reportes', exist_ok=True)
-    nombre = f'reportes/Armado_HB_{datos.get("equipo","X")}_{datetime.now().strftime("%Y%m%d_%H%M")}.docx'
+    id_head = datos.get('id_head','') or 'X'
+    id_bowl = datos.get('id_bowl','') or 'X'
+    nombre = f'reportes/Armado_HB_{id_head}_{id_bowl}_{datetime.now().strftime("%Y%m%d_%H%M")}.docx'
     doc.save(nombre)
     return nombre
+
 
 
 # ══════════════════════════════════════════════════════════════
