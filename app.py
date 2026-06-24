@@ -1882,7 +1882,6 @@ def planificacion():
         if fecha_str not in semanas[semana]['dias']:
             semanas[semana]['dias'][fecha_str] = {'cambios': [], 'armados': []}
         semanas[semana]['dias'][fecha_str]['cambios'] += data['cambios']
-        semanas[semana]['dias'][fecha_str]['armados'] += data['armados']
 
 
 # Personal por semana
@@ -1899,6 +1898,9 @@ def planificacion():
         data['armados_lineas'] = []
         if tiene_l1: data['armados_lineas'].append('L1')
         if tiene_l2: data['armados_lineas'].append('L2')
+        for semana, sdata in semanas.items():
+            if fecha_str in sdata['dias']:
+                sdata['dias'][fecha_str]['armados_lineas'] = data['armados_lineas']
         
         data['personal_cambio'] = n_c * 12
         data['personal_armado'] = n_a * 9

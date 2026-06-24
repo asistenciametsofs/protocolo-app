@@ -26,7 +26,7 @@
         .chip { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin: 2px; }
         .chip-cambio { background: #ffe0e0; color: #dc3545; }
         .chip-armado { background: #e0eaff; color: #0d6efd; }
-        .dia-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 12px; }
+        .dia-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 12px; flex-wrap: wrap; }
         .dia-fecha { min-width: 90px; font-weight: bold; color: #555; }
         .alerta-rojo { border-left-color: #dc3545; }
         .alerta-amarillo { border-left-color: #ffc107; }
@@ -46,9 +46,9 @@
     <a href="/" class="btn-back">← Volver al inicio</a>
 
     <div class="tab-btns">
-        <button class="tab-btn activo" onclick="showTab('semanas')">📆 Por Semana</button>
-        <button class="tab-btn" onclick="showTab('dias')">📅 Por Día</button>
-        <button class="tab-btn" onclick="showTab('resumen')">📊 Resumen</button>
+        <button class="tab-btn activo" onclick="showTab('semanas', this)">📆 Por Semana</button>
+        <button class="tab-btn" onclick="showTab('dias', this)">📅 Por Día</button>
+        <button class="tab-btn" onclick="showTab('resumen', this)">📊 Resumen</button>
     </div>
 
     <!-- TAB SEMANAS -->
@@ -57,7 +57,7 @@
             {% for semana, data in semanas.items() %}
             <div class="semana-card {% if data.personal_total > 20 %}alerta-rojo{% elif data.personal_total > 10 %}alerta-amarillo{% endif %}">
                 <div class="semana-titulo">📅 Semana {{ semana }}</div>
-                
+
                 {% if data.cambios %}
                 <div style="margin-bottom:6px">
                     <strong>🔧 Cambios:</strong>
@@ -77,7 +77,7 @@
                 <div class="dia-row">
                     <span class="dia-fecha">{{ fecha_str }}</span>
                     {% for ch in ddata.cambios %}<span class="chip chip-cambio">🔧 {{ ch }}</span>{% endfor %}
-                    {% for ch in ddata.armados %}<span class="chip chip-armado">🔩 {{ ch }}</span>{% endfor %}
+                    {% for l in ddata.armados_lineas %}<span class="chip chip-armado">🔩 Armado {{ l }}</span>{% endfor %}
                 </div>
                 {% endfor %}
 
@@ -117,9 +117,9 @@
                 {% for fecha_str, data in dias.items() %}
                 <tr>
                     <td><strong>{{ fecha_str }}</strong></td>
-                    <td>{% for ch in data.cambios %}<span class="chip chip-cambio">{{ ch }}</span>{% endfor %}</td>
-                    <td>{% for ch in data.armados %}<span class="chip chip-armado">{{ ch }}</span>{% endfor %}</td>
-                    <td><strong>{{ data.cambios|length * 12 + data.armados|length * 9 }}</strong> personas</td>
+                    <td>{% for ch in data.cambios %}<span class="chip chip-cambio">{{ ch }}</span>{% endfor %}{% if not data.cambios %}-{% endif %}</td>
+                    <td>{% for l in data.armados_lineas %}<span class="chip chip-armado">Armado {{ l }}</span>{% endfor %}{% if not data.armados_lineas %}-{% endif %}</td>
+                    <td><strong>{{ data.cambios|length * 12 + data.armados_lineas|length * 9 }}</strong> personas</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -138,8 +138,6 @@
                         <th>Último Cambio</th>
                         <th>Días Prom.</th>
                         <th>Próximas fechas cambio</th>
-                        <th>Días Prom. Armado</th>
-                        <th>Próximas fechas armado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,13 +153,6 @@
                         {% endfor %}
                         {% if not d.fechas_cambio %}-{% endif %}
                     </td>
-                    <td>{{ d.duracion_prom_arm or '-' }}</td>
-                    <td>
-                        {% for f in d.fechas_armado %}
-                        <span class="chip chip-armado">{{ f }}</span>
-                        {% endfor %}
-                        {% if not d.fechas_armado %}-{% endif %}
-                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -171,11 +162,11 @@
 </div>
 
 <script>
-function showTab(tab) {
+function showTab(tab, btn) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('activo'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
     document.getElementById('tab-' + tab).classList.add('activo');
-    event.target.classList.add('activo');
+    btn.classList.add('activo');
 }
 </script>
 </body>
