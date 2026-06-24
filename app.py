@@ -1884,10 +1884,22 @@ def planificacion():
         semanas[semana]['dias'][fecha_str]['cambios'] += data['cambios']
         semanas[semana]['dias'][fecha_str]['armados'] += data['armados']
 
-    # Personal por semana
+
+# Personal por semana
+    L1 = ['CR011','CR012','CR013','CR014']
+    L2 = ['CR021','CR022','CR023','CR024']
+    
     for semana, data in semanas.items():
         n_c = len(data['cambios'])
-        n_a = len(data['armados'])
+        # Armados: 1 por línea que tenga cambios esa semana
+        tiene_l1 = any(ch in L1 for ch in data['cambios'])
+        tiene_l2 = any(ch in L2 for ch in data['cambios'])
+        n_a = (1 if tiene_l1 else 0) + (1 if tiene_l2 else 0)
+        
+        data['armados_lineas'] = []
+        if tiene_l1: data['armados_lineas'].append('L1')
+        if tiene_l2: data['armados_lineas'].append('L2')
+        
         data['personal_cambio'] = n_c * 12
         data['personal_armado'] = n_a * 9
         data['personal_total'] = data['personal_cambio'] + data['personal_armado']

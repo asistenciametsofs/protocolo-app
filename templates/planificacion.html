@@ -64,10 +64,11 @@
                     {% for ch in data.cambios %}<span class="chip chip-cambio">{{ ch }}</span>{% endfor %}
                 </div>
                 {% endif %}
-                {% if data.armados %}
+
+                {% if data.armados_lineas %}
                 <div style="margin-bottom:8px">
                     <strong>🔩 Armados:</strong>
-                    {% for ch in data.armados %}<span class="chip chip-armado">{{ ch }}</span>{% endfor %}
+                    {% for l in data.armados_lineas %}<span class="chip chip-armado">Armado {{ l }}</span>{% endfor %}
                 </div>
                 {% endif %}
 
