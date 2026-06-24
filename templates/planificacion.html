@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificación de Mantenimiento</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #0f5132; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #0f5132; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-title { font-size: 15px; font-weight: bold; color: #0f5132; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #d1e7dd; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: #0f5132; color: white; padding: 8px 6px; text-align: left; }
+        td { padding: 7px 6px; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .badge-cambio { background: #dc3545; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .badge-armado { background: #0d6efd; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .semana-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #0f5132; }
+        .semana-titulo { font-size: 14px; font-weight: bold; color: #0f5132; margin-bottom: 10px; }
+        .personal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .personal-kpi { background: #f0f4ff; border-radius: 8px; padding: 10px; text-align: center; }
+        .personal-kpi-label { font-size: 11px; color: #666; }
+        .personal-kpi-valor { font-size: 20px; font-weight: bold; color: #0f5132; }
+        .alerta-rojo { border-left-color: #dc3545; }
+        .alerta-amarillo { border-left-color: #ffc107; }
+        .chip { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin: 2px; }
+        .chip-cambio { background: #ffe0e0; color: #dc3545; }
+        .chip-armado { background: #e0eaff; color: #0d6efd; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>📅 Planificación de Mantenimiento — Próximos 5 meses</h1>
+</div>
+<div class="container">
+    <a href="/" class="btn-back">← Volver al inicio</a>
+
+    <!-- TABLA RESUMEN POR CHANCADORA -->
+    <div class="card">
+        <div class="card-title">📊 Pronóstico por Chancadora</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Chancadora</th>
+                    <th>Último Cambio</th>
+                    <th>Días Prom.</th>
+                    <th>Próx. Cambio</th>
+                    <th>Último Armado</th>
+                    <th>Días Prom.</th>
+                    <th>Próx. Armado</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ch in chancadoras %}
+            {% set d = datos_plan[ch] %}
+            <tr>
+                <td><strong>{{ ch }}</strong></td>
+                <td>{{ d.ultimo_cambio }}</td>
+                <td>{{ d.duracion_promedio or '-' }}</td>
+                <td>
+                    {% if d.proxima_fecha != '-' %}
+                        {% if d.proxima_fecha <= hoy %}
+                            <span style="color:#dc3545;font-weight:bold">⚠️ {{ d.proxima_fecha }}</span>
+                        {% else %}
+                            <span style="color:#0f5132">{{ d.proxima_fecha }}</span>
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ d.ultimo_armado }}</td>
+                <td>{{ d.duracion_prom_arm or '-' }}</td>
+                <td>
+                    {% if d.proxima_fecha_arm != '-' %}
+                        {% if d.proxima_fecha_arm <= hoy %}
+                            <span style="color:#dc3545;font-weight:bold">⚠️ {{ d.proxima_fecha_arm }}</span>
+                        {% else %}
+                            <span style="color:#0d6efd">{{ d.proxima_fecha_arm }}</span>
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SEMANAS -->
+    <div class="card-title" style="margin-bottom:12px; color:#0f5132; font-weight:bold; font-size:15px;">📆 Actividades por Semana</div>
+
+    {% if semanas %}
+        {% for semana, data in semanas.items() %}
+        <div class="semana-card {% if data.personal_total > 20 %}alerta-rojo{% elif data.personal_total > 10 %}alerta-amarillo{% endif %}">
+            <div class="semana-titulo">📅 Semana {{ semana }}</div>
+            
+            {% if data.cambios %}
+            <div style="margin-bottom:6px">
+                <strong>Cambios:</strong>
+                {% for ch in data.cambios %}
+                <span class="chip chip-cambio">🔧 {{ ch }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if data.armados %}
+            <div style="margin-bottom:6px">
+                <strong>Armados:</strong>
+                {% for ch in data.armados %}
+                <span class="chip chip-armado">🔩 {{ ch }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="personal-grid">
+                <div class="personal-kpi">
+                    <div class="personal-kpi-label">Personal Cambios</div>
+                    <div class="personal-kpi-valor" style="color:#dc3545">{{ data.personal_cambio }}</div>
+                    <div style="font-size:10px;color:#888;margin-top:2px">{{ data.detalle_cambio }}</div>
+                </div>
+                <div class="personal-kpi">
+                    <div class="personal-kpi-label">Personal Armados</div>
+                    <div class="personal-kpi-valor" style="color:#0d6efd">{{ data.personal_armado }}</div>
+                    <div style="font-size:10px;color:#888;margin-top:2px">{{ data.detalle_armado }}</div>
+                </div>
+                <div class="personal-kpi">
+                    <div class="personal-kpi-label">Total Personal</div>
+                    <div class="personal-kpi-valor">{{ data.personal_total }}</div>
+                    <div style="font-size:10px;color:#888;margin-top:2px">personas requeridas</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align:center;padding:24px;color:#999;font-size:13px">
+            No hay actividades proyectadas en los próximos 5 meses con datos suficientes.
+        </div>
+    {% endif %}
+
+</div>
+</body>
+</html>
