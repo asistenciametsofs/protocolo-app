@@ -119,7 +119,13 @@
                     <td><strong>{{ fecha_str }}</strong></td>
                     <td>{% for ch in data.cambios %}<span class="chip chip-cambio">{{ ch }}</span>{% endfor %}{% if not data.cambios %}-{% endif %}</td>
                     <td>{% for l in data.armados_lineas %}<span class="chip chip-armado">Armado {{ l }}</span>{% endfor %}{% if not data.armados_lineas %}-{% endif %}</td>
-                    <td><strong>{{ data.cambios|length * 12 + data.armados_lineas|length * 9 }}</strong> personas</td>
+                    <td>
+                        <strong>{{ data.cambios|length * 12 + data.armados_lineas|length * 9 }}</strong> personas<br>
+                        <span style="font-size:10px;color:#888">
+                        {% if data.cambios|length > 0 %}{{ data.cambios|length * 3 }} sold, {{ data.cambios|length }} riggers, {{ data.cambios|length }} op.grúa, {{ data.cambios|length * 7 }} mec (cambio){% endif %}
+                        {% if data.armados_lineas|length > 0 %} | {{ data.armados_lineas|length * 2 }} sold, {{ data.armados_lineas|length }} op.grúa, {{ data.armados_lineas|length }} riggers, {{ data.armados_lineas|length * 5 }} mec (armado){% endif %}
+                        </span>
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>
