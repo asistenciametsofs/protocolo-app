@@ -1784,12 +1784,13 @@ def planificacion():
     c = conn.cursor()
     
     chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+    L1 = ['CR011','CR012','CR013','CR014']
+    L2 = ['CR021','CR022','CR023','CR024']
     datos_plan = {}
     hoy = datetime.now()
     fin = hoy + timedelta(days=150)
     
     for ch in chancadoras:
-        # Fechas de cambio históricas
         c.execute('''SELECT fecha_inicio FROM cambio_hb 
                      WHERE chancadora = %s AND fecha_inicio IS NOT NULL
                      ORDER BY fecha_inicio ASC''', (ch,))
@@ -1813,43 +1814,13 @@ def planificacion():
                 if proxima >= hoy:
                     fechas_cambio_proyectadas.append(proxima.strftime('%Y-%m-%d'))
                 proxima += timedelta(days=duracion_promedio)
-
-        # Armados históricos
-        c.execute('''SELECT fecha_inicio FROM armado_hb
-                     WHERE cliente IS NOT NULL AND fecha_inicio IS NOT NULL
-                     ORDER BY fecha_inicio ASC''', )
-        fechas_arm_all = [r[0] for r in c.fetchall()]
-
-        c.execute('''SELECT fecha_inicio FROM armado_hb
-                     WHERE fecha_inicio IS NOT NULL
-                     ORDER BY fecha_inicio ASC''')
-        fechas_arm = [r[0] for r in c.fetchall()]
-
-        duracion_prom_arm = None
-        fechas_armado_proyectadas = []
-        ultimo_armado = fechas_arm[-1] if fechas_arm else None
-
-        if len(fechas_arm) >= 2:
-            durs = []
-            for i in range(1, len(fechas_arm)):
-                d1 = datetime.combine(fechas_arm[i-1], datetime.min.time()) if hasattr(fechas_arm[i-1], 'year') else datetime.strptime(str(fechas_arm[i-1]), '%Y-%m-%d')
-                d2 = datetime.combine(fechas_arm[i], datetime.min.time()) if hasattr(fechas_arm[i], 'year') else datetime.strptime(str(fechas_arm[i]), '%Y-%m-%d')
-                durs.append((d2 - d1).days)
-            duracion_prom_arm = round(sum(durs) / len(durs))
-            ul = datetime.combine(ultimo_armado, datetime.min.time()) if hasattr(ultimo_armado, 'year') else datetime.strptime(str(ultimo_armado), '%Y-%m-%d')
-            proxima = ul + timedelta(days=duracion_prom_arm)
-            while proxima <= fin:
-                if proxima >= hoy:
-                    fechas_armado_proyectadas.append(proxima.strftime('%Y-%m-%d'))
-                proxima += timedelta(days=duracion_prom_arm)
+        elif len(fechas) == 1:
+            ultimo_cambio = fechas[-1]
 
         datos_plan[ch] = {
             'ultimo_cambio': str(ultimo_cambio) if ultimo_cambio else '-',
             'duracion_promedio': duracion_promedio,
             'fechas_cambio': fechas_cambio_proyectadas,
-            'ultimo_armado': str(ultimo_armado) if ultimo_armado else '-',
-            'duracion_prom_arm': duracion_prom_arm,
-            'fechas_armado': fechas_armado_proyectadas,
         }
     
     conn.close()
@@ -1859,12 +1830,16 @@ def planificacion():
     for ch, d in datos_plan.items():
         for fecha_str in d['fechas_cambio']:
             if fecha_str not in dias:
-                dias[fecha_str] = {'cambios': [], 'armados': []}
+                dias[fecha_str] = {'cambios': []}
             dias[fecha_str]['cambios'].append(ch)
-        for fecha_str in d['fechas_armado']:
-            if fecha_str not in dias:
-                dias[fecha_str] = {'cambios': [], 'armados': []}
-            dias[fecha_str]['armados'].append(ch)
+
+    # Calcular armados_lineas por día
+    for fecha_str, data in dias.items():
+        tiene_l1 = any(ch in L1 for ch in data['cambios'])
+        tiene_l2 = any(ch in L2 for ch in data['cambios'])
+        data['armados_lineas'] = []
+        if tiene_l1: data['armados_lineas'].append('L1')
+        if tiene_l2: data['armados_lineas'].append('L2')
 
     # Agrupar por SEMANA
     semanas = {}
@@ -1872,36 +1847,24 @@ def planificacion():
         fecha = datetime.strptime(fecha_str, '%Y-%m-%d')
         semana = fecha.strftime('%Y-W%W')
         if semana not in semanas:
-            semanas[semana] = {'cambios': [], 'armados': [], 'dias': {}}
+            semanas[semana] = {'cambios': [], 'dias': {}}
         for ch in data['cambios']:
             if ch not in semanas[semana]['cambios']:
                 semanas[semana]['cambios'].append(ch)
-        for ch in data['armados']:
-            if ch not in semanas[semana]['armados']:
-                semanas[semana]['armados'].append(ch)
         if fecha_str not in semanas[semana]['dias']:
-            semanas[semana]['dias'][fecha_str] = {'cambios': [], 'armados': []}
+            semanas[semana]['dias'][fecha_str] = {'cambios': [], 'armados_lineas': []}
         semanas[semana]['dias'][fecha_str]['cambios'] += data['cambios']
+        semanas[semana]['dias'][fecha_str]['armados_lineas'] = data['armados_lineas']
 
-
-# Personal por semana
-    L1 = ['CR011','CR012','CR013','CR014']
-    L2 = ['CR021','CR022','CR023','CR024']
-    
+    # Personal por semana
     for semana, data in semanas.items():
         n_c = len(data['cambios'])
-        # Armados: 1 por línea que tenga cambios esa semana
         tiene_l1 = any(ch in L1 for ch in data['cambios'])
         tiene_l2 = any(ch in L2 for ch in data['cambios'])
         n_a = (1 if tiene_l1 else 0) + (1 if tiene_l2 else 0)
-        
         data['armados_lineas'] = []
         if tiene_l1: data['armados_lineas'].append('L1')
         if tiene_l2: data['armados_lineas'].append('L2')
-        for semana, sdata in semanas.items():
-            if fecha_str in sdata['dias']:
-                sdata['dias'][fecha_str]['armados_lineas'] = data['armados_lineas']
-        
         data['personal_cambio'] = n_c * 12
         data['personal_armado'] = n_a * 9
         data['personal_total'] = data['personal_cambio'] + data['personal_armado']
