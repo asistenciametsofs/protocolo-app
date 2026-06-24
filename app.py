@@ -1824,6 +1824,16 @@ def planificacion():
         }
     
     conn.close()
+    # Correcciones manuales de próxima fecha
+    correcciones = {
+        'CR021': '2026-07-01',
+        'CR024': '2026-07-06',
+    }
+    for ch, fecha_corr in correcciones.items():
+        if ch in datos_plan and datos_plan[ch]['fechas_cambio']:
+            datos_plan[ch]['fechas_cambio'][0] = fecha_corr
+        elif ch in datos_plan:
+            datos_plan[ch]['fechas_cambio'] = [fecha_corr]
     
     # Agrupar por DÍA
     dias = {}
