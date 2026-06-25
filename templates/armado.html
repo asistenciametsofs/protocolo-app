@@ -580,6 +580,7 @@ function recuperarBorrador() {
                 el.value = data[name];
             }
         });
+        calcularDesgaste();
     });
 }
 
@@ -590,6 +591,27 @@ function limpiarBorrador() {
 window.addEventListener('load', recuperarBorrador);
 setInterval(guardarBorrador, 5000);
 document.getElementById('form-armado').addEventListener('submit', limpiarBorrador);
+
+function calcularDesgaste() {
+    const medida = parseFloat(document.getElementById('feed_plate_altura').value);
+    const display = document.getElementById('desgaste_display');
+    if (isNaN(medida)) { display.textContent = '-'; display.style.background = '#fafafa'; display.style.color = '#333'; return; }
+    const nominal = 125;
+    const minimo = 50;
+    const desgaste = ((nominal - medida) / (nominal - minimo)) * 100;
+    display.textContent = desgaste.toFixed(1) + '%';
+    if (medida <= 60) {
+        display.style.background = '#ffe0e0';
+        display.style.color = '#dc3545';
+    } else if (medida <= 80) {
+        display.style.background = '#fff3cd';
+        display.style.color = '#856404';
+    } else {
+        display.style.background = '#d1e7dd';
+        display.style.color = '#0f5132';
+    }
+}
+
 
 </script>
 </body>
