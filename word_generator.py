@@ -521,7 +521,7 @@ def generar_word_cambio(datos):
         add_section_title_green(doc, '8. MONTAJE DE SOCKET')
         add_inspeccion_table(doc, [
             ('1. Calentar el socket a 120°C por encima de la temperatura ambiente', '', datos.get('sk_mont_calentar_obs','')),
-            ('2. Enfriar el socket a temperatura ambiente y ajustar los pernos a 2820 N.m', '', datos.get('sk_mont_enfriar_obs','')),
+            ('2. Enfriar el socket a temperatura ambiente y ajustar los pernos', '', datos.get('sk_mont_enfriar_obs','')),
             ('3. GAP entre el socket y mainshaft (debe ser 0)', '', datos.get('sk_mont_gap_obs','')),
         ], header_color='0F5132')
         add_cotas_tabla(doc, 'Posición de Cotas — Socket Nuevo', datos, 'sk_new')
@@ -537,7 +537,7 @@ def generar_word_cambio(datos):
     add_section_title_green(doc, '10. INSPECCIÓN DE MAIN FRAME LINERS')
     add_imagen(doc, 'static/imagenes/MFLIns.png')
     add_inspeccion_table(doc, [
-        ('Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m', datos.get('mfl_pernos_estado',''), datos.get('mfl_pernos_obs','')),
+        ('Inspección de 24 pernos de MFL pernos M24x40', datos.get('mfl_pernos_estado',''), datos.get('mfl_pernos_obs','')),
         ('¿Se aplicó wearing compound en las paredes de los MFL?', datos.get('mfl_wearing_estado',''), datos.get('mfl_wearing_obs','')),
         ('Medida de MFL promedio', '', str(datos.get('mfl_medida',''))),
         ('Medición A/B/C/D/E/F/G/H (mm)', '', f"A:{datos.get('mfl_med_A','-')} B:{datos.get('mfl_med_B','-')} C:{datos.get('mfl_med_C','-')} D:{datos.get('mfl_med_D','-')} E:{datos.get('mfl_med_E','-')} F:{datos.get('mfl_med_F','-')} G:{datos.get('mfl_med_G','-')} H:{datos.get('mfl_med_H','-')}"),
