@@ -314,7 +314,7 @@ def generar_word_armado(datos):
     add_section_title(doc, 'LOCKING NUT')
     add_inspeccion_table(doc, [
         ('41. Inspeccionar el estado del Locking Nut', datos.get('ln_paso41_estado',''), datos.get('ln_paso41_obs','')),
-        ('42. Diámetro del Locking Nut', '', datos.get('ln_diametro','')),
+        ('42. Realizar la medicion del espesor del locking nut', '', datos.get('ln_diametro','')),
         ('43. Verificar espaciamiento homogéneo entre Torch Ring y Locking Nut', '', datos.get('ln_espaciamiento','')),
         ('44. Torque Inicial al 50%', '', datos.get('ln_torque50','')),
         ('45. Torque Inicial al 75%', '', datos.get('ln_torque75','')),
@@ -325,29 +325,36 @@ def generar_word_armado(datos):
     ])
     add_imagen(doc, 'static/imagenes/locking_nut.png')
 
-    add_section_title(doc, 'EPÓXICO Y BACKING')
+    add_section_title(doc, 'MONTAJE DEL HEAD Y BOWL LINER')
     add_inspeccion_table(doc, [
-        ('49. Cantidad requerida de epóxico', '', datos.get('epoxi_cantidad','')),
+        ('49. Cantidad requerida de epóxico en Head', '', datos.get('epoxi_cantidad','')),
+        ('53. Cantidad requerida de epóxico en Bowl', '', datos.get('epoxi_cantidad_bowl','')),
         ('50. Fecha Vencimiento Catalizador', '', datos.get('epoxi_venc_catalizador','')),
         ('51. Fecha Vencimiento Epóxico', '', datos.get('epoxi_venc_epoxico','')),
         ('52. T° del batido sin catalizador (15°C - 20°C)', '', datos.get('epoxi_temp_sin_cat','')),
         ('53. T° del batido con catalizador (24°C - 28°C)', '', datos.get('epoxi_temp_con_cat','')),
+        ('53. Gap entre head core - head liner', '', datos.get('gap_headcore_headliner','')),
+        ('53. Gap entre bowl - bowl liner', '', datos.get('gap_bowl_bowlliner','')),
     ])
 
     add_section_title(doc, 'SECCIÓN 2 - INSPECCIÓN DE BOWL')
     add_inspeccion_table(doc, [
+        ('62. Realizar una inspección del bowl y tapa de ajuste', datos.get('bowl_paso63_estado',''), datos.get('bowl_paso63_obs','')),
+        ('62. Realizar una inspección del bowl ring', datos.get('bowl_paso64_estado',''), datos.get('bowl_paso64_obs','')),
+        ('58.2. De encontrar alguna fisura, aplicar NDT y mostrar evidencia fotografica con las dimensiones (ancho, largo, profundidad)', '', datos.get('bowl_paso65_obs','')),
+        ('58. Verificar estado del asiento del Bowl - Bowl Liner (fisuras)', datos.get('bowl_paso58_estado',''), datos.get('bowl_paso58_obs','')),
+        ('58.2. Realizar prueba NDT e indicar observaciones', '', datos.get('bowl_paso582_obs','')),
+        ('58.1. Indicar medida de fisuras', '', datos.get('bowl_medida_fisuras','')),
         ('54. Inspeccionar el estado del Hooper', datos.get('bowl_paso54_estado',''), datos.get('bowl_paso54_obs','')),
         ('55. Medida tomada al Hooper (mm)', '', datos.get('bowl_medida_hooper','')),
-        ('56. Verificar estado de las roscas con peineta', datos.get('bowl_paso56_estado',''), datos.get('bowl_paso56_obs','')),
         ('57. Inspeccionar estado de conjuntos cuñas, tuercas esféricas y placas de bloqueo', datos.get('bowl_paso57_estado',''), datos.get('bowl_paso57_obs','')),
-        ('58. Verificar estado del asiento del Bowl - Bowl Liner (fisuras)', datos.get('bowl_paso58_estado',''), datos.get('bowl_paso58_obs','')),
-        ('58.1. Indicar medida de fisuras', '', datos.get('bowl_medida_fisuras','')),
-        ('58.2. Realizar prueba NDT e indicar observaciones', '', datos.get('bowl_paso582_obs','')),
-        ('60. Verificar estado de anillo adaptador', datos.get('bowl_paso60_estado',''), datos.get('bowl_paso60_obs','')),
         ('61. Verificar el ajuste de las tuercas esféricas de los pernos cuña', datos.get('bowl_paso61_estado',''), datos.get('bowl_paso61_obs','')),
         ('62. Verificar estado de los hilos del Bowl (fisuras)', datos.get('bowl_paso62_estado',''), datos.get('bowl_paso62_obs','')),
-        ('62.1. Medida de fisura', '', datos.get('bowl_medida_fisura62','')),
         ('62.2. Realizar NDT e indicar observaciones', '', datos.get('bowl_paso622_obs','')),
+        ('62.1. Medida de fisura', '', datos.get('bowl_medida_fisura62','')),
+        ('56. Verificar estado de las roscas con peineta', datos.get('bowl_paso56_estado',''), datos.get('bowl_paso56_obs','')),
+        ('60. Verificar estado de anillo adaptador', datos.get('bowl_paso60_estado',''), datos.get('bowl_paso60_obs','')),
+        
     ])
 
     fotos = [k for k in datos.keys() if k.startswith('foto_path_')]
