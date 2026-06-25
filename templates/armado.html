@@ -317,9 +317,9 @@
         </div>
     </div>
 
-    <!-- 5. CARTER -->
+    <!-- 4. CARTER -->
     <div class="seccion">
-        <div class="seccion-titulo">5. Carter</div>
+        <div class="seccion-titulo">4. Carter</div>
         <img src="/static/imagenes/carter.png" class="img-tecnica" alt="Carter">
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
@@ -332,7 +332,7 @@
 
         <!-- HEAD CORE -->
     <div class="seccion">
-        <div class="seccion-titulo">Head Core</div>
+        <div class="seccion-titulo">5. Head Core</div>
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
@@ -362,26 +362,39 @@
         <table class="tabla-pasos">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
-            <tr><td class="paso-desc"><span class="paso-num">36-</span> Inspeccionar el estado del feed plate</td><td><select name="feed_plate_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso36_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp36')">📷 Foto</button><input type="file" name="foto_fp36" id="foto_fp36" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp36"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">36-</span> Inspeccionar el estado del feed plate</td><td><select name="feed_plate_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso36_obs" placeholder="Aquí los hallazgos encontrados"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp36')">📷 Foto</button><input type="file" name="foto_fp36" id="foto_fp36" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp36"></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">38-</span> Verificar el estado de los asientos de los pernos cortados salientes del Feed Plate</td><td><select name="fp_paso38_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso38_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp38')">📷 Foto</button><input type="file" name="foto_fp38" id="foto_fp38" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp38"></td></tr>
             </tbody>
         </table>
-        <label>37- ¿Requiere cambio Feed Plate?</label>
-        <div class="grid3" style="margin-top:6px;align-items:end">
-            <div><select name="feed_plate_cambio" class="estado-select" onchange="toggleCondicional(this,'fp_cambio','fp_no_cambio')"><option value="NO">NO</option><option value="SI">SÍ</option></select></div>
-            <div><label>Medida Feed Plate (mm)</label><input type="number" step="0.1" name="feed_plate_altura" placeholder="mm"></div>
-            <div><label>% Desgaste</label><input type="number" step="0.1" name="feed_plate_desgaste" placeholder="%"></div>
+        <div class="grid3" style="margin-top:10px; align-items:end">
+            <div>
+                <label>Medida Feed Plate (mm)</label>
+                <input type="number" step="0.1" name="feed_plate_altura" id="feed_plate_altura" placeholder="mm" oninput="calcularDesgaste()">
+                <div style="font-size:11px;color:#888;margin-top:4px">Nominal: 125mm | Mín: 50mm</div>
+            </div>
+            <div>
+                <label>% Desgaste</label>
+                <div id="desgaste_display" style="padding:9px; border-radius:7px; font-size:13px; font-weight:bold; background:#fafafa; border:1px solid #ddd;">-</div>
+            </div>
+            <div>
+                <label>¿Se cambiará en esta intervención?</label>
+                <select name="feed_plate_cambio" class="estado-select" onchange="toggleCondicional(this,'fp_cambio')">
+                    <option value="NO">NO</option><option value="SI">SÍ</option>
+                </select>
+            </div>
         </div>
-        <div style="font-size:11px;color:#888;margin-top:4px">Mínimo: 50mm | Nominal: 124mm</div>
-        <div class="banner-verde" id="fp_no_cambio">NO REQUIERE CAMBIO</div>
-        <div class="condicional" id="fp_cambio"><div class="banner-amarillo">REQUIERE CAMBIO</div></div>
-        <table class="tabla-pasos" style="margin-top:10px">
-            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr><td class="paso-desc"><span class="paso-num">38-</span> Verificar el estado de los asientos de los pernos cortados salientes del Feed Plate</td><td><select name="fp_paso38_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso38_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            <tr><td class="paso-desc"><span class="paso-num">39-</span> Realizar limpieza de la superficie del Head (amoladora)</td><td><select name="fp_paso39_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso39_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            <tr><td class="paso-desc"><span class="paso-num">40-</span> Aplicar una capa de aceite la parte superior del Head</td><td></td><td><input class="obs-input" name="fp_paso40_obs" placeholder="Hallazgos..."></td><td></td></tr>
-            </tbody>
-        </table>
+        <div class="condicional" id="fp_cambio">
+            <div class="banner-amarillo">REQUIERE CAMBIO</div>
+            <table class="tabla-pasos" style="margin-top:10px">
+                <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+                <tbody>
+                <tr><td class="paso-desc"><span class="paso-num">39-</span> Realizar limpieza de la superficie del Head (amoladora)</td><td><select name="fp_paso39_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="fp_paso39_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp39')">📷 Foto</button><input type="file" name="foto_fp39" id="foto_fp39" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp39"></td></tr>
+                <tr><td class="paso-desc"><span class="paso-num">40-</span> Aplicar una capa de aceite la parte superior del Head</td><td></td><td><input class="obs-input" name="fp_paso40_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_fp40')">📷 Foto</button><input type="file" name="foto_fp40" id="foto_fp40" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_fp40"></td></tr>
+                </tbody>
+            </table>
+            <label style="margin-top:10px">Nueva medida de Feed Plate (mm)</label>
+            <input type="number" step="0.1" name="feed_plate_nueva_medida" placeholder="mm" style="max-width:200px">
+        </div>
     </div>
 
     <!-- 7. LOCKING NUT -->
