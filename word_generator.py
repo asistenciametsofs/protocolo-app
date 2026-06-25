@@ -265,10 +265,10 @@ def generar_word_armado(datos):
 
     add_section_title(doc, 'INSPECCIÓN DE LOWER BUSHING')
     add_inspeccion_table(doc, [
-        ('16. Realizar inspección visual de la superficie del lower bushing (golpes, rayones, huellas, etc.)', datos.get('lb_paso16_estado',''), datos.get('lb_paso16_obs','')),
-        ('16.1. De encontrar desprendimiento de material, fisuras u otro similar aplicar NDT y evidenciar', '', datos.get('lb_paso161_obs','')),
-        ('17. Inspeccionar el estado de los 16 pernos de fijación M20 x 70 — 325 N.m (240 Lb.ft)', datos.get('lb_paso17_estado',''), datos.get('lb_paso17_obs','')),
-        ('18. ¿Requiere cambio de Lower Bushing?', datos.get('lower_bushing_cambio','NO'), ''),
+        ('08. Realizar inspección visual de la superficie del lower bushing (golpes, rayones, huellas, etc.)', datos.get('lb_paso16_estado',''), datos.get('lb_paso16_obs','')),
+        ('08.1. De encontrar desprendimiento de material, fisuras u otro similar aplicar NDT y evidenciar', '', datos.get('lb_paso161_obs','')),
+        ('09. Inspeccionar el estado de los 16 pernos de fijación M20 x 70 — 325 N.m (240 Lb.ft)', datos.get('lb_paso17_estado',''), datos.get('lb_paso17_obs','')),
+        ('10. ¿Requiere cambio de Lower Bushing?', datos.get('lower_bushing_cambio','NO'), ''),
     ])
     if datos.get('lower_bushing_cambio','NO') == 'SI':
         add_banner(doc, 'SI REQUIERE CAMBIO (ENVIAR A REPARACIÓN)', 'FFC107')
@@ -284,76 +284,76 @@ def generar_word_armado(datos):
 
     add_section_title(doc, 'CARTER')
     add_inspeccion_table(doc, [
-        ('34. Realizar inspección del carter superior (que no presente fisuras en su superficie)', datos.get('carter_sup_estado',''), datos.get('carter_sup_obs','')),
-        ('35. Realizar inspección del carter inferior (que no presente fisuras en su superficie)', datos.get('carter_inf_estado',''), datos.get('carter_inf_obs','')),
+        ('11. Realizar inspección del carter superior (que no presente fisuras en su superficie)', datos.get('carter_sup_estado',''), datos.get('carter_sup_obs','')),
+        ('12. Realizar inspección del carter inferior (que no presente fisuras en su superficie)', datos.get('carter_inf_estado',''), datos.get('carter_inf_obs','')),
     ])
     add_imagen(doc, 'static/imagenes/carter.png')
 
     add_section_title(doc, 'HEAD CORE')
     add_inspeccion_table(doc, [
-        ('17. Inspección visual de la superficie del head core', datos.get('hc_insp_estado',''), datos.get('hc_insp_obs','')),
-        ('NDT — evidencia fotográfica con dimensiones', '', datos.get('hc_ndt_obs','')),
-        ('3. Inspección cabeza de pernos de sujeción del head ball', datos.get('hc_pernos_estado',''), datos.get('hc_pernos_obs','')),
-        ('18. Aplicar capa de aceite superficie superior head core (si es nuevo)', '', datos.get('hc_aceite_obs','')),
-        ('19. Limpieza mecánica superficie del head core', datos.get('hc_limpieza_estado',''), datos.get('hc_limpieza_obs','')),
-        ('20. Aplicar capa de grasa superficie del head core', '', datos.get('hc_grasa_obs','')),
-        ('21. ¿Se requiere cambio de head core?', datos.get('hc_cambio','NO'), 'SI — Enviar a reparación / NO — Sin observaciones'),
+        ('13. Inspección visual de la superficie del head core', datos.get('hc_insp_estado',''), datos.get('hc_insp_obs','')),
+        ('13.1. NDT — evidencia fotográfica con dimensiones', '', datos.get('hc_ndt_obs','')),
+        ('14. Inspección cabeza de pernos de sujeción del head ball', datos.get('hc_pernos_estado',''), datos.get('hc_pernos_obs','')),
+        ('15. Aplicar capa de aceite superficie superior head core (si es nuevo)', '', datos.get('hc_aceite_obs','')),
+        ('16. Limpieza mecánica superficie del head core', datos.get('hc_limpieza_estado',''), datos.get('hc_limpieza_obs','')),
+        ('17. Aplicar capa de grasa superficie del head core', '', datos.get('hc_grasa_obs','')),
+        ('18. ¿Se requiere cambio de head core?', datos.get('hc_cambio','NO'), 'SI — Enviar a reparación / NO — Sin observaciones'),
     ])
     if datos.get('hc_cambio') == 'SI':
         add_banner(doc, 'SI REQUIERE CAMBIO — ENVIAR A REPARACIÓN', 'FFC107')
 
     add_section_title(doc, 'FEED PLATE')
     add_inspeccion_table(doc, [
-        ('36. Inspeccionar el estado del feed plate', datos.get('feed_plate_estado',''), datos.get('fp_paso36_obs','')),
-        ('37. ¿Requiere cambio Feed Plate?', datos.get('feed_plate_cambio','NO'), f"Medida: {datos.get('feed_plate_altura','')} mm | Desgaste: {datos.get('feed_plate_desgaste','')}% | Mín: 50mm | Nominal: 124mm"),
-        ('38. Verificar estado de los asientos de los pernos cortados salientes del Feed Plate', datos.get('fp_paso38_estado',''), datos.get('fp_paso38_obs','')),
-        ('39. Realizar limpieza de la superficie del Head (amoladora)', datos.get('fp_paso39_estado',''), datos.get('fp_paso39_obs','')),
-        ('40. Aplicar una capa de aceite la parte superior del Head', '', datos.get('fp_paso40_obs','')),
+        ('18. Inspeccionar el estado del feed plate', datos.get('feed_plate_estado',''), datos.get('fp_paso36_obs','')),
+        ('19. ¿Requiere cambio Feed Plate?', datos.get('feed_plate_cambio','NO'), f"Medida: {datos.get('feed_plate_altura','')} mm | Desgaste: {datos.get('feed_plate_desgaste','')}% | Mín: 50mm | Nominal: 124mm"),
+        ('20. Verificar estado de los asientos de los pernos cortados salientes del Feed Plate', datos.get('fp_paso38_estado',''), datos.get('fp_paso38_obs','')),
+        ('21. Realizar limpieza de la superficie del Head (amoladora)', datos.get('fp_paso39_estado',''), datos.get('fp_paso39_obs','')),
+        ('22. Aplicar una capa de aceite la parte superior del Head', '', datos.get('fp_paso40_obs','')),
     ])
 
     add_section_title(doc, 'LOCKING NUT')
     add_inspeccion_table(doc, [
-        ('41. Inspeccionar el estado del Locking Nut', datos.get('ln_paso41_estado',''), datos.get('ln_paso41_obs','')),
-        ('42. Realizar la medicion del espesor del locking nut', '', datos.get('ln_diametro','')),
-        ('43. Verificar espaciamiento homogéneo entre Torch Ring y Locking Nut', '', datos.get('ln_espaciamiento','')),
-        ('44. Torque Inicial al 50%', '', datos.get('ln_torque50','')),
-        ('45. Torque Inicial al 75%', '', datos.get('ln_torque75','')),
-        ('46. Torque Inicial al 100%', '', datos.get('ln_torque100','')),
-        ('46.1. Número de serie del torquímetro', '', datos.get('ln_serial_torq','')),
-        ('47. GAP Final: 1.0 mm a 1.5 mm (Locking Nut - Torch Ring)', '', datos.get('ln_gap1','')),
-        ('48. GAP Final: 0 a 0.25 mm (Manto Inferior y Head)', '', datos.get('ln_gap2','')),
+        ('23. Inspeccionar el estado del Locking Nut', datos.get('ln_paso41_estado',''), datos.get('ln_paso41_obs','')),
+        ('24. Realizar la medicion del espesor del locking nut', '', datos.get('ln_diametro','')),
+        ('25. Verificar espaciamiento homogéneo entre Torch Ring y Locking Nut', '', datos.get('ln_espaciamiento','')),
+        ('26. Torque Inicial al 50%', '', datos.get('ln_torque50','')),
+        ('27. Torque Inicial al 75%', '', datos.get('ln_torque75','')),
+        ('28. Torque Inicial al 100%', '', datos.get('ln_torque100','')),
+        ('28.1. Número de serie del torquímetro', '', datos.get('ln_serial_torq','')),
+        ('29. GAP Final: 1.0 mm a 1.5 mm (Locking Nut - Torch Ring)', '', datos.get('ln_gap1','')),
+        ('30. GAP Final: 0 a 0.25 mm (Manto Inferior y Head)', '', datos.get('ln_gap2','')),
     ])
     add_imagen(doc, 'static/imagenes/locking_nut.png')
 
     add_section_title(doc, 'MONTAJE DEL HEAD Y BOWL LINER')
     add_inspeccion_table(doc, [
-        ('49. Cantidad requerida de epóxico en Head', '', datos.get('epoxi_cantidad','')),
-        ('53. Cantidad requerida de epóxico en Bowl', '', datos.get('epoxi_cantidad_bowl','')),
-        ('50. Fecha Vencimiento Catalizador', '', datos.get('epoxi_venc_catalizador','')),
-        ('51. Fecha Vencimiento Epóxico', '', datos.get('epoxi_venc_epoxico','')),
-        ('52. T° del batido sin catalizador (15°C - 20°C)', '', datos.get('epoxi_temp_sin_cat','')),
-        ('53. T° del batido con catalizador (24°C - 28°C)', '', datos.get('epoxi_temp_con_cat','')),
-        ('53. Gap entre head core - head liner', '', datos.get('gap_headcore_headliner','')),
-        ('53. Gap entre bowl - bowl liner', '', datos.get('gap_bowl_bowlliner','')),
+        ('31. Cantidad requerida de epóxico en Head', '', datos.get('epoxi_cantidad','')),
+        ('32. Cantidad requerida de epóxico en Bowl', '', datos.get('epoxi_cantidad_bowl','')),
+        ('33. Fecha Vencimiento Catalizador', '', datos.get('epoxi_venc_catalizador','')),
+        ('34. Fecha Vencimiento Epóxico', '', datos.get('epoxi_venc_epoxico','')),
+        ('35. T° del batido sin catalizador (15°C - 20°C)', '', datos.get('epoxi_temp_sin_cat','')),
+        ('36. T° del batido con catalizador (24°C - 28°C)', '', datos.get('epoxi_temp_con_cat','')),
+        ('37. Gap entre head core - head liner', '', datos.get('gap_headcore_headliner','')),
+        ('38. Gap entre bowl - bowl liner', '', datos.get('gap_bowl_bowlliner','')),
     ])
 
     add_section_title(doc, 'SECCIÓN 2 - INSPECCIÓN DE BOWL')
     add_inspeccion_table(doc, [
-        ('62. Realizar una inspección del bowl y tapa de ajuste', datos.get('bowl_paso63_estado',''), datos.get('bowl_paso63_obs','')),
-        ('62. Realizar una inspección del bowl ring', datos.get('bowl_paso64_estado',''), datos.get('bowl_paso64_obs','')),
-        ('58.2. De encontrar alguna fisura, aplicar NDT y mostrar evidencia fotografica con las dimensiones (ancho, largo, profundidad)', '', datos.get('bowl_paso65_obs','')),
-        ('58. Verificar estado del asiento del Bowl - Bowl Liner (fisuras)', datos.get('bowl_paso58_estado',''), datos.get('bowl_paso58_obs','')),
-        ('58.2. Realizar prueba NDT e indicar observaciones', '', datos.get('bowl_paso582_obs','')),
-        ('58.1. Indicar medida de fisuras', '', datos.get('bowl_medida_fisuras','')),
-        ('54. Inspeccionar el estado del Hooper', datos.get('bowl_paso54_estado',''), datos.get('bowl_paso54_obs','')),
-        ('55. Medida tomada al Hooper (mm)', '', datos.get('bowl_medida_hooper','')),
-        ('57. Inspeccionar estado de conjuntos cuñas, tuercas esféricas y placas de bloqueo', datos.get('bowl_paso57_estado',''), datos.get('bowl_paso57_obs','')),
-        ('61. Verificar el ajuste de las tuercas esféricas de los pernos cuña', datos.get('bowl_paso61_estado',''), datos.get('bowl_paso61_obs','')),
-        ('62. Verificar estado de los hilos del Bowl (fisuras)', datos.get('bowl_paso62_estado',''), datos.get('bowl_paso62_obs','')),
-        ('62.2. Realizar NDT e indicar observaciones', '', datos.get('bowl_paso622_obs','')),
-        ('62.1. Medida de fisura', '', datos.get('bowl_medida_fisura62','')),
-        ('56. Verificar estado de las roscas con peineta', datos.get('bowl_paso56_estado',''), datos.get('bowl_paso56_obs','')),
-        ('60. Verificar estado de anillo adaptador', datos.get('bowl_paso60_estado',''), datos.get('bowl_paso60_obs','')),
+        ('39. Realizar una inspección del bowl y tapa de ajuste', datos.get('bowl_paso63_estado',''), datos.get('bowl_paso63_obs','')),
+        ('40. Realizar una inspección del bowl ring', datos.get('bowl_paso64_estado',''), datos.get('bowl_paso64_obs','')),
+        ('40.1. De encontrar alguna fisura, aplicar NDT y mostrar evidencia fotografica con las dimensiones (ancho, largo, profundidad)', '', datos.get('bowl_paso65_obs','')),
+        ('41. Verificar estado del asiento del Bowl - Bowl Liner (fisuras)', datos.get('bowl_paso58_estado',''), datos.get('bowl_paso58_obs','')),
+        ('41.1. Realizar prueba NDT e indicar observaciones', '', datos.get('bowl_paso582_obs','')),
+        ('41.2. Indicar medida de fisuras', '', datos.get('bowl_medida_fisuras','')),
+        ('42. Inspeccionar el estado del Hooper', datos.get('bowl_paso54_estado',''), datos.get('bowl_paso54_obs','')),
+        ('43. Medida tomada al Hooper (mm)', '', datos.get('bowl_medida_hooper','')),
+        ('44. Inspeccionar estado de conjuntos cuñas, tuercas esféricas y placas de bloqueo', datos.get('bowl_paso57_estado',''), datos.get('bowl_paso57_obs','')),
+        ('45. Verificar el ajuste de las tuercas esféricas de los pernos cuña', datos.get('bowl_paso61_estado',''), datos.get('bowl_paso61_obs','')),
+        ('46. Verificar estado de los hilos del Bowl (fisuras)', datos.get('bowl_paso62_estado',''), datos.get('bowl_paso62_obs','')),
+        ('46.1. Realizar NDT e indicar observaciones', '', datos.get('bowl_paso622_obs','')),
+        ('46.2. Medida de fisura', '', datos.get('bowl_medida_fisura62','')),
+        ('47. Verificar estado de las roscas con peineta', datos.get('bowl_paso56_estado',''), datos.get('bowl_paso56_obs','')),
+        ('48. Verificar estado de anillo adaptador', datos.get('bowl_paso60_estado',''), datos.get('bowl_paso60_obs','')),
         
     ])
 
