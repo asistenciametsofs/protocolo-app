@@ -289,6 +289,19 @@ def generar_word_armado(datos):
     ])
     add_imagen(doc, 'static/imagenes/carter.png')
 
+    add_section_title(doc, 'HEAD CORE')
+    add_inspeccion_table(doc, [
+        ('17. Inspección visual de la superficie del head core', datos.get('hc_insp_estado',''), datos.get('hc_insp_obs','')),
+        ('NDT — evidencia fotográfica con dimensiones', '', datos.get('hc_ndt_obs','')),
+        ('3. Inspección cabeza de pernos de sujeción del head ball', datos.get('hc_pernos_estado',''), datos.get('hc_pernos_obs','')),
+        ('18. Aplicar capa de aceite superficie superior head core (si es nuevo)', '', datos.get('hc_aceite_obs','')),
+        ('19. Limpieza mecánica superficie del head core', datos.get('hc_limpieza_estado',''), datos.get('hc_limpieza_obs','')),
+        ('20. Aplicar capa de grasa superficie del head core', '', datos.get('hc_grasa_obs','')),
+        ('21. ¿Se requiere cambio de head core?', datos.get('hc_cambio','NO'), 'SI — Enviar a reparación / NO — Sin observaciones'),
+    ])
+    if datos.get('hc_cambio') == 'SI':
+        add_banner(doc, 'SI REQUIERE CAMBIO — ENVIAR A REPARACIÓN', 'FFC107')
+
     add_section_title(doc, 'FEED PLATE')
     add_inspeccion_table(doc, [
         ('36. Inspeccionar el estado del feed plate', datos.get('feed_plate_estado',''), datos.get('fp_paso36_obs','')),

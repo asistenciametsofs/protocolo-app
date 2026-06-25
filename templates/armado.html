@@ -330,6 +330,32 @@
         </table>
     </div>
 
+        <!-- HEAD CORE -->
+    <div class="seccion">
+        <div class="seccion-titulo">Head Core</div>
+        <table class="tabla-pasos">
+            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <tbody>
+            <tr><td class="paso-desc"><span class="paso-num">17-</span> Realizar inspección visual de la superficie del head core</td><td><select name="hc_insp_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="hc_insp_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_hc1')">📷 Foto</button><input type="file" name="foto_hc1" id="foto_hc1" class="foto-input-hidden" accept="image/*" onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_hc1"></td></tr>
+            <tr><td class="paso-desc">De encontrar algún defecto, aplicar NDT y mostrar evidencia fotográfica con las dimensiones (ancho, largo, profundidad)</td><td></td><td><input class="obs-input" name="hc_ndt_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">3-</span> Realizar inspección del estado de la cabeza de los pernos de sujeción del head ball (head core)</td><td><select name="hc_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="hc_pernos_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">18-</span> Aplicar una capa de aceite a la superficie superior del head core (si es nuevo)</td><td></td><td><input class="obs-input" name="hc_aceite_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">19-</span> Realizar limpieza mecánica a la superficie del head core</td><td><select name="hc_limpieza_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="hc_limpieza_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            <tr><td class="paso-desc"><span class="paso-num">20-</span> Aplicar una capa de grasa a la superficie del head core</td><td></td><td><input class="obs-input" name="hc_grasa_obs" placeholder="Hallazgos..."></td><td></td></tr>
+            </tbody>
+        </table>
+        <label>21- ¿Se requiere cambio de head core?</label>
+        <select name="hc_cambio" class="estado-select" onchange="toggleCondicional(this,'hc_cambio_sec')">
+            <option value="NO">NO</option><option value="SI">SÍ</option>
+        </select>
+        <div class="condicional" id="hc_cambio_sec">
+            <div class="banner-amarillo">SI — ENVIAR A REPARACIÓN</div>
+        </div>
+        <div id="hc_no_cambio_msg" style="display:none">
+            <div class="banner-verde">NO — SIN OBSERVACIONES</div>
+        </div>
+    </div>
+
     <!-- 6. FEED PLATE -->
     <div class="seccion">
         <div class="seccion-titulo">6. Feed Plate</div>
