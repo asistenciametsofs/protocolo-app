@@ -508,10 +508,7 @@ def generar_word_cambio(datos):
     add_inspeccion_table(doc, [
         ('Realizar inspección visual del socket (fisuras, golpes, rayones, sin obstrucciones, sin desprendimientos, sin deformaciones, etc)', datos.get('socket_fisuras_estado',''), datos.get('socket_fisuras_obs','')),
         ('Inspeccionar los pernos del Socket', datos.get('socket_pernos_estado',''), datos.get('socket_pernos_obs','')),
-        ('GAP Socket-Mainshaft 0°', '', str(datos.get('socket_gap_0',''))),
-        ('GAP Socket-Mainshaft 90°', '', str(datos.get('socket_gap_90',''))),
-        ('GAP Socket-Mainshaft 180°', '', str(datos.get('socket_gap_180',''))),
-        ('GAP Socket-Mainshaft 270°', '', str(datos.get('socket_gap_270',''))),
+        ('GAP Socket-Mainshaft', '', str(datos.get('socket_gap_0',''))),
         ('¿Se cambiará en esta inspección el Socket?', datos.get('socket_cambio_ahora','NO'), ''),
         ('¿Se requiere cambio en la siguiente intervención?', datos.get('socket_cambio_siguiente','NO'), ''),
     ], header_color='0F5132')
@@ -588,21 +585,19 @@ def generar_word_cambio(datos):
         ('Medida promedio espesor protección estática (mm)', '', str(datos.get('prot_estatico_espesor','') or '-')),
     ], header_color='0F5132')
 
-    add_section_title_green(doc, '14. INSPECCIÓN DE GUARD PIN')
-    tabla_gp = doc.add_table(rows=1, cols=5)
+    add_section_title_green(doc, '13. INSPECCIÓN DE GUARD PIN')
+    tabla_gp = doc.add_table(rows=1, cols=4)
     tabla_gp.style = 'Table Grid'
     bold_cell(tabla_gp.cell(0,0), 'Guard Pin', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
     bold_cell(tabla_gp.cell(0,1), '¿Se cambió?', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-    bold_cell(tabla_gp.cell(0,2), 'Medida (mm)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-    bold_cell(tabla_gp.cell(0,3), 'Medida Nueva (mm)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-    bold_cell(tabla_gp.cell(0,4), 'Observaciones', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+    bold_cell(tabla_gp.cell(0,2), 'Medida actual/saliente (mm)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+    bold_cell(tabla_gp.cell(0,3), 'Medida nueva (mm)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
     for i in range(1, 7):
         row = tabla_gp.add_row()
         normal_cell(row.cells[0], f'Guard Pin {i}', bold=True)
         normal_cell(row.cells[1], datos.get(f'gp{i}_cambio',''), align=WD_ALIGN_PARAGRAPH.CENTER)
-        normal_cell(row.cells[2], str(datos.get(f'gp{i}_medida','')), align=WD_ALIGN_PARAGRAPH.CENTER)
+        normal_cell(row.cells[2], str(datos.get(f'gp{i}_medida','') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
         normal_cell(row.cells[3], str(datos.get(f'gp{i}_medida_nueva','') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
-        normal_cell(row.cells[4], datos.get(f'gp{i}_obs',''))
     doc.add_paragraph()
 
     add_section_title_green(doc, '15. INSPECCIÓN DE PROTECTOR DINÁMICO')
@@ -1149,18 +1144,17 @@ def generar_informe_metso(datos):
 
     # 5.5 Guard Pins
     add_para(doc, '5.5 GUARD PINS', bold=True, size=10, color=NARANJA, space_before=6)
-    t_gp = doc.add_table(rows=1, cols=5)
+    t_gp = doc.add_table(rows=1, cols=4)
     t_gp.style = 'Table Grid'
-    for i, h in enumerate(['Guard Pin','Medida','¿Se cambió?','Medida Nueva','Observaciones']):
+    for i, h in enumerate(['Guard Pin','¿Se cambió?','Medida actual/saliente','Medida nueva']):
         cell_write(t_gp.cell(0,i), h, bold=True, size=9,
                    color=BLANCO, bg=NARANJA, align=WD_ALIGN_PARAGRAPH.CENTER)
     for i in range(1, 7):
         row = t_gp.add_row()
         cell_write(row.cells[0], f'Guard Pin {i}', bold=True, size=9)
-        cell_write(row.cells[1], str(d.get(f'gp{i}_medida','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
-        cell_write(row.cells[2], str(d.get(f'gp{i}_cambio','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[1], str(d.get(f'gp{i}_cambio','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        cell_write(row.cells[2], str(d.get(f'gp{i}_medida','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
         cell_write(row.cells[3], str(d.get(f'gp{i}_medida_nueva','') or '-'), size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
-        cell_write(row.cells[4], str(d.get(f'gp{i}_obs','') or ''), size=9)
     doc.add_paragraph().paragraph_format.space_after = Pt(2)
     add_fotos_seccion(doc, d, ['gp', 'guard', 'gp1', 'gp2'])
 
