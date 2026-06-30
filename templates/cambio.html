@@ -202,38 +202,14 @@
             </tbody>
         </table>
         <img src="/static/imagenes/aro.png" class="img-tecnica" alt="Aro de Ajuste" style="max-width:175px;">
-        <div class="subseccion-titulo">Inspección de Clamping Cylinders</div>
-        <table class="tabla-pasos">
-            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr>
-                <td class="paso-desc">¿Se detectan fugas de aceite por el extremo del Clamping Cylinder?</td>
-                <td><select name="clamping_fugas_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>No presenta</option><option>Presenta</option></select></td>
-                <td><input class="obs-input" name="clamping_fugas_obs" placeholder="Aquí los hallazgos encontrados"></td>
-                <td><button type="button" class="btn-foto" onclick="tomarFoto('foto_clamp1')">📷 Foto</button><input type="file" name="foto_clamp1" id="foto_clamp1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_clamp1"></td>
-            </tr>
-            </tbody>
-        </table>
-        <img src="/static/imagenes/cilindros.png" class="img-tecnica" alt="Cilindros" style="max-width:175px;">
-    </div>
 
     <!-- 3. INSPECCIÓN DE SOCKET LINER -->
     <div class="seccion">
         <div class="seccion-titulo">3. Inspección de Socket Liner</div>
-        <table class="tabla-pasos">
-            <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
-            <tbody>
-            <tr>
-                <td class="paso-desc">Verificar el estado del socket liner</td>
-                <td><select name="sl_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td>
-                <td><input class="obs-input" name="sl_ranuras_obs" placeholder="Aquí los hallazgos encontrados"></td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table>
         <table class="tabla-pasos" style="margin-top:10px">
             <thead><tr><th>Descripción</th><th>Estado</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
             <tbody>
+            <tr><td class="paso-desc">Verificar el estado del socket liner</td><td><select name="sl_ranuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_ranuras_obs" placeholder="Aquí los hallazgos encontrados..."></td><td></td></tr>
             <tr><td class="paso-desc">Verificar presencia de fisuras en el socket liner</td><td><select name="sl_fisuras_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_fisuras_obs" placeholder="Hallazgos..."></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_sl3')">📷 Foto</button><input type="file" name="foto_sl3" id="foto_sl3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_sl3"></td></tr>         
             <tr><td class="paso-desc">Verificar presencia de deformaciones en el socket liner</td><td><select name="sl_deformaciones_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_deformaciones_obs" placeholder="Hallazgos..."></td><td></td></tr>
             <tr><td class="paso-desc">Verificar que los canales se encuentren libres sin obstrucción</td><td><select name="sl_canales_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="sl_canales_obs" placeholder="Hallazgos..."></td><td></td></tr>
@@ -332,13 +308,9 @@
             <tr><td class="paso-desc">Inspeccionar los pernos del Socket</td><td><select name="socket_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="socket_pernos_obs" placeholder="Cantidad: 04 pernos M36 x 110"></td><td></td></tr>
             </tbody>
         </table>
-        <img src="/static/imagenes/MedidaSocket.png" class="img-tecnica" alt="Medida Socket GAP">
         <label style="margin-top:10px">Medición de GAP Socket - Mainshaft (debe ser 0)</label>
         <div class="grid4">
-            <div><div class="medida-label">0°</div><input type="number" step="0.01" name="socket_gap_0" placeholder="mm"></div>
-            <div><div class="medida-label">90°</div><input type="number" step="0.01" name="socket_gap_90" placeholder="mm"></div>
-            <div><div class="medida-label">180°</div><input type="number" step="0.01" name="socket_gap_180" placeholder="mm"></div>
-            <div><div class="medida-label">270°</div><input type="number" step="0.01" name="socket_gap_270" placeholder="mm"></div>
+            <div><div class="medida-label">Medida (mm)</div><input type="number" step="0.01" name="socket_gap_0" placeholder="mm"></div>
         </div>
         <div class="grid2" style="margin-top:10px">
             <div>
@@ -439,7 +411,6 @@
             <tbody>
             <tr><td class="paso-desc">Inspección de 24 pernos de MFL pernos M24x40 Torque: 778 N.m</td><td><select name="mfl_pernos_estado" class="estado-select" onchange="colorEstado(this)"><option>Bueno</option><option>Malo</option></select></td><td><input class="obs-input" name="mfl_pernos_obs" placeholder="Indicar medidas de fisura"></td><td>
             <tr><td class="paso-desc">¿Se aplicó wearing compound en las paredes de los MFL?</td><td><select name="mfl_wearing_estado" class="estado-select" onchange="colorEstado(this)"><option value="">Seleccionar...</option><option>SI</option><option>NO</option></select></td><td><input class="obs-input" name="mfl_wearing_obs" placeholder="Observaciones..."></td><td></td></tr>
-            <tr><td class="paso-desc">Medida de MFL promedio (Mínimo 9mm)</td><td></td><td><input class="obs-input" name="mfl_medida" placeholder="Medida en mm"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_mfl2')">📷 Foto</button><input type="file" name="foto_mfl2" id="foto_mfl2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_mfl2"></td></tr>
             </tbody>
         </table>
         <label style="margin-top:10px">Medición de Main Frame Liners (mm)</label>
@@ -542,31 +513,17 @@
 
         <div class="subseccion-titulo">14. Inspección de Guard Pin</div>
         <table class="tabla-pasos">
-            <thead><tr><th>Descripción</th><th>¿Se cambió?</th><th>Medida guard pin actual o saliente(mm)</th><th>Observaciones</th><th>Evidencia</th></tr></thead>
+            <thead><tr><th>Descripción</th><th>¿Se cambió?</th><th>Medida actual/saliente (mm)</th><th>Medida nueva (mm)</th><th>Evidencia</th></tr></thead>
             <tbody>
-            <tr><td class="paso-desc">Realizar inspección de guard pin 1</td><td><select name="gp1_cambio" class="estado-select" onchange="toggleGuardPinNuevo()"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp1_medida" placeholder="mm"></td><td><input class="obs-input" name="gp1_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp1')">📷 Foto</button><input type="file" name="foto_gp1" id="foto_gp1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp1"></td></tr>
-            <tr><td class="paso-desc">Realizar inspección de guard pin 2</td><td><select name="gp2_cambio" class="estado-select" onchange="toggleGuardPinNuevo()"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp2_medida" placeholder="mm"></td><td><input class="obs-input" name="gp2_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp2')">📷 Foto</button><input type="file" name="foto_gp2" id="foto_gp2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp2"></td></tr>
-            <tr><td class="paso-desc">Realizar inspección de guard pin 3</td><td><select name="gp3_cambio" class="estado-select" onchange="toggleGuardPinNuevo()"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp3_medida" placeholder="mm"></td><td><input class="obs-input" name="gp3_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp3')">📷 Foto</button><input type="file" name="foto_gp3" id="foto_gp3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp3"></td></tr>
-            <tr><td class="paso-desc">Realizar inspección de guard pin 4</td><td><select name="gp4_cambio" class="estado-select" onchange="toggleGuardPinNuevo()"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp4_medida" placeholder="mm"></td><td><input class="obs-input" name="gp4_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp4')">📷 Foto</button><input type="file" name="foto_gp4" id="foto_gp4" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp4"></td></tr>
-            <tr><td class="paso-desc">Realizar inspección de guard pin 5</td><td><select name="gp5_cambio" class="estado-select" onchange="toggleGuardPinNuevo()"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp5_medida" placeholder="mm"></td><td><input class="obs-input" name="gp5_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp5')">📷 Foto</button><input type="file" name="foto_gp5" id="foto_gp5" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp5"></td></tr>
-            <tr><td class="paso-desc">Realizar inspección de guard pin 6</td><td><select name="gp6_cambio" class="estado-select" onchange="toggleGuardPinNuevo()"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp6_medida" placeholder="mm"></td><td><input class="obs-input" name="gp6_obs" placeholder="Indicar medidas de fisura"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp6')">📷 Foto</button><input type="file" name="foto_gp6" id="foto_gp6" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp6"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 1</td><td><select name="gp1_cambio" class="estado-select" onchange="toggleGuardPinFila(this,'gp1_medida_nueva')"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp1_medida" placeholder="mm"></td><td><input type="number" step="0.01" class="obs-input" name="gp1_medida_nueva" id="gp1_medida_nueva" placeholder="mm" disabled style="background:#e9ecef;"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp1')">📷 Foto</button><input type="file" name="foto_gp1" id="foto_gp1" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp1"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 2</td><td><select name="gp2_cambio" class="estado-select" onchange="toggleGuardPinFila(this,'gp2_medida_nueva')"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp2_medida" placeholder="mm"></td><td><input type="number" step="0.01" class="obs-input" name="gp2_medida_nueva" id="gp2_medida_nueva" placeholder="mm" disabled style="background:#e9ecef;"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp2')">📷 Foto</button><input type="file" name="foto_gp2" id="foto_gp2" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp2"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 3</td><td><select name="gp3_cambio" class="estado-select" onchange="toggleGuardPinFila(this,'gp3_medida_nueva')"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp3_medida" placeholder="mm"></td><td><input type="number" step="0.01" class="obs-input" name="gp3_medida_nueva" id="gp3_medida_nueva" placeholder="mm" disabled style="background:#e9ecef;"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp3')">📷 Foto</button><input type="file" name="foto_gp3" id="foto_gp3" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp3"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 4</td><td><select name="gp4_cambio" class="estado-select" onchange="toggleGuardPinFila(this,'gp4_medida_nueva')"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp4_medida" placeholder="mm"></td><td><input type="number" step="0.01" class="obs-input" name="gp4_medida_nueva" id="gp4_medida_nueva" placeholder="mm" disabled style="background:#e9ecef;"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp4')">📷 Foto</button><input type="file" name="foto_gp4" id="foto_gp4" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp4"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 5</td><td><select name="gp5_cambio" class="estado-select" onchange="toggleGuardPinFila(this,'gp5_medida_nueva')"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp5_medida" placeholder="mm"></td><td><input type="number" step="0.01" class="obs-input" name="gp5_medida_nueva" id="gp5_medida_nueva" placeholder="mm" disabled style="background:#e9ecef;"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp5')">📷 Foto</button><input type="file" name="foto_gp5" id="foto_gp5" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp5"></td></tr>
+            <tr><td class="paso-desc">Realizar inspección de guard pin 6</td><td><select name="gp6_cambio" class="estado-select" onchange="toggleGuardPinFila(this,'gp6_medida_nueva')"><option value="">Seleccionar...</option><option>NO SE MIDIO</option><option>SI</option><option>NO</option></select></td><td><input type="number" step="0.01" class="obs-input" name="gp6_medida" placeholder="mm"></td><td><input type="number" step="0.01" class="obs-input" name="gp6_medida_nueva" id="gp6_medida_nueva" placeholder="mm" disabled style="background:#e9ecef;"></td><td><button type="button" class="btn-foto" onclick="tomarFoto('foto_gp6')">📷 Foto</button><input type="file" name="foto_gp6" id="foto_gp6" class="foto-input-hidden" accept="image/*"  onchange="previewFoto(this)"><img class="foto-preview" id="prev_foto_gp6"></td></tr>
             </tbody>
         </table>
         <img src="/static/imagenes/pin.png" class="img-tecnica" alt="Guard Pin" style="max-width:175px;">
-        <div class="condicional" id="gp_nuevo_sec">
-            <div class="banner-amarillo">MEDIDA DE GUARD PIN NUEVO</div>
-            <table class="tabla-pasos">
-                <thead><tr><th>Descripción</th><th>Medida guard pin nuevo(mm)</th></tr></thead>
-                <tbody>
-                <tr><td class="paso-desc">Guard Pin 1 nuevo</td><td><input type="number" step="0.01" class="obs-input" name="gp1_medida_nueva" placeholder="mm"></td></tr>
-                <tr><td class="paso-desc">Guard Pin 2 nuevo</td><td><input type="number" step="0.01" class="obs-input" name="gp2_medida_nueva" placeholder="mm"></td></tr>
-                <tr><td class="paso-desc">Guard Pin 3 nuevo</td><td><input type="number" step="0.01" class="obs-input" name="gp3_medida_nueva" placeholder="mm"></td></tr>
-                <tr><td class="paso-desc">Guard Pin 4 nuevo</td><td><input type="number" step="0.01" class="obs-input" name="gp4_medida_nueva" placeholder="mm"></td></tr>
-                <tr><td class="paso-desc">Guard Pin 5 nuevo</td><td><input type="number" step="0.01" class="obs-input" name="gp5_medida_nueva" placeholder="mm"></td></tr>
-                <tr><td class="paso-desc">Guard Pin 6 nuevo</td><td><input type="number" step="0.01" class="obs-input" name="gp6_medida_nueva" placeholder="mm"></td></tr>
-                </tbody>
-            </table>
-        </div>
         
         <div class="subseccion-titulo">15. Inspección de Protector Dinámico</div>
         <table class="tabla-pasos">
@@ -774,6 +731,7 @@
                 </tr>
                 </tbody>
             </table>
+si
 
             <!-- SISTEMA DE LUBRICACIÓN -->
             <div class="subseccion-titulo">Sistema de Lubricación</div>
@@ -878,14 +836,15 @@ function toggleCondicional(sel, idSi) {
     }
 }
 
-function toggleGuardPinNuevo() {
-    const selects = ['gp1_cambio','gp2_cambio','gp3_cambio','gp4_cambio','gp5_cambio','gp6_cambio'];
-    const algunoSI = selects.some(name => document.querySelector(`[name="${name}"]`).value === 'SI');
-    const div = document.getElementById('gp_nuevo_sec');
-    if (algunoSI) {
-        div.classList.add('activo');
+function toggleGuardPinFila(sel, idNueva) {
+    const input = document.getElementById(idNueva);
+    if (sel.value === 'SI') {
+        input.disabled = false;
+        input.style.background = '#fafafa';
     } else {
-        div.classList.remove('activo');
+        input.disabled = true;
+        input.value = '';
+        input.style.background = '#e9ecef';
     }
 }
 function tomarFoto(inputId) {
