@@ -1923,7 +1923,11 @@ def subir_a_drive(ruta_archivo, nombre_archivo):
             'parents': [folder_id]
         }
         media = MediaFileUpload(ruta_archivo, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-        service.files().create(body=file_metadata, media_body=media).execute()
+        service.files().create(
+            body=file_metadata, 
+            media_body=media,
+            supportsAllDrives=True
+        ).execute()
         print(f'✅ Archivo subido a Drive: {nombre_archivo}')
     except Exception as e:
         print(f'❌ Error subiendo a Drive: {e}')
