@@ -69,6 +69,7 @@ def guardar_armado_route():
     datos_word.update(fotos_paths)
     print(f'FOTOS: {list(fotos_paths.keys())}')
     ruta_word = generar_word_armado(datos_word)
+    threading.Thread(target=subir_a_drive, args=(ruta_word, os.path.basename(ruta_word))).start()
 
     # Recopilar correos seleccionados
     correos = []
@@ -241,6 +242,7 @@ def guardar_cambio_route():
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
     ruta_word = generar_word_cambio(datos_word)
+    threading.Thread(target=subir_a_drive, args=(ruta_word, os.path.basename(ruta_word))).start()
 
     # Recopilar correos seleccionados
     correos = []
@@ -1894,6 +1896,37 @@ def planificacion():
                            semanas=semanas_sorted,
                            dias=dias_sorted,
                            hoy=hoy.strftime('%Y-%m-%d'))
+
+def subir_a_drive(ruta_archivo, nombre_archivo):
+    try:
+        import json
+        from googleapiclient.discovery import build
+        from googleapiclient.http import MediaFileUpload
+        from google.oauth2 import service_account
+        
+        credenciales_json = os.environ.get('GOOGLE_CREDENTIALS_JSON')
+        folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+        
+        if not credenciales_json or not folder_id:
+            print('❌ Faltan credenciales de Google Drive')
+            return
+        
+        creds_dict = json.loads(credenciales_json)
+        creds = service_account.Credentials.from_service_account_info(
+            creds_dict,
+            scopes=['https://www.googleapis.com/auth/drive.file']
+        )
+        service = build('drive', 'v3', credentials=creds)
+        
+        file_metadata = {
+            'name': nombre_archivo,
+            'parents': [folder_id]
+        }
+        media = MediaFileUpload(ruta_archivo, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        service.files().create(body=file_metadata, media_body=media).execute()
+        print(f'✅ Archivo subido a Drive: {nombre_archivo}')
+    except Exception as e:
+        print(f'❌ Error subiendo a Drive: {e}')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
