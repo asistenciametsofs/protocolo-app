@@ -69,7 +69,7 @@ def guardar_armado_route():
     datos_word.update(fotos_paths)
     print(f'FOTOS: {list(fotos_paths.keys())}')
     ruta_word = generar_word_armado(datos_word)
-    threading.Thread(target=subir_a_drive, args=(ruta_word, os.path.basename(ruta_word))).start()
+    subir_a_drive(ruta_word, os.path.basename(ruta_word))
 
     # Recopilar correos seleccionados
     correos = []
@@ -242,7 +242,7 @@ def guardar_cambio_route():
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
     ruta_word = generar_word_cambio(datos_word)
-    threading.Thread(target=subir_a_drive, args=(ruta_word, os.path.basename(ruta_word))).start()
+    subir_a_drive(ruta_word, os.path.basename(ruta_word))
 
     # Recopilar correos seleccionados
     correos = []
