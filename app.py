@@ -449,12 +449,16 @@ def descargar_reporte(tipo, id):
     print(f'DEBUG epoxi: {datos.get("epoxi_venc_catalizador")} | {datos.get("epoxi_Venc_Catalizador")}')
     if tipo == 'armado':
         ruta = generar_word_armado(datos)
-        nombre = f"Armado_{datos.get('equipo','X')}.docx"
+        fecha = str(datos.get('fecha_inicio','') or '').replace('-','')[:8]
+        id_head = datos.get('id_head','') or 'X'
+        id_bowl = datos.get('id_bowl','') or 'X'
+        nombre = f"{fecha}_ArmadoHB_{id_head}_{id_bowl}.docx"
     else:
         ruta = generar_word_cambio(datos)
-        nombre = f"Cambio_{datos.get('chancadora','X')}.docx"
+        fecha = str(datos.get('fecha_inicio','') or '').replace('-','')[:8]
+        chancadora = datos.get('chancadora','') or 'X'
+        nombre = f"{fecha}_CambioHB_{chancadora}.docx"
     return send_file(ruta, as_attachment=True, download_name=nombre)
-
 @app.route('/dashboard')
 def dashboard():
     import psycopg2
