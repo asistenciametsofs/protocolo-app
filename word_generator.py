@@ -315,45 +315,43 @@ def generar_word_armado(datos):
     add_inspeccion_table(doc, [
         ('23. Inspeccionar el estado del Locking Nut', datos.get('ln_paso41_estado',''), datos.get('ln_paso41_obs','')),
         ('24. Realizar la medicion del espesor del locking nut', '', datos.get('ln_diametro','')),
-        ('25. Verificar espaciamiento homogéneo entre Torch Ring y Locking Nut', '', datos.get('ln_espaciamiento','')),
-        ('26. Torque Inicial al 50%', '', datos.get('ln_torque50','')),
-        ('27. Torque Inicial al 75%', '', datos.get('ln_torque75','')),
-        ('28. Torque Inicial al 100%', '', datos.get('ln_torque100','')),
-        ('28.1. Número de serie del torquímetro', '', datos.get('ln_serial_torq','')),
-        ('29. GAP Final: 1.0 mm a 1.5 mm (Locking Nut - Torch Ring)', '', datos.get('ln_gap1','')),
-        ('30. GAP Final: 0 a 0.25 mm (Manto Inferior y Head)', '', datos.get('ln_gap2','')),
+        ('25. Torque Inicial al 50%', '', datos.get('ln_torque50','')),
+        ('26. Torque Inicial al 75%', '', datos.get('ln_torque75','')),
+        ('27. Torque Inicial al 100%', '', datos.get('ln_torque100','')),
+        ('27.1. Número de serie del torquímetro', '', datos.get('ln_serial_torq','')),
+        ('28. GAP Final: 1.0 mm a 1.5 mm (Locking Nut - Torch Ring)', '', datos.get('ln_gap1','')),
     ])
     add_imagen(doc, 'static/imagenes/locking_nut.png')
 
     add_section_title(doc, 'MONTAJE DEL HEAD Y BOWL LINER')
     add_inspeccion_table(doc, [
-        ('31. Cantidad requerida de epóxico en Head', '', datos.get('epoxi_cantidad','')),
-        ('32. Cantidad requerida de epóxico en Bowl', '', datos.get('epoxi_cantidad_bowl','')),
-        ('33. Fecha Vencimiento Catalizador', '', datos.get('epoxi_venc_catalizador','')),
-        ('34. Fecha Vencimiento Epóxico', '', datos.get('epoxi_venc_epoxico','')),
-        ('35. T° del batido sin catalizador (15°C - 20°C)', '', datos.get('epoxi_temp_sin_cat','')),
-        ('36. T° del batido con catalizador (24°C - 28°C)', '', datos.get('epoxi_temp_con_cat','')),
-        ('37. Gap entre head core - head liner', '', datos.get('gap_headcore_headliner','')),
-        ('38. Gap entre bowl - bowl liner', '', datos.get('gap_bowl_bowlliner','')),
+        ('29. Cantidad requerida de epóxico en Head', '', datos.get('epoxi_cantidad','')),
+        ('30. Cantidad requerida de epóxico en Bowl', '', datos.get('epoxi_cantidad_bowl','')),
+        ('31. Fecha Vencimiento Catalizador', '', datos.get('epoxi_venc_catalizador','')),
+        ('32. Fecha Vencimiento Epóxico', '', datos.get('epoxi_venc_epoxico','')),
+        ('33. T° del batido sin catalizador (15°C - 20°C)', '', datos.get('epoxi_temp_sin_cat','')),
+        ('34. T° del batido con catalizador (24°C - 28°C)', '', datos.get('epoxi_temp_con_cat','')),
+        ('35. Gap entre head core - head liner', '', datos.get('gap_headcore_headliner','')),
+        ('36. Gap entre bowl - bowl liner', '', datos.get('gap_bowl_bowlliner','')),
     ])
 
     add_section_title(doc, 'SECCIÓN 2 - INSPECCIÓN DE BOWL')
     add_inspeccion_table(doc, [
-        ('39. Realizar una inspección del bowl y tapa de ajuste', datos.get('bowl_paso63_estado',''), datos.get('bowl_paso63_obs','')),
-        ('40. Realizar una inspección del bowl ring', datos.get('bowl_paso64_estado',''), datos.get('bowl_paso64_obs','')),
-        ('40.1. De encontrar alguna fisura, aplicar NDT y mostrar evidencia fotografica con las dimensiones (ancho, largo, profundidad)', '', datos.get('bowl_paso65_obs','')),
-        ('41. Verificar estado del asiento del Bowl - Bowl Liner (fisuras)', datos.get('bowl_paso58_estado',''), datos.get('bowl_paso58_obs','')),
-        ('41.1. Realizar prueba NDT e indicar observaciones', '', datos.get('bowl_paso582_obs','')),
-        ('41.2. Indicar medida de fisuras', '', datos.get('bowl_medida_fisuras','')),
-        ('42. Inspeccionar el estado del Hooper', datos.get('bowl_paso54_estado',''), datos.get('bowl_paso54_obs','')),
-        ('43. Medida tomada al Hooper (mm)', '', datos.get('bowl_medida_hooper','')),
-        ('44. Inspeccionar estado de conjuntos cuñas, tuercas esféricas y placas de bloqueo', datos.get('bowl_paso57_estado',''), datos.get('bowl_paso57_obs','')),
-        ('45. Verificar el ajuste de las tuercas esféricas de los pernos cuña', datos.get('bowl_paso61_estado',''), datos.get('bowl_paso61_obs','')),
-        ('46. Verificar estado de los hilos del Bowl (fisuras)', datos.get('bowl_paso62_estado',''), datos.get('bowl_paso62_obs','')),
-        ('46.1. Realizar NDT e indicar observaciones', '', datos.get('bowl_paso622_obs','')),
-        ('46.2. Medida de fisura', '', datos.get('bowl_medida_fisura62','')),
-        ('47. Verificar estado de las roscas con peineta', datos.get('bowl_paso56_estado',''), datos.get('bowl_paso56_obs','')),
-        ('48. Verificar estado de anillo adaptador', datos.get('bowl_paso60_estado',''), datos.get('bowl_paso60_obs','')),
+        ('37. Realizar una inspección del bowl y tapa de ajuste', datos.get('bowl_paso63_estado',''), datos.get('bowl_paso63_obs','')),
+        ('38. Realizar una inspección del bowl ring', datos.get('bowl_paso64_estado',''), datos.get('bowl_paso64_obs','')),
+        ('38.1. De encontrar alguna fisura, aplicar NDT y mostrar evidencia fotografica con las dimensiones (ancho, largo, profundidad)', '', datos.get('bowl_paso65_obs','')),
+        ('39. Verificar estado del asiento del Bowl - Bowl Liner (fisuras)', datos.get('bowl_paso58_estado',''), datos.get('bowl_paso58_obs','')),
+        ('39.1. Realizar prueba NDT e indicar observaciones', '', datos.get('bowl_paso582_obs','')),
+        ('39.2. Indicar medida de fisuras', '', datos.get('bowl_medida_fisuras','')),
+        ('40. Inspeccionar el estado del Hooper', datos.get('bowl_paso54_estado',''), datos.get('bowl_paso54_obs','')),
+        ('41. Medida tomada al Hooper (mm)', '', datos.get('bowl_medida_hooper','')),
+        ('42. Inspeccionar estado de conjuntos cuñas, tuercas esféricas y placas de bloqueo', datos.get('bowl_paso57_estado',''), datos.get('bowl_paso57_obs','')),
+        ('43. Verificar el ajuste de las tuercas esféricas de los pernos cuña', datos.get('bowl_paso61_estado',''), datos.get('bowl_paso61_obs','')),
+        ('44. Verificar estado de los hilos del Bowl (fisuras)', datos.get('bowl_paso62_estado',''), datos.get('bowl_paso62_obs','')),
+        ('44.1. Realizar NDT e indicar observaciones', '', datos.get('bowl_paso622_obs','')),
+        ('44.2. Medida de fisura', '', datos.get('bowl_medida_fisura62','')),
+        ('45. Verificar estado de las roscas con peineta', datos.get('bowl_paso56_estado',''), datos.get('bowl_paso56_obs','')),
+        ('46. Verificar estado de bowl ring', datos.get('bowl_paso60_estado',''), datos.get('bowl_paso60_obs','')),
         
     ])
 
@@ -465,9 +463,7 @@ def generar_word_cambio(datos):
     ], header_color='0F5132')
 
     add_inspeccion_table(doc, [
-        ('Verificar presencia de fisuras en el socket liner', datos.get('sl_fisuras_estado',''), datos.get('sl_fisuras_obs','')),
-        ('Verificar presencia de deformaciones en el socket liner', datos.get('sl_deformaciones_estado',''), datos.get('sl_deformaciones_obs','')),
-        ('Verificar que los canales se encuentren libres sin obstrucción', datos.get('sl_canales_estado',''), datos.get('sl_canales_obs','')),
+        ('Verificar presencia de fisuras, deformaciones y canales libres de obstrucción en el socket liner', datos.get('sl_fisuras_estado',''), datos.get('sl_fisuras_obs','')),
     ], header_color='0F5132')
     add_imagen(doc, 'static/imagenes/socket_liner1.png')
 
@@ -643,54 +639,64 @@ def generar_word_cambio(datos):
         ], header_color='0F5132')
 
     # ── SISTEMAS AUXILIARES ──────────────────────────────────
-    if datos.get('sistemas_aux_inspeccion') == 'SI':
+    hay_sistemas = any([
+        datos.get('trans_inspeccion') == 'SI',
+        datos.get('hidra_inspeccion') == 'SI',
+        datos.get('blower_inspeccion') == 'SI',
+        datos.get('lubri_inspeccion') == 'SI',
+    ])
+    if hay_sistemas:
         add_section_title_green(doc, 'INSPECCIÓN DE SISTEMAS AUXILIARES')
 
-        add_section_title_green(doc, 'Sistema de Transmisión')
-        add_inspeccion_table(doc, [
-            ('Frecuencia tensado de correas (Hz)', '', str(datos.get('trans_frecuencia') or '-')),
-            ('Estado de polea conducida', datos.get('trans_polea_estado',''), datos.get('trans_polea_obs','')),
-            ('Estado de radiador', datos.get('trans_radiador_estado',''), datos.get('trans_radiador_obs','')),
-        ], header_color='0F5132')
+        if datos.get('trans_inspeccion') == 'SI':
+            add_section_title_green(doc, 'Sistema de Transmisión')
+            add_inspeccion_table(doc, [
+                ('Frecuencia tensado de correas (Hz)', '', str(datos.get('trans_frecuencia') or '-')),
+                ('Estado de polea conducida', datos.get('trans_polea_estado',''), datos.get('trans_polea_obs','')),
+                ('Estado de radiador', datos.get('trans_radiador_estado',''), datos.get('trans_radiador_obs','')),
+            ], header_color='0F5132')
 
-        add_section_title_green(doc, 'Sistema Hidráulico — Presión de Acumuladores (950-1050 PSI)')
-        tabla_ac = doc.add_table(rows=1, cols=3)
-        tabla_ac.style = 'Table Grid'
-        bold_cell(tabla_ac.cell(0,0), 'N°', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-        bold_cell(tabla_ac.cell(0,1), 'Presión encontrada (PSI)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-        bold_cell(tabla_ac.cell(0,2), 'Presión final tras recarga N₂ (PSI)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
-        for i in range(1, 9):
+        if datos.get('hidra_inspeccion') == 'SI':
+            add_section_title_green(doc, 'Sistema Hidráulico — Presión de Acumuladores (950-1050 PSI)')
+            tabla_ac = doc.add_table(rows=1, cols=3)
+            tabla_ac.style = 'Table Grid'
+            bold_cell(tabla_ac.cell(0,0), 'N°', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+            bold_cell(tabla_ac.cell(0,1), 'Presión encontrada (PSI)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+            bold_cell(tabla_ac.cell(0,2), 'Presión final tras recarga N₂ (PSI)', bg='0F5132', color='FFFFFF', align=WD_ALIGN_PARAGRAPH.CENTER)
+            for i in range(1, 9):
+                row = tabla_ac.add_row()
+                normal_cell(row.cells[0], str(i), align=WD_ALIGN_PARAGRAPH.CENTER)
+                normal_cell(row.cells[1], str(datos.get(f'acum_pres_{i}') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+                normal_cell(row.cells[2], str(datos.get(f'acum_final_{i}') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
             row = tabla_ac.add_row()
-            normal_cell(row.cells[0], str(i), align=WD_ALIGN_PARAGRAPH.CENTER)
-            normal_cell(row.cells[1], str(datos.get(f'acum_pres_{i}') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
-            normal_cell(row.cells[2], str(datos.get(f'acum_final_{i}') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
-        row = tabla_ac.add_row()
-        normal_cell(row.cells[0], 'Consola', bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
-        normal_cell(row.cells[1], str(datos.get('acum_pres_consola') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
-        normal_cell(row.cells[2], str(datos.get('acum_final_consola') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
-        doc.add_paragraph()
+            normal_cell(row.cells[0], 'Consola', bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+            normal_cell(row.cells[1], str(datos.get('acum_pres_consola') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+            normal_cell(row.cells[2], str(datos.get('acum_final_consola') or '-'), align=WD_ALIGN_PARAGRAPH.CENTER)
+            doc.add_paragraph()
+            add_inspeccion_table(doc, [
+                ('Bloque hidráulico', datos.get('hidra_bloque_estado',''), datos.get('hidra_bloque_obs','')),
+                ('Bomba y acople hidráulico', datos.get('hidra_bomba_estado',''), datos.get('hidra_bomba_obs','')),
+                ('Motor hidráulico 1', datos.get('hidra_motor1_estado',''), datos.get('hidra_motor1_obs','')),
+                ('Motor hidráulico 2', datos.get('hidra_motor2_estado',''), datos.get('hidra_motor2_obs','')),
+                ('Motor hidráulico 3', datos.get('hidra_motor3_estado',''), datos.get('hidra_motor3_obs','')),
+            ], header_color='0F5132')
 
-        add_inspeccion_table(doc, [
-            ('Bloque hidráulico', datos.get('hidra_bloque_estado',''), datos.get('hidra_bloque_obs','')),
-            ('Bomba y acople hidráulico', datos.get('hidra_bomba_estado',''), datos.get('hidra_bomba_obs','')),
-            ('Motor hidráulico 1', datos.get('hidra_motor1_estado',''), datos.get('hidra_motor1_obs','')),
-            ('Motor hidráulico 2', datos.get('hidra_motor2_estado',''), datos.get('hidra_motor2_obs','')),
-            ('Motor hidráulico 3', datos.get('hidra_motor3_estado',''), datos.get('hidra_motor3_obs','')),
-        ], header_color='0F5132')
+        if datos.get('blower_inspeccion') == 'SI':
+            add_section_title_green(doc, 'Sistema Blower')
+            add_inspeccion_table(doc, [
+                ('Inspección / Limpieza de filtro', datos.get('blower_filtro_estado',''), datos.get('blower_filtro_obs','')),
+                ('¿Se cambió el filtro?', datos.get('blower_cambio_filtro','NO'), datos.get('blower_cambio_obs','')),
+            ], header_color='0F5132')
 
-        add_section_title_green(doc, 'Sistema Blower')
-        add_inspeccion_table(doc, [
-            ('Inspección / Limpieza de filtro', datos.get('blower_filtro_estado',''), datos.get('blower_filtro_obs','')),
-            ('¿Se cambió el filtro?', datos.get('blower_cambio_filtro','NO'), datos.get('blower_cambio_obs','')),
-        ], header_color='0F5132')
+        if datos.get('lubri_inspeccion') == 'SI':
+            add_section_title_green(doc, 'Sistema de Lubricación')
+            add_inspeccion_table(doc, [
+                ('Cedazo de tanque de lubricación', datos.get('lubri_cedazo_estado',''), datos.get('lubri_cedazo_obs','')),
+                ('Inspección de la junta de expansión', datos.get('lubri_junta_estado',''), datos.get('lubri_junta_obs','')),
+                ('Inspección de líneas de lubricación del motor hidráulico', datos.get('lubri_lineas_estado',''), datos.get('lubri_lineas_obs','')),
+                ('Diferencia de presión del banco de filtros (psi)', '', str(datos.get('lubri_presion_filtros','') or '-')),
+            ], header_color='0F5132')
 
-        add_section_title_green(doc, 'Sistema de Lubricación')
-        add_inspeccion_table(doc, [
-            ('Cedazo de tanque de lubricación', datos.get('lubri_cedazo_estado',''), datos.get('lubri_cedazo_obs','')),
-            ('Inspección de la junta de expansión', datos.get('lubri_junta_estado',''), datos.get('lubri_junta_obs','')),
-            ('Inspección de líneas de lubricación del motor hidráulico', datos.get('lubri_lineas_estado',''), datos.get('lubri_lineas_obs','')),
-            ('Diferencia de presión del banco de filtros (psi)', '', str(datos.get('lubri_presion_filtros','') or '-')),
-        ], header_color='0F5132')
 
         # ── CHUTE DE ALIMENTACIÓN ────────────────────────────────
         add_section_title_green(doc, 'INSPECCIÓN DE CHUTE DE ALIMENTACIÓN')
