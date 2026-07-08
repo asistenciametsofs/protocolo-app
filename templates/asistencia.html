@@ -29,6 +29,7 @@
         .links { display: flex; gap: 8px; margin-top: 16px; }
         .link-btn { flex: 1; padding: 10px; background: #f0f2f5; border-radius: 8px; text-align: center; text-decoration: none; color: #1a3a5c; font-size: 12px; font-weight: bold; }
     </style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 <div class="header">
@@ -40,8 +41,8 @@
     <div class="card">
         <div class="card-title">🔍 Buscar Personal</div>
         <div class="scanner-area">
-            📷 Escanea el código de barras del fotocheck<br>
-            <small>o ingresa el DNI manualmente abajo</small>
+            <button class="btn btn-buscar" onclick="toggleScanner()" id="btn_scanner" style="margin-bottom:8px">📷 Abrir cámara para escanear</button>
+            <div id="reader" style="display:none;width:100%"></div>
         </div>
         <label>DNI</label>
         <input type="text" id="dni_input" placeholder="Ingresa DNI" maxlength="20" oninput="this.value=this.value.toUpperCase()" onkeypress="if(event.key==='Enter') buscarPersonal()" autofocus>
@@ -151,6 +152,36 @@ function mostrarMensaje(texto, tipo) {
     el.textContent = texto;
     el.className = `mensaje msg-${tipo}`;
     el.style.display = 'block';
+}
+let scanner = null;
+let scannerActivo = false;
+
+function toggleScanner() {
+    if (scannerActivo) {
+        scanner.stop().then(() => {
+            document.getElementById('reader').style.display = 'none';
+            document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear';
+            scannerActivo = false;
+        });
+    } else {
+        document.getElementById('reader').style.display = 'block';
+        document.getElementById('btn_scanner').textContent = '⏹ Cerrar cámara';
+        scanner = new Html5Qrcode('reader');
+        scanner.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 250, height: 100 } },
+            (decodedText) => {
+                document.getElementById('dni_input').value = decodedText.replace(/\D/g,'').slice(0,8);
+                scanner.stop().then(() => {
+                    document.getElementById('reader').style.display = 'none';
+                    document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear';
+                    scannerActivo = false;
+                    buscarPersonal();
+                });
+            },
+            (error) => {}
+        ).then(() => { scannerActivo = true; });
+    }
 }
 </script>
 </body>
