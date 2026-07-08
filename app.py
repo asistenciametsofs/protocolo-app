@@ -1965,7 +1965,9 @@ def asistencia_registrar():
     dni = data.get('dni')
     tipo = data.get('tipo')  # 'ingreso' o 'salida'
     turno = data.get('turno', 'DIA')
-    ahora = datetime.now()
+    from datetime import timezone, timedelta
+    peru_tz = timezone(timedelta(hours=-5))
+    ahora = datetime.now(peru_tz).replace(tzinfo=None)
     fecha = ahora.date()
     if turno == 'NOCHE' and tipo == 'salida':
         from datetime import timedelta
