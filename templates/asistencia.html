@@ -44,7 +44,7 @@
             <small>o ingresa el DNI manualmente abajo</small>
         </div>
         <label>DNI</label>
-        <input type="text" id="dni_input" placeholder="Ingresa DNI" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')" onkeypress="if(event.key==='Enter') buscarPersonal()">
+        <input type="text" id="dni_input" placeholder="Ingresa DNI" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')" onkeypress="if(event.key==='Enter') buscarPersonal()" autofocus>
         <button class="btn btn-buscar" onclick="buscarPersonal()">🔍 Buscar</button>
 
         <div class="personal-card" id="personal_card">
