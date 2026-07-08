@@ -1895,7 +1895,212 @@ def planificacion():
                            dias=dias_sorted,
                            hoy=hoy.strftime('%Y-%m-%d'))
 
+# ══════════════════════════════════════════════════════════════
+# MÓDULO ASISTENCIA
+# ══════════════════════════════════════════════════════════════
 
+def init_asistencia_db():
+    try:
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS personal (
+                id SERIAL PRIMARY KEY,
+                um TEXT DEFAULT 'SMCV',
+                dni TEXT UNIQUE NOT NULL,
+                nombres TEXT NOT NULL,
+                perfil TEXT,
+                dia_cero TEXT,
+                gerencia TEXT,
+                tipo_contrato TEXT,
+                activo BOOLEAN DEFAULT TRUE
+            )
+        ''')
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS asistencia (
+                id SERIAL PRIMARY KEY,
+                dni TEXT NOT NULL,
+                fecha DATE NOT NULL,
+                turno TEXT DEFAULT 'DIA',
+                hora_ingreso TIMESTAMP,
+                hora_salida TIMESTAMP,
+                horas_trabajadas REAL,
+                horas_extras REAL,
+                fecha_registro TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        print('✅ Tablas asistencia listas')
+    except Exception as e:
+        print(f'❌ Error init_asistencia_db: {e}')
+
+with app.app_context():
+    init_asistencia_db()
+
+@app.route('/asistencia')
+def asistencia():
+    return render_template('asistencia.html')
+
+@app.route('/asistencia/buscar')
+def asistencia_buscar():
+    import psycopg2
+    dni = request.args.get('dni','').strip()
+    if not dni:
+        return {'error': 'DNI requerido'}, 400
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('SELECT dni, nombres, perfil, gerencia, tipo_contrato FROM personal WHERE dni = %s AND activo = TRUE', (dni,))
+    p = c.fetchone()
+    conn.close()
+    if not p:
+        return {'error': 'Personal no encontrado'}, 404
+    return {'dni': p[0], 'nombres': p[1], 'perfil': p[2], 'gerencia': p[3], 'tipo_contrato': p[4]}
+
+@app.route('/asistencia/registrar', methods=['POST'])
+def asistencia_registrar():
+    import psycopg2
+    from datetime import datetime
+    data = request.get_json()
+    dni = data.get('dni')
+    tipo = data.get('tipo')  # 'ingreso' o 'salida'
+    turno = data.get('turno', 'DIA')
+    ahora = datetime.now()
+    fecha = ahora.date()
+    if turno == 'NOCHE' and tipo == 'salida':
+        from datetime import timedelta
+        fecha = (ahora - timedelta(days=1)).date()
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    if tipo == 'ingreso':
+        c.execute('''INSERT INTO asistencia (dni, fecha, turno, hora_ingreso)
+                     VALUES (%s, %s, %s, %s)
+                     ON CONFLICT DO NOTHING''', (dni, fecha, turno, ahora))
+    else:
+        c.execute('''SELECT id, hora_ingreso FROM asistencia 
+                     WHERE dni = %s AND fecha = %s AND turno = %s AND hora_salida IS NULL
+                     ORDER BY hora_ingreso DESC LIMIT 1''', (dni, fecha, turno))
+        reg = c.fetchone()
+        if reg:
+            horas = (ahora - reg[1]).total_seconds() / 3600
+            extras = max(0, horas - 9.58)
+            c.execute('''UPDATE asistencia SET hora_salida = %s, horas_trabajadas = %s, horas_extras = %s
+                         WHERE id = %s''', (ahora, round(horas,2), round(extras,2), reg[0]))
+    conn.commit()
+    conn.close()
+    return {'ok': True, 'hora': ahora.strftime('%H:%M:%S')}
+
+@app.route('/asistencia/reporte')
+def asistencia_reporte():
+    import psycopg2
+    fecha_desde = request.args.get('desde', '')
+    fecha_hasta = request.args.get('hasta', '')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    query = '''SELECT a.dni, p.nombres, p.perfil, p.gerencia, a.fecha, a.turno,
+                      a.hora_ingreso, a.hora_salida, a.horas_trabajadas, a.horas_extras
+               FROM asistencia a
+               LEFT JOIN personal p ON a.dni = p.dni
+               WHERE 1=1'''
+    params = []
+    if fecha_desde:
+        query += ' AND a.fecha >= %s'
+        params.append(fecha_desde)
+    if fecha_hasta:
+        query += ' AND a.fecha <= %s'
+        params.append(fecha_hasta)
+    query += ' ORDER BY a.fecha DESC, p.nombres ASC'
+    c.execute(query, params)
+    registros = c.fetchall()
+    conn.close()
+    return render_template('asistencia_reporte.html', registros=registros, desde=fecha_desde, hasta=fecha_hasta)
+
+@app.route('/asistencia/exportar')
+def asistencia_exportar():
+    import psycopg2
+    import io
+    fecha_desde = request.args.get('desde', '')
+    fecha_hasta = request.args.get('hasta', '')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    query = '''SELECT a.dni, p.nombres, p.perfil, p.gerencia, p.tipo_contrato,
+                      a.fecha, a.turno, a.hora_ingreso, a.hora_salida, 
+                      a.horas_trabajadas, a.horas_extras
+               FROM asistencia a
+               LEFT JOIN personal p ON a.dni = p.dni
+               WHERE 1=1'''
+    params = []
+    if fecha_desde:
+        query += ' AND a.fecha >= %s'
+        params.append(fecha_desde)
+    if fecha_hasta:
+        query += ' AND a.fecha <= %s'
+        params.append(fecha_hasta)
+    query += ' ORDER BY a.fecha DESC, p.nombres ASC'
+    c.execute(query, params)
+    registros = c.fetchall()
+    conn.close()
+    output = io.StringIO()
+    output.write('DNI,NOMBRES,PERFIL,GERENCIA,TIPO CONTRATO,FECHA,TURNO,HORA INGRESO,HORA SALIDA,HORAS TRABAJADAS,HORAS EXTRAS\n')
+    for r in registros:
+        output.write(f'{r[0]},{r[1]},{r[2]},{r[3]},{r[4]},{r[5]},{r[6]},{str(r[7])[:16] if r[7] else ""},{str(r[8])[:16] if r[8] else ""},{r[9] or ""},{r[10] or ""}\n')
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode("utf-8-sig")),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'asistencia_{fecha_desde}_{fecha_hasta}.csv'
+    )
+
+@app.route('/asistencia/admin', methods=['GET','POST'])
+def asistencia_admin():
+    import psycopg2
+    admin_pass = os.environ.get('ADMIN_PASSWORD','admin123')
+    if request.method == 'POST':
+        accion = request.form.get('accion')
+        clave = request.form.get('clave','')
+        if clave != admin_pass:
+            return render_template('asistencia_admin.html', error='Clave incorrecta', personal=[])
+        if accion == 'agregar':
+            dni = request.form.get('dni')
+            nombres = request.form.get('nombres')
+            perfil = request.form.get('perfil')
+            gerencia = request.form.get('gerencia')
+            tipo_contrato = request.form.get('tipo_contrato')
+            conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+            c = conn.cursor()
+            c.execute('INSERT INTO personal (dni, nombres, perfil, gerencia, tipo_contrato) VALUES (%s,%s,%s,%s,%s) ON CONFLICT (dni) DO NOTHING',
+                      (dni, nombres, perfil, gerencia, tipo_contrato))
+            conn.commit()
+            conn.close()
+        elif accion == 'eliminar':
+            dni = request.form.get('dni')
+            conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+            c = conn.cursor()
+            c.execute('UPDATE personal SET activo = FALSE WHERE dni = %s', (dni,))
+            conn.commit()
+            conn.close()
+        elif accion == 'editar':
+            dni = request.form.get('dni')
+            nombres = request.form.get('nombres')
+            perfil = request.form.get('perfil')
+            gerencia = request.form.get('gerencia')
+            tipo_contrato = request.form.get('tipo_contrato')
+            conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+            c = conn.cursor()
+            c.execute('UPDATE personal SET nombres=%s, perfil=%s, gerencia=%s, tipo_contrato=%s WHERE dni=%s',
+                      (nombres, perfil, gerencia, tipo_contrato, dni))
+            conn.commit()
+            conn.close()
+    clave_ok = request.args.get('clave') == admin_pass or request.form.get('clave') == admin_pass
+    personal = []
+    if clave_ok or request.method == 'GET':
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('SELECT dni, nombres, perfil, gerencia, tipo_contrato FROM personal WHERE activo = TRUE ORDER BY nombres')
+        personal = c.fetchall()
+        conn.close()
+    return render_template('asistencia_admin.html', personal=personal, clave_ok=clave_ok, error=None)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
