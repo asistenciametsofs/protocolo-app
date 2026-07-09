@@ -29,10 +29,6 @@ def home():
 def mantenimiento():
     return render_template('index.html')
 
-@app.route('/inventarios')
-def inventarios():
-    return render_template('inventarios_login.html')
-
 @app.route('/armado')
 def armado():
     return render_template('armado.html')
