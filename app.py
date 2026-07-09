@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file 
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias
 from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
@@ -22,8 +22,16 @@ with app.app_context():
     init_db()
 
 @app.route('/')
-def index():
+def home():
+    return render_template('home.html')
+
+@app.route('/mantenimiento')
+def mantenimiento():
     return render_template('index.html')
+
+@app.route('/inventarios')
+def inventarios():
+    return render_template('inventarios_login.html')
 
 @app.route('/armado')
 def armado():
@@ -89,7 +97,7 @@ def guardar_armado_route():
         except Exception as e:
             print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
-    return redirect(url_for('index'))
+    return redirect(url_for('mantenimiento'))
 
 @app.route('/cambio')
 def cambio():
@@ -261,7 +269,7 @@ def guardar_cambio_route():
         except Exception as e:
             print(f'❌ Error correo: {e}')
     flash('✅ Protocolo guardado y enviado por correo!')
-    return redirect(url_for('index'))
+    return redirect(url_for('mantenimiento'))
 
 @app.route('/historial/<tipo>')
 def historial(tipo):
@@ -2108,6 +2116,294 @@ def asistencia_admin():
         personal = c.fetchall()
         conn.close()
     return render_template('asistencia_admin.html', personal=personal, clave_ok=clave_ok, error=None)
+
+# ══════════════════════════════════════════════════════════════
+# MÓDULO GESTIÓN DE INVENTARIOS — pegar en app.py antes de if __name__
+# ══════════════════════════════════════════════════════════════
+
+INVENTARIO_PASSWORD = os.environ.get('INVENTARIO_PASSWORD', 'SMCV2026')
+
+def init_inventario_db():
+    try:
+        import psycopg2
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS inventario_items (
+                id SERIAL PRIMARY KEY,
+                tipo TEXT NOT NULL,
+                descripcion TEXT NOT NULL,
+                categoria TEXT DEFAULT 'HERRAMIENTA',
+                ubicacion TEXT NOT NULL,
+                cantidad INTEGER DEFAULT 0,
+                costo_unitario NUMERIC DEFAULT 0,
+                estado TEXT DEFAULT 'OPERATIVO',
+                fecha_registro TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS inventario_movimientos (
+                id SERIAL PRIMARY KEY,
+                item_id INTEGER REFERENCES inventario_items(id),
+                tipo TEXT,
+                descripcion TEXT,
+                categoria TEXT,
+                ubicacion_origen TEXT,
+                responsable TEXT,
+                trabajador TEXT,
+                linea_destino TEXT,
+                cantidad INTEGER,
+                fecha DATE,
+                costo_total NUMERIC,
+                estado_aprobacion TEXT DEFAULT 'APROBADO',
+                estado_prestamo TEXT,
+                foto_url TEXT,
+                fecha_registro TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        print('✅ Tablas inventario listas')
+    except Exception as e:
+        print(f'❌ Error init_inventario_db: {e}')
+
+with app.app_context():
+    init_inventario_db()
+
+UBICACIONES_INV = ['LINEA 1', 'LINEA 2', 'CONTENEDOR', 'FEEDER']
+LINEAS_DESTINO = ['LINEA 1 - C1', 'LINEA 1 - C2', 'LINEA 2 - C1', 'LINEA 2 - C2']
+UMBRAL_APROBACION_INV = 500
+
+@app.route('/inventarios', methods=['GET', 'POST'])
+def inventarios():
+    if request.args.get('rol') == 'usuario':
+        session['inv_rol'] = 'usuario'
+        return redirect(url_for('inventarios_dashboard'))
+
+    error = None
+    if request.method == 'POST':
+        clave = request.form.get('clave', '')
+        if clave == INVENTARIO_PASSWORD:
+            session['inv_rol'] = 'almacenero'
+            return redirect(url_for('inventarios_dashboard'))
+        else:
+            error = 'Contraseña incorrecta'
+
+    return render_template('inventarios_login.html', error=error)
+
+@app.route('/inventarios/salir')
+def inventarios_salir():
+    session.pop('inv_rol', None)
+    return redirect(url_for('inventarios'))
+
+def _inv_requiere_rol():
+    """Devuelve el rol actual o None si no hay sesión iniciada."""
+    return session.get('inv_rol')
+
+@app.route('/inventarios/dashboard')
+def inventarios_dashboard():
+    rol = _inv_requiere_rol()
+    if not rol:
+        return redirect(url_for('inventarios'))
+
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
+    c = conn.cursor()
+    c.execute('SELECT * FROM inventario_items ORDER BY tipo')
+    items = c.fetchall()
+    c.execute("SELECT COUNT(*) as total FROM inventario_movimientos WHERE estado_prestamo = 'PRESTADO'")
+    prestamos = c.fetchone()['total']
+    conn.close()
+
+    criticos = [i for i in items if i['cantidad'] < 5]
+    total_unidades = sum(i['cantidad'] for i in items)
+    por_ubicacion = {}
+    for u in UBICACIONES_INV:
+        por_ubicacion[u] = sum(i['cantidad'] for i in items if i['ubicacion'] == u)
+
+    return render_template('inventarios_dashboard.html',
+        rol=rol, items=items, criticos=criticos,
+        total_unidades=total_unidades, por_ubicacion=por_ubicacion,
+        prestamos=prestamos)
+
+@app.route('/inventarios/catalogo', methods=['GET', 'POST'])
+def inventarios_catalogo():
+    rol = _inv_requiere_rol()
+    if not rol:
+        return redirect(url_for('inventarios'))
+
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    if request.method == 'POST' and rol == 'almacenero':
+        accion = request.form.get('accion')
+        if accion == 'agregar':
+            c.execute('''INSERT INTO inventario_items (tipo, descripcion, categoria, ubicacion, cantidad, costo_unitario, estado)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s)''',
+                      (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
+                       request.form.get('ubicacion'), int(request.form.get('cantidad') or 0),
+                       float(request.form.get('costo_unitario') or 0), request.form.get('estado')))
+            conn.commit()
+        elif accion == 'editar':
+            item_id = request.form.get('item_id')
+            c.execute('''UPDATE inventario_items SET tipo=%s, descripcion=%s, categoria=%s,
+                         cantidad=%s, costo_unitario=%s, estado=%s WHERE id=%s''',
+                      (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
+                       int(request.form.get('cantidad') or 0), float(request.form.get('costo_unitario') or 0),
+                       request.form.get('estado'), item_id))
+            conn.commit()
+        elif accion == 'eliminar':
+            item_id = request.form.get('item_id')
+            c.execute('DELETE FROM inventario_items WHERE id=%s', (item_id,))
+            conn.commit()
+
+    filtro_ubic = request.args.get('ubicacion', 'TODAS')
+    filtro_critico = request.args.get('critico', 'TODOS')
+    busqueda = request.args.get('q', '').strip()
+
+    query = 'SELECT * FROM inventario_items WHERE 1=1'
+    params = []
+    if filtro_ubic != 'TODAS':
+        query += ' AND ubicacion = %s'
+        params.append(filtro_ubic)
+    if filtro_critico == 'CRITICO':
+        query += ' AND cantidad < 5'
+    elif filtro_critico == 'NORMAL':
+        query += ' AND cantidad >= 5'
+    if busqueda:
+        query += ' AND (LOWER(descripcion) LIKE %s OR LOWER(tipo) LIKE %s)'
+        like = f'%{busqueda.lower()}%'
+        params += [like, like]
+    query += ' ORDER BY tipo'
+    c.execute(query, params)
+    cols = [d[0] for d in c.description]
+    items = [dict(zip(cols, row)) for row in c.fetchall()]
+    conn.close()
+
+    return render_template('inventarios_catalogo.html',
+        rol=rol, items=items, ubicaciones=UBICACIONES_INV,
+        filtro_ubic=filtro_ubic, filtro_critico=filtro_critico, busqueda=busqueda)
+
+@app.route('/inventarios/movimientos', methods=['GET', 'POST'])
+def inventarios_movimientos():
+    rol = _inv_requiere_rol()
+    if not rol:
+        return redirect(url_for('inventarios'))
+
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    if request.method == 'POST' and rol == 'almacenero':
+        item_id = int(request.form.get('item_id'))
+        cantidad = int(request.form.get('cantidad'))
+        ubicacion_origen = request.form.get('ubicacion_origen')
+        responsable = request.form.get('responsable')
+        trabajador = request.form.get('trabajador')
+        linea = request.form.get('linea')
+        fecha = request.form.get('fecha')
+
+        c.execute('SELECT tipo, descripcion, categoria, costo_unitario, cantidad FROM inventario_items WHERE id=%s', (item_id,))
+        item = c.fetchone()
+        if item:
+            tipo, descripcion, categoria, costo_unitario, disponible = item
+            if cantidad <= disponible:
+                foto_url = None
+                foto = request.files.get('foto')
+                if foto and foto.filename:
+                    try:
+                        resultado = cloudinary.uploader.upload(
+                            foto, folder='inventarios',
+                            transformation=[{'width': 600, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                        )
+                        foto_url = resultado['secure_url']
+                    except Exception as e:
+                        print(f'Error subiendo foto inventario: {e}')
+
+                c.execute('UPDATE inventario_items SET cantidad = cantidad - %s WHERE id=%s', (cantidad, item_id))
+
+                costo_total = float(costo_unitario) * cantidad
+                estado_aprobacion = 'PENDIENTE' if costo_total > UMBRAL_APROBACION_INV else 'APROBADO'
+                estado_prestamo = 'PRESTADO' if categoria == 'HERRAMIENTA' else None
+
+                c.execute('''INSERT INTO inventario_movimientos
+                    (item_id, tipo, descripcion, categoria, ubicacion_origen, responsable, trabajador,
+                     linea_destino, cantidad, fecha, costo_total, estado_aprobacion, estado_prestamo, foto_url)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+                    (item_id, tipo, descripcion, categoria, ubicacion_origen, responsable, trabajador,
+                     linea, cantidad, fecha, costo_total, estado_aprobacion, estado_prestamo, foto_url))
+                conn.commit()
+                flash('✅ Salida registrada')
+            else:
+                flash('❌ No hay stock suficiente en esa ubicación')
+        return redirect(url_for('inventarios_movimientos'))
+
+    c.execute('SELECT id, tipo, descripcion, ubicacion, cantidad FROM inventario_items WHERE cantidad > 0 ORDER BY tipo')
+    items_disponibles = c.fetchall()
+
+    c.execute('SELECT * FROM inventario_movimientos ORDER BY fecha_registro DESC LIMIT 100')
+    cols = [d[0] for d in c.description]
+    movimientos = [dict(zip(cols, row)) for row in c.fetchall()]
+    conn.close()
+
+    return render_template('inventarios_movimientos.html',
+        rol=rol, items_disponibles=items_disponibles, movimientos=movimientos,
+        lineas_destino=LINEAS_DESTINO, umbral=UMBRAL_APROBACION_INV,
+        fecha_hoy=__import__('datetime').datetime.now().strftime('%Y-%m-%d'))
+
+@app.route('/inventarios/movimientos/aprobar/<int:mov_id>', methods=['POST'])
+def inventarios_aprobar(mov_id):
+    if _inv_requiere_rol() != 'almacenero':
+        return redirect(url_for('inventarios'))
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute("UPDATE inventario_movimientos SET estado_aprobacion='APROBADO' WHERE id=%s", (mov_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('inventarios_movimientos'))
+
+@app.route('/inventarios/movimientos/devolver/<int:mov_id>', methods=['POST'])
+def inventarios_devolver(mov_id):
+    if _inv_requiere_rol() != 'almacenero':
+        return redirect(url_for('inventarios'))
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('SELECT item_id, cantidad FROM inventario_movimientos WHERE id=%s', (mov_id,))
+    row = c.fetchone()
+    if row:
+        item_id, cantidad = row
+        c.execute('UPDATE inventario_items SET cantidad = cantidad + %s WHERE id=%s', (cantidad, item_id))
+        c.execute("UPDATE inventario_movimientos SET estado_prestamo='DEVUELTO' WHERE id=%s", (mov_id,))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('inventarios_movimientos'))
+
+@app.route('/inventarios/exportar')
+def inventarios_exportar():
+    rol = _inv_requiere_rol()
+    if not rol:
+        return redirect(url_for('inventarios'))
+    import psycopg2, io
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('SELECT tipo, descripcion, categoria, ubicacion, cantidad, costo_unitario, estado FROM inventario_items ORDER BY tipo')
+    items = c.fetchall()
+    conn.close()
+    output = io.StringIO()
+    output.write('TIPO,DESCRIPCION,CATEGORIA,UBICACION,CANTIDAD,COSTO UNITARIO,ESTADO,CRITICO\n')
+    for r in items:
+        critico = 'SI' if r[4] < 5 else 'NO'
+        output.write(f'{r[0]},{r[1]},{r[2]},{r[3]},{r[4]},{r[5]},{r[6]},{critico}\n')
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode('utf-8-sig')),
+        mimetype='text/csv', as_attachment=True,
+        download_name=f'inventario_smcv_{__import__("datetime").datetime.now().strftime("%Y%m%d")}.csv'
+    )
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

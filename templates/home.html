@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metso Field Services - Inicio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .header { background: white; color: black; padding: 20px; text-align: center; border-bottom: 4px solid black; }
+        .header h1 { font-size: 20px; color: black; }
+        .header p { font-size: 13px; color: #444; margin-top: 4px; }
+        .metso-brand { font-weight: 900; color: black; font-size: 28px; letter-spacing: 2px; display: block; margin-bottom: 8px; }
+        .container { max-width: 480px; margin: 60px auto; padding: 0 16px; }
+        .option {
+            display: block;
+            background: white;
+            border-radius: 14px;
+            padding: 28px 24px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 6px solid #1a3a5c;
+            transition: transform 0.15s ease;
+        }
+        .option:active { transform: scale(0.98); }
+        .option.inventarios { border-left-color: #E8622C; }
+        .option .icon { font-size: 30px; margin-bottom: 10px; display: block; }
+        .option h2 { font-size: 17px; color: #1a3a5c; margin-bottom: 6px; }
+        .option.inventarios h2 { color: #E8622C; }
+        .option p { font-size: 13px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="metso-brand">METSO</span>
+        <h1>Sistema SMCV</h1>
+        <p>Selecciona el módulo al que deseas ingresar</p>
+    </div>
+    <div class="container">
+        <a href="{{ url_for('mantenimiento') }}" class="option">
+            <span class="icon">⚙️</span>
+            <h2>Gestión de Mantenimiento Chancadoras</h2>
+            <p>Protocolos, dashboard, historial, alturas de bowl y planificación MP1250</p>
+        </a>
+
+        <a href="{{ url_for('inventarios') }}" class="option inventarios">
+            <span class="icon">📦</span>
+            <h2>Gestión de Inventarios</h2>
+            <p>Herramientas, consumibles y EPP por ubicación, con control de stock crítico</p>
+        </a>
+    </div>
+</body>
+</html>

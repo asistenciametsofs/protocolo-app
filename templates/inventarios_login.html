@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventarios - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .header { background: white; color: black; padding: 20px; text-align: center; border-bottom: 4px solid #E8622C; }
+        .header h1 { font-size: 20px; color: #E8622C; }
+        .header p { font-size: 13px; color: #444; margin-top: 4px; }
+        .metso-brand { font-weight: 900; color: black; font-size: 26px; letter-spacing: 2px; display: block; margin-bottom: 6px; }
+        .container { max-width: 420px; margin: 50px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 12px; padding: 26px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .btn { display: block; width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; margin-bottom: 10px; }
+        .btn-usuario { background: #e8f0fe; color: #1a3a5c; }
+        .btn-almacenero { background: #E8622C; color: white; }
+        .divider { text-align: center; color: #999; font-size: 12px; margin: 14px 0; }
+        input[type=password] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 15px; margin-bottom: 10px; }
+        .error { background: #f8d7da; color: #842029; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; }
+        .hint { font-size: 11px; color: #999; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="metso-brand">METSO</span>
+        <h1>📦 Gestión de Inventarios</h1>
+        <p>SMCV · Cerro Verde</p>
+    </div>
+    <div class="container">
+        <div class="card">
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <a href="{{ url_for('inventarios', rol='usuario') }}" class="btn btn-usuario">👁 Ingresar como Usuario (solo ver)</a>
+
+            <div class="divider">— o —</div>
+
+            <form method="POST">
+                <label style="font-size:13px; color:#666; display:block; margin-bottom:6px;">Contraseña de Almacenero</label>
+                <input type="password" name="clave" placeholder="Contraseña" autofocus>
+                <button type="submit" class="btn btn-almacenero">🔧 Ingresar como Almacenero</button>
+            </form>
+
+            <p class="hint">El Almacenero puede añadir, editar, registrar salidas y devoluciones.<br>El Usuario solo consulta el stock.</p>
+        </div>
+    </div>
+</body>
+</html>

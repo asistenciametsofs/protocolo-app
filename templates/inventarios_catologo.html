@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventarios - Catálogo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .header { background: white; padding: 16px 20px; border-bottom: 4px solid #E8622C; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header h1 { font-size: 17px; color: #E8622C; }
+        .badge-rol { font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 20px; }
+        .badge-almacenero { background: #fde3d6; color: #E8622C; }
+        .badge-usuario { background: #e8f0fe; color: #1a3a5c; }
+        .nav { display: flex; gap: 8px; padding: 10px 16px; background: white; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+        .nav a { text-decoration: none; font-size: 13px; font-weight: bold; padding: 8px 14px; border-radius: 8px; background: #f0f2f5; color: #444; }
+        .nav a.active { background: #E8622C; color: white; }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+        .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .filtros input, .filtros select { padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; }
+        .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-orange { background: #E8622C; color: white; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-blue { background: #3B82C4; color: white; }
+        .btn-red { background: #c0392b; color: white; }
+        .btn-outline { background: white; border: 1px solid #ccc; color: #444; }
+        details.add-form { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        details.add-form summary { cursor: pointer; font-weight: bold; color: #E8622C; font-size: 14px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .form-grid input, .form-grid select { padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; }
+        .item-card { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #3B82C4; }
+        .item-card.critico { border-left-color: #c0392b; background: #fdf6f5; }
+        .item-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .item-desc { font-size: 14px; font-weight: bold; color: #333; }
+        .item-tipo { font-size: 11px; color: #888; }
+        .item-qty { font-size: 20px; font-weight: bold; color: #1a3a5c; }
+        .item-qty.critico { color: #c0392b; }
+        .tag { font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 20px; margin-right: 4px; }
+        .tag-epp { background: #e8f0fe; color: #3B82C4; }
+        .tag-herramienta { background: #f0e8fd; color: #7c3aed; }
+        .tag-consumible { background: #fff4d6; color: #b7860b; }
+        .item-meta { font-size: 12px; color: #666; margin-top: 6px; }
+        .item-actions { margin-top: 10px; display: flex; gap: 8px; }
+        details.edit-form { margin-top: 10px; }
+        details.edit-form summary { font-size: 12px; color: #3B82C4; cursor: pointer; }
+        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+        .edit-grid input, .edit-grid select { padding: 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 Gestión de Inventarios</h1>
+        <span class="badge-rol {{ 'badge-almacenero' if rol == 'almacenero' else 'badge-usuario' }}">
+            {{ 'ALMACENERO' if rol == 'almacenero' else 'USUARIO' }}
+        </span>
+    </div>
+    <div class="nav">
+        <a href="{{ url_for('inventarios_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('inventarios_catalogo') }}" class="active">Catálogo</a>
+        <a href="{{ url_for('inventarios_movimientos') }}">Movimientos</a>
+    </div>
+
+    <div class="container">
+        <form method="GET" class="filtros">
+            <input type="text" name="q" placeholder="Buscar tipo o descripción..." value="{{ busqueda }}">
+            <select name="ubicacion">
+                <option value="TODAS" {{ 'selected' if filtro_ubic == 'TODAS' }}>Todas las ubicaciones</option>
+                {% for u in ubicaciones %}
+                <option value="{{ u }}" {{ 'selected' if filtro_ubic == u }}>{{ u }}</option>
+                {% endfor %}
+            </select>
+            <select name="critico">
+                <option value="TODOS" {{ 'selected' if filtro_critico == 'TODOS' }}>Crítico y normal</option>
+                <option value="CRITICO" {{ 'selected' if filtro_critico == 'CRITICO' }}>Solo críticos</option>
+                <option value="NORMAL" {{ 'selected' if filtro_critico == 'NORMAL' }}>Solo normales</option>
+            </select>
+            <button type="submit" class="btn btn-outline">Filtrar</button>
+            <a href="{{ url_for('inventarios_exportar') }}" class="btn btn-green">⬇ Exportar CSV</a>
+        </form>
+
+        {% if rol == 'almacenero' %}
+        <details class="add-form">
+            <summary>➕ Añadir nuevo ítem</summary>
+            <form method="POST">
+                <input type="hidden" name="accion" value="agregar">
+                <div class="form-grid">
+                    <input type="text" name="tipo" placeholder="Tipo (ej. CASCO)" required>
+                    <input type="text" name="descripcion" placeholder="Descripción" required>
+                    <select name="categoria">
+                        <option value="HERRAMIENTA">HERRAMIENTA</option>
+                        <option value="EPP">EPP</option>
+                        <option value="CONSUMIBLE">CONSUMIBLE</option>
+                    </select>
+                    <select name="ubicacion">
+                        {% for u in ubicaciones %}
+                        <option value="{{ u }}">{{ u }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="cantidad" placeholder="Cantidad" min="0" required>
+                    <input type="number" name="costo_unitario" placeholder="Costo unit. (S/)" min="0" step="0.01">
+                    <select name="estado">
+                        <option value="OPERATIVO">OPERATIVO</option>
+                        <option value="EN MANTENIMIENTO">EN MANTENIMIENTO</option>
+                        <option value="DE BAJA">DE BAJA</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-orange" style="margin-top:10px;">Guardar ítem</button>
+            </form>
+        </details>
+        {% endif %}
+
+        <p style="font-size:12px; color:#888; margin-bottom:10px;">Mostrando {{ items|length }} ítems</p>
+
+        {% for item in items %}
+        <div class="item-card {{ 'critico' if item.cantidad < 5 }}">
+            <div class="item-top">
+                <div>
+                    <span class="tag tag-{{ item.categoria|lower }}">{{ item.categoria }}</span>
+                    <div class="item-desc">{{ item.descripcion }}</div>
+                    <div class="item-tipo">{{ item.tipo }} · {{ item.ubicacion }}</div>
+                </div>
+                <div class="item-qty {{ 'critico' if item.cantidad < 5 }}">{{ item.cantidad }}</div>
+            </div>
+            <div class="item-meta">Costo unit.: S/ {{ '%.2f'|format(item.costo_unitario) }} · Estado: {{ item.estado }}</div>
+
+            {% if rol == 'almacenero' %}
+            <div class="item-actions">
+                <form method="POST" onsubmit="return confirm('¿Eliminar este ítem?');">
+                    <input type="hidden" name="accion" value="eliminar">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <button type="submit" class="btn btn-red">Eliminar</button>
+                </form>
+            </div>
+            <details class="edit-form">
+                <summary>✏️ Editar</summary>
+                <form method="POST">
+                    <input type="hidden" name="accion" value="editar">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <div class="edit-grid">
+                        <input type="text" name="tipo" value="{{ item.tipo }}">
+                        <input type="text" name="descripcion" value="{{ item.descripcion }}">
+                        <select name="categoria">
+                            <option value="HERRAMIENTA" {{ 'selected' if item.categoria == 'HERRAMIENTA' }}>HERRAMIENTA</option>
+                            <option value="EPP" {{ 'selected' if item.categoria == 'EPP' }}>EPP</option>
+                            <option value="CONSUMIBLE" {{ 'selected' if item.categoria == 'CONSUMIBLE' }}>CONSUMIBLE</option>
+                        </select>
+                        <input type="number" name="cantidad" value="{{ item.cantidad }}">
+                        <input type="number" name="costo_unitario" value="{{ item.costo_unitario }}" step="0.01">
+                        <select name="estado">
+                            <option value="OPERATIVO" {{ 'selected' if item.estado == 'OPERATIVO' }}>OPERATIVO</option>
+                            <option value="EN MANTENIMIENTO" {{ 'selected' if item.estado == 'EN MANTENIMIENTO' }}>EN MANTENIMIENTO</option>
+                            <option value="DE BAJA" {{ 'selected' if item.estado == 'DE BAJA' }}>DE BAJA</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-blue" style="margin-top:8px;">Guardar cambios</button>
+                </form>
+            </details>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
