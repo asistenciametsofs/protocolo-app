@@ -69,11 +69,11 @@
         </div>
         <div class="kpi">
             <div class="kpi-label">Total horas trabajadas</div>
-            <div class="kpi-valor">{{ "%.1f"|format(registros|sum(attribute=8) if registros else 0) }}</div>
+            <div class="kpi-valor">{{ "%.1f"|format(registros|sum(attribute=8)) }}</div>
         </div>
         <div class="kpi">
             <div class="kpi-label">Total horas extras</div>
-            <div class="kpi-valor" style="color:#dc3545">{{ "%.1f"|format(registros|sum(attribute=9) if registros else 0) }}</div>
+            <div class="kpi-valor" style="color:#dc3545">{{ "%.1f"|format(registros|sum(attribute=9)) }}</div>
         </div>
     </div>
 
