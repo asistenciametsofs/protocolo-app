@@ -2015,7 +2015,12 @@ def asistencia_reporte():
     c.execute(query, params)
     registros = c.fetchall()
     conn.close()
-    return render_template('asistencia_reporte.html', registros=registros, desde=fecha_desde, hasta=fecha_hasta)
+# Convertir None a 0 en horas
+    registros_limpios = [list(r) for r in registros]
+    for r in registros_limpios:
+        r[8] = r[8] or 0
+        r[9] = r[9] or 0
+    return render_template('asistencia_reporte.html', registros=registros_limpios, desde=fecha_desde, hasta=fecha_hasta)
 
 @app.route('/asistencia/exportar')
 def asistencia_exportar():
