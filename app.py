@@ -1949,17 +1949,19 @@ def asistencia():
 @app.route('/asistencia/buscar')
 def asistencia_buscar():
     import psycopg2
-    dni = request.args.get('dni','').strip()
-    if not dni:
-        return {'error': 'DNI requerido'}, 400
+    busqueda = request.args.get('dni','').strip()
+    if not busqueda:
+        return {'error': 'DNI o fotocheck requerido'}, 400
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
-    c.execute('SELECT dni, nombres, perfil, gerencia, tipo_contrato FROM personal WHERE dni = %s AND activo = TRUE', (dni,))
+    c.execute('''SELECT dni, nombres, perfil, gerencia, tipo_contrato, fotocheck 
+                 FROM personal 
+                 WHERE (dni = %s OR fotocheck = %s) AND activo = TRUE''', (busqueda, busqueda))
     p = c.fetchone()
     conn.close()
     if not p:
         return {'error': 'Personal no encontrado'}, 404
-    return {'dni': p[0], 'nombres': p[1], 'perfil': p[2], 'gerencia': p[3], 'tipo_contrato': p[4]}
+    return {'dni': p[0], 'nombres': p[1], 'perfil': p[2], 'gerencia': p[3], 'tipo_contrato': p[4], 'fotocheck': p[5]}
 
 @app.route('/asistencia/registrar', methods=['POST'])
 def asistencia_registrar():
@@ -1988,10 +1990,24 @@ def asistencia_registrar():
                      ORDER BY hora_ingreso DESC LIMIT 1''', (dni, fecha, turno))
         reg = c.fetchone()
         if reg:
-            horas = (ahora - reg[1]).total_seconds() / 3600
-            extras = max(0, horas - 9.58)
-            c.execute('''UPDATE asistencia SET hora_salida = %s, horas_trabajadas = %s, horas_extras = %s
-                         WHERE id = %s''', (ahora, round(horas,2), round(extras,2), reg[0]))
+            horas_brutas = (ahora - reg[1]).total_seconds() / 3600
+            horas_sin_refri = horas_brutas - 0.75
+            horas_normales = 9.58
+            extras_total = max(0, horas_sin_refri - horas_normales)
+            # Verificar si es sábado(5) o domingo(6)
+            if ahora.weekday() in [5, 6]:
+                extras_25 = 0
+                extras_35 = 0
+                extras_100 = extras_total
+            else:
+                extras_25 = min(extras_total, 2.0)
+                extras_35 = min(max(0, extras_total - 2.0), 1.0)
+                extras_100 = 0
+            c.execute('''UPDATE asistencia SET hora_salida = %s, horas_trabajadas = %s,
+                         horas_extras = %s, extras_25 = %s, extras_35 = %s, extras_100 = %s
+                         WHERE id = %s''',
+                      (ahora, round(horas_sin_refri,2), round(extras_total,2),
+                       round(extras_25,2), round(extras_35,2), round(extras_100,2), reg[0]))
     conn.commit()
     conn.close()
     return {'ok': True, 'hora': ahora.strftime('%H:%M:%S')}
