@@ -2046,13 +2046,17 @@ def asistencia_reporte():
 def asistencia_exportar():
     import psycopg2
     import io
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    
     fecha_desde = request.args.get('desde', '')
     fecha_hasta = request.args.get('hasta', '')
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
     query = '''SELECT a.dni, p.nombres, p.perfil, p.gerencia, p.tipo_contrato,
                       a.fecha, a.turno, a.hora_ingreso, a.hora_salida, 
-                      a.horas_trabajadas, a.horas_extras
+                      a.horas_trabajadas, a.horas_extras,
+                      a.extras_25, a.extras_35, a.extras_100
                FROM asistencia a
                LEFT JOIN personal p ON a.dni = p.dni
                WHERE 1=1'''
@@ -2067,17 +2071,53 @@ def asistencia_exportar():
     c.execute(query, params)
     registros = c.fetchall()
     conn.close()
-    output = io.StringIO()
-    output.write('DNI,NOMBRES,PERFIL,GERENCIA,TIPO CONTRATO,FECHA,TURNO,HORA INGRESO,HORA SALIDA,HORAS TRABAJADAS,HORAS EXTRAS\n')
-    for r in registros:
-        output.write(f'{r[0]},{r[1]},{r[2]},{r[3]},{r[4]},{r[5]},{r[6]},{str(r[7])[:16] if r[7] else ""},{str(r[8])[:16] if r[8] else ""},{r[9] or ""},{r[10] or ""}\n')
-    output.seek(0)
-    return send_file(
-        io.BytesIO(output.getvalue().encode("utf-8-sig")),
-        mimetype='text/csv',
-        as_attachment=True,
-        download_name=f'asistencia_{fecha_desde}_{fecha_hasta}.csv'
-    )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Asistencia'
+
+    # Encabezados
+    headers = ['DNI','NOMBRES','PERFIL','GERENCIA','TIPO CONTRATO','FECHA','TURNO',
+               'HORA INGRESO','HORA SALIDA','H. TRABAJADAS','H. EXTRAS TOTAL',
+               'H. EXTRAS 25%','H. EXTRAS 35%','H. EXTRAS 100%']
+    
+    header_fill = PatternFill(start_color='1A3A5C', end_color='1A3A5C', fill_type='solid')
+    header_font = Font(bold=True, color='FFFFFF')
+    
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Datos
+    for row_idx, r in enumerate(registros, 2):
+        ws.cell(row=row_idx, column=1, value=r[0])
+        ws.cell(row=row_idx, column=2, value=r[1])
+        ws.cell(row=row_idx, column=3, value=r[2])
+        ws.cell(row=row_idx, column=4, value=r[3])
+        ws.cell(row=row_idx, column=5, value=r[4])
+        ws.cell(row=row_idx, column=6, value=str(r[5]))
+        ws.cell(row=row_idx, column=7, value=r[6])
+        ws.cell(row=row_idx, column=8, value=r[7].strftime('%H:%M') if r[7] else '')
+        ws.cell(row=row_idx, column=9, value=r[8].strftime('%H:%M') if r[8] else '')
+        ws.cell(row=row_idx, column=10, value=r[9] or 0)
+        ws.cell(row=row_idx, column=11, value=r[10] or 0)
+        ws.cell(row=row_idx, column=12, value=r[11] or 0)
+        ws.cell(row=row_idx, column=13, value=r[12] or 0)
+        ws.cell(row=row_idx, column=14, value=r[13] or 0)
+
+    # Ancho columnas
+    anchos = [12,35,25,15,15,12,8,12,12,14,14,14,14,14]
+    for i, ancho in enumerate(anchos, 1):
+        ws.column_dimensions[ws.cell(row=1,column=i).column_letter].width = ancho
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return send_file(buffer, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     as_attachment=True,
+                     download_name=f'asistencia_{fecha_desde}_{fecha_hasta}.xlsx')
 
 @app.route('/asistencia/admin', methods=['GET','POST'])
 def asistencia_admin():
