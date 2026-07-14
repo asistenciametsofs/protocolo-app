@@ -42,7 +42,7 @@
     <div class="card">
         <div class="card-title">🔍 Filtros</div>
         <form method="GET" action="/asistencia/reporte">
-            <div class="filtros">
+            <div class="filtros" style="grid-template-columns: 1fr 1fr 1fr auto auto;">
                 <div>
                     <label>Desde</label>
                     <input type="date" name="desde" value="{{ desde }}">
@@ -51,8 +51,12 @@
                     <label>Hasta</label>
                     <input type="date" name="hasta" value="{{ hasta }}">
                 </div>
+                <div>
+                    <label>DNI</label>
+                    <input type="text" name="dni" value="{{ dni_filtro }}" placeholder="Filtrar por DNI">
+                </div>
                 <button type="submit" class="btn btn-filtrar">🔍 Filtrar</button>
-                <a href="/asistencia/exportar?desde={{ desde }}&hasta={{ hasta }}" class="btn btn-excel">📥 Excel</a>
+                <a href="/asistencia/exportar?desde={{ desde }}&hasta={{ hasta }}&dni={{ dni_filtro }}" class="btn btn-excel">📥 Excel</a>
             </div>
         </form>
     </div>

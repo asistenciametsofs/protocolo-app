@@ -2017,6 +2017,7 @@ def asistencia_reporte():
     import psycopg2
     fecha_desde = request.args.get('desde', '')
     fecha_hasta = request.args.get('hasta', '')
+    dni_filtro = request.args.get('dni', '')
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
     query = '''SELECT a.dni, p.nombres, p.perfil, p.gerencia, a.fecha, a.turno,
@@ -2031,6 +2032,9 @@ def asistencia_reporte():
     if fecha_hasta:
         query += ' AND a.fecha <= %s'
         params.append(fecha_hasta)
+    if dni_filtro:
+        query += ' AND a.dni = %s'
+        params.append(dni_filtro)
     query += ' ORDER BY a.fecha DESC, p.nombres ASC'
     c.execute(query, params)
     registros = c.fetchall()
@@ -2040,7 +2044,7 @@ def asistencia_reporte():
     for r in registros_limpios:
         r[8] = r[8] or 0
         r[9] = r[9] or 0
-    return render_template('asistencia_reporte.html', registros=registros_limpios, desde=fecha_desde, hasta=fecha_hasta)
+    return render_template('asistencia_reporte.html', registros=registros_limpios, desde=fecha_desde, hasta=fecha_hasta, dni_filtro=dni_filtro)
 
 @app.route('/asistencia/exportar')
 def asistencia_exportar():
