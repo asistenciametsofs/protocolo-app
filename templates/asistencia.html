@@ -169,7 +169,7 @@ function toggleScanner() {
         scanner = new Html5Qrcode('reader');
         scanner.start(
             { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 250, height: 100 } },
+            { fps: 10, qrbox: { width: 300, height: 150 } },
             (decodedText) => {
                 // Extraer DNI del QR peruano
                 let dniExtraido = '';
@@ -180,7 +180,8 @@ function toggleScanner() {
                 } else {
                     dniExtraido = decodedText.replace(/\D/g,'').slice(0,8);
                 }
-                document.getElementById('dni_input').value = dniExtraido;
+
+                document.getElementById('dni_input').value = decodedText.trim();
                 scanner.stop().then(() => {
                     document.getElementById('reader').style.display = 'none';
                     document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear';
