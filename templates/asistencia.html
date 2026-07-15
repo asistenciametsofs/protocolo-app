@@ -152,7 +152,8 @@ function toggleScanner() {
             { fps: 10, qrbox: { width: 250, height: 100 } },
             (decodedText) => {
                 // Poner el texto completo escaneado y buscar
-                document.getElementById('dni_input').value = decodedText.trim();
+                const soloNumeros = decodedText.match(/\d{10}/);
+                document.getElementById('dni_input').value = soloNumeros ? soloNumeros[0] : decodedText.trim();
                 scanner.stop().then(() => {
                     document.getElementById('reader').style.display = 'none';
                     document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear fotocheck';
