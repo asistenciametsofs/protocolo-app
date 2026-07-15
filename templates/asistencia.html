@@ -180,7 +180,11 @@ function toggleScanner() {
                     dniExtraido = decodedText.replace(/\D/g,'').slice(0,8);
                 }
 
-                document.getElementById('dni_input').value = decodedText.trim();
+                // Extraer 10 dígitos del fotocheck o 8 del DNI
+                const match10 = decodedText.match(/\d{10}/);
+                const match8 = decodedText.match(/\d{8}/);
+                const valor = match10 ? match10[0] : (match8 ? match8[0] : decodedText.trim());
+                document.getElementById('dni_input').value = valor;
                 scanner.stop().then(() => {
                     document.getElementById('reader').style.display = 'none';
                     document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear';
