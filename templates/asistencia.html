@@ -29,7 +29,7 @@
         .links { display: flex; gap: 8px; margin-top: 16px; }
         .link-btn { flex: 1; padding: 10px; background: #f0f2f5; border-radius: 8px; text-align: center; text-decoration: none; color: #1a3a5c; font-size: 12px; font-weight: bold; }
     </style>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 <div class="header">
@@ -41,11 +41,11 @@
     <div class="card">
         <div class="card-title">🔍 Buscar Personal</div>
         <div class="scanner-area">
-            <button class="btn btn-buscar" onclick="toggleScanner()" id="btn_scanner" style="margin-bottom:8px">📷 Abrir cámara para escanear</button>
+            <button class="btn btn-buscar" onclick="toggleScanner()" id="btn_scanner" style="margin-bottom:8px">📷 Abrir cámara para escanear fotocheck</button>
             <div id="reader" style="display:none;width:100%"></div>
         </div>
-        <label>DNI</label>
-        <input type="text" id="dni_input" placeholder="Ingresa DNI o escanea fotocheck" maxlength="20" onkeypress="if(event.key==='Enter') buscarPersonal()" autofocus>
+        <label>DNI (ingreso manual)</label>
+        <input type="text" id="dni_input" placeholder="Ingresa DNI" maxlength="20" onkeypress="if(event.key==='Enter') buscarPersonal()" autofocus>
         <button class="btn btn-buscar" onclick="buscarPersonal()">🔍 Buscar</button>
         <div class="personal-card" id="personal_card">
             <div class="personal-nombre" id="p_nombre"></div>
@@ -73,33 +73,16 @@
 
 <script>
 let dniActual = '';
+let scanner = null;
+let scannerActivo = false;
 
-// Auto-focus para escaneo de código de barras
 document.getElementById('dni_input').focus();
 
-// Detectar escaneo (el scanner escribe rápido y presiona Enter)
-let scanBuffer = '';
-let scanTimer = null;
-document.addEventListener('keypress', function(e) {
-    if (document.activeElement === document.getElementById('dni_input')) return;
-    if (e.key === 'Enter') {
-        if (scanBuffer.length >= 6) {
-            document.getElementById('dni_input').value = scanBuffer;
-            buscarPersonal();
-        }
-        scanBuffer = '';
-    } else {
-        scanBuffer += e.key;
-        clearTimeout(scanTimer);
-        scanTimer = setTimeout(() => { scanBuffer = ''; }, 100);
-    }
-});
-
 async function buscarPersonal() {
-    const dni = document.getElementById('dni_input').value.trim();
-    if (!dni) return;
+    const valor = document.getElementById('dni_input').value.trim();
+    if (!valor) return;
     try {
-        const res = await fetch(`/asistencia/buscar?dni=${dni}`);
+        const res = await fetch(`/asistencia/buscar?dni=${valor}`);
         const data = await res.json();
         if (data.error) {
             mostrarMensaje(data.error, 'err');
@@ -152,14 +135,12 @@ function mostrarMensaje(texto, tipo) {
     el.className = `mensaje msg-${tipo}`;
     el.style.display = 'block';
 }
-let scanner = null;
-let scannerActivo = false;
 
 function toggleScanner() {
     if (scannerActivo) {
         scanner.stop().then(() => {
             document.getElementById('reader').style.display = 'none';
-            document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear';
+            document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear fotocheck';
             scannerActivo = false;
         });
     } else {
@@ -168,26 +149,13 @@ function toggleScanner() {
         scanner = new Html5Qrcode('reader');
         scanner.start(
             { facingMode: 'environment' },
-            { fps: 30, qrbox: { width: 350, height: 80 }, formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.EAN_13] },
+            { fps: 10, qrbox: { width: 250, height: 100 } },
             (decodedText) => {
-                // Extraer DNI del QR peruano
-                let dniExtraido = '';
-                // Buscar 8 dígitos seguidos en el texto
-                const match = decodedText.match(/\b\d{8}\b/);
-                if (match) {
-                    dniExtraido = match[0];
-                } else {
-                    dniExtraido = decodedText.replace(/\D/g,'').slice(0,8);
-                }
-
-                // Extraer 10 dígitos del fotocheck o 8 del DNI
-                const match10 = decodedText.match(/\d{10}/);
-                const match8 = decodedText.match(/\d{8}/);
-                const valor = match10 ? match10[0] : (match8 ? match8[0] : decodedText.trim());
-                document.getElementById('dni_input').value = valor;
+                // Poner el texto completo escaneado y buscar
+                document.getElementById('dni_input').value = decodedText.trim();
                 scanner.stop().then(() => {
                     document.getElementById('reader').style.display = 'none';
-                    document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear';
+                    document.getElementById('btn_scanner').textContent = '📷 Abrir cámara para escanear fotocheck';
                     scannerActivo = false;
                     buscarPersonal();
                 });
