@@ -45,9 +45,8 @@
             <div id="reader" style="display:none;width:100%"></div>
         </div>
         <label>DNI</label>
-        <input type="text" id="dni_input" placeholder="Ingresa DNI" maxlength="20" oninput="this.value=this.value.toUpperCase()" onkeypress="if(event.key==='Enter') buscarPersonal()" autofocus>
+        <input type="text" id="dni_input" placeholder="Ingresa DNI o escanea fotocheck" maxlength="20" onkeypress="if(event.key==='Enter') buscarPersonal()" autofocus>
         <button class="btn btn-buscar" onclick="buscarPersonal()">🔍 Buscar</button>
-
         <div class="personal-card" id="personal_card">
             <div class="personal-nombre" id="p_nombre"></div>
             <div class="personal-info" id="p_info"></div>
@@ -169,7 +168,7 @@ function toggleScanner() {
         scanner = new Html5Qrcode('reader');
         scanner.start(
             { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 300, height: 150 } },
+            { fps: 30, qrbox: { width: 350, height: 80 }, formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.EAN_13] },
             (decodedText) => {
                 // Extraer DNI del QR peruano
                 let dniExtraido = '';
