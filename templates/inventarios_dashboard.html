@@ -74,6 +74,14 @@
                 <div class="label">Herramientas prestadas</div>
                 <div class="value">{{ prestamos }}</div>
             </div>
+            <div class="kpi critico">
+                <div class="label">Inoperativos / Observados</div>
+                <div class="value">{{ no_operativos|length }}</div>
+            </div>
+            <div class="kpi critico">
+                <div class="label">Mantto. próximos (60 días)</div>
+                <div class="value">{{ proximos_mantto|length }}</div>
+            </div>
         </div>
 
         <div class="card">
@@ -87,7 +95,7 @@
         </div>
 
         <div class="card">
-            <h2>⚠️ Ítems en estado crítico (stock menor a 5)</h2>
+            <h2>⚠️ Ítems en estado crítico (bajo su stock mínimo)</h2>
             {% if criticos|length == 0 %}
                 <p style="font-size:13px; color:#999;">No hay ítems críticos por ahora.</p>
             {% endif %}
@@ -95,9 +103,43 @@
             <div class="critico-item">
                 <div>
                     <div class="desc">{{ item.descripcion }}</div>
-                    <div class="tipo">{{ item.tipo }} · {{ item.ubicacion }}</div>
+                    <div class="tipo">{{ item.tipo }} · {{ item.ubicacion }} · mínimo: {{ item.stock_minimo or 5 }}</div>
                 </div>
                 <div class="qty">{{ item.cantidad }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>🚫 Ítems Inoperativos / Observados</h2>
+            {% if no_operativos|length == 0 %}
+                <p style="font-size:13px; color:#999;">No hay ítems inoperativos u observados por ahora.</p>
+            {% endif %}
+            {% for item in no_operativos %}
+            <div class="critico-item">
+                <div>
+                    <div class="desc">{{ item.descripcion }} <span style="font-size:10px; font-weight:bold; padding:2px 8px; border-radius:20px; background:{{ '#fdecea' if item.estado == 'INOPERATIVO' else '#fff4d6' }}; color:{{ '#c0392b' if item.estado == 'INOPERATIVO' else '#b7860b' }};">{{ item.estado }}</span></div>
+                    <div class="tipo">{{ item.tipo }} · {{ item.ubicacion }}</div>
+                    {% if item.observacion %}<div style="font-size:12px; color:#c0392b; margin-top:4px;">{{ item.observacion }}</div>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>🛠️ Próximos mantenimientos (menos de 2 meses)</h2>
+            {% if proximos_mantto|length == 0 %}
+                <p style="font-size:13px; color:#999;">No hay mantenimientos próximos a vencer en los próximos 60 días.</p>
+            {% endif %}
+            {% for item in proximos_mantto %}
+            <div class="critico-item" style="border-left-color: {{ '#c0392b' if item.dias_restantes < 0 else '#e0a800' }};">
+                <div>
+                    <div class="desc">{{ item.descripcion }}</div>
+                    <div class="tipo">{{ item.tipo }} · {{ item.ubicacion }} · {{ item.fecha_prox_parsed }}</div>
+                </div>
+                <div class="qty" style="color: {{ '#c0392b' if item.dias_restantes < 0 else '#e0a800' }};">
+                    {% if item.dias_restantes < 0 %}Vencido hace {{ -item.dias_restantes }} días{% else %}En {{ item.dias_restantes }} días{% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
