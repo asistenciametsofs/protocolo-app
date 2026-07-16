@@ -2208,6 +2208,7 @@ def init_inventario_db():
         c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS proveedor TEXT")
         c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS observacion TEXT")
         c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS certificado_url TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS stock_minimo INTEGER DEFAULT 5")
         c.execute('''
             CREATE TABLE IF NOT EXISTS inventario_movimientos (
                 id SERIAL PRIMARY KEY,
@@ -2267,6 +2268,47 @@ def _inv_requiere_rol():
     """Devuelve el rol actual o None si no hay sesión iniciada."""
     return session.get('inv_rol')
 
+
+# ══════════════════════════════════════════════════════════════
+# REEMPLAZA tu función @app.route('/inventarios/dashboard') completa por esta
+# ══════════════════════════════════════════════════════════════
+
+def _inv_parsear_fecha(texto):
+    """Intenta parsear una fecha en varios formatos comunes. Devuelve un date o None."""
+    if not texto:
+        return None
+    texto = str(texto).strip()
+    if not texto:
+        return None
+    from datetime import datetime as _dt
+    formatos = ['%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%d/%m/%y', '%d-%m-%y', '%Y/%m/%d']
+    for fmt in formatos:
+        try:
+            return _dt.strptime(texto, fmt).date()
+        except ValueError:
+            continue
+    return None
+
+# ══════════════════════════════════════════════════════════════
+# REEMPLAZA tu función @app.route('/inventarios/dashboard') completa por esta
+# ══════════════════════════════════════════════════════════════
+
+def _inv_parsear_fecha(texto):
+    """Intenta parsear una fecha en varios formatos comunes. Devuelve un date o None."""
+    if not texto:
+        return None
+    texto = str(texto).strip()
+    if not texto:
+        return None
+    from datetime import datetime as _dt
+    formatos = ['%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%d/%m/%y', '%d-%m-%y', '%Y/%m/%d']
+    for fmt in formatos:
+        try:
+            return _dt.strptime(texto, fmt).date()
+        except ValueError:
+            continue
+    return None
+
 @app.route('/inventarios/dashboard')
 def inventarios_dashboard():
     rol = _inv_requiere_rol()
@@ -2275,6 +2317,7 @@ def inventarios_dashboard():
 
     import psycopg2
     from psycopg2.extras import RealDictCursor
+    from datetime import date, timedelta
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'), cursor_factory=RealDictCursor)
     c = conn.cursor()
     c.execute('SELECT * FROM inventario_items ORDER BY tipo')
@@ -2283,17 +2326,28 @@ def inventarios_dashboard():
     prestamos = c.fetchone()['total']
     conn.close()
 
-    criticos = [i for i in items if i['cantidad'] < 5]
+    criticos = [i for i in items if i['cantidad'] < (i.get('stock_minimo') or 5)]
     total_unidades = sum(i['cantidad'] for i in items)
     por_ubicacion = {}
     for u in UBICACIONES_INV:
         por_ubicacion[u] = sum(i['cantidad'] for i in items if i['ubicacion'] == u)
 
-    return render_template('inventarios_dashboard.html',
-        rol=rol, items=items, criticos=criticos,
-        total_unidades=total_unidades, por_ubicacion=por_ubicacion,
-        prestamos=prestamos)
+    no_operativos = [i for i in items if str(i.get('estado') or '').strip().upper() in ('INOPERATIVO', 'OBSERVADO')]
 
+    hoy = date.today()
+    limite = hoy + timedelta(days=60)
+    proximos_mantto = []
+    for i in items:
+        fecha_prox = _inv_parsear_fecha(i.get('proximo_mantto'))
+        if fecha_prox and fecha_prox <= limite:
+            dias_restantes = (fecha_prox - hoy).days
+            proximos_mantto.append({**i, 'fecha_prox_parsed': fecha_prox, 'dias_restantes': dias_restantes})
+    proximos_mantto.sort(key=lambda x: x['dias_restantes'])
+
+    return render_template('inventarios_dashboard.html',
+        rol=rol, items=items, criticos=criticos, total_unidades=total_unidades,
+        por_ubicacion=por_ubicacion, prestamos=prestamos,
+        no_operativos=no_operativos, proximos_mantto=proximos_mantto)
 # ══════════════════════════════════════════════════════════════
 # REEMPLAZA tu función @app.route('/inventarios/catalogo') completa por esta
 # ══════════════════════════════════════════════════════════════
@@ -2327,8 +2381,8 @@ def inventarios_catalogo():
                 (tipo, descripcion, categoria, ubicacion, cantidad, costo_unitario, estado,
                  codigo_interno, n_serie, modelo_parte, fecha_certificado, anio_fab,
                  ultimo_mantto, proximo_mantto, estatus_certificacion, proveedor,
-                 observacion, certificado_url)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+                 observacion, certificado_url, stock_minimo)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
                 (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
                  request.form.get('ubicacion'), int(request.form.get('cantidad') or 0),
                  float(request.form.get('costo_unitario') or 0), request.form.get('estado'),
@@ -2336,7 +2390,8 @@ def inventarios_catalogo():
                  request.form.get('fecha_certificado'), request.form.get('anio_fab'),
                  request.form.get('ultimo_mantto'), request.form.get('proximo_mantto'),
                  request.form.get('estatus_certificacion'), request.form.get('proveedor'),
-                 request.form.get('observacion'), certificado_url))
+                 request.form.get('observacion'), certificado_url,
+                 int(request.form.get('stock_minimo') or 5)))
             conn.commit()
 
         elif accion == 'editar':
@@ -2346,7 +2401,7 @@ def inventarios_catalogo():
                     cantidad=%s, costo_unitario=%s, estado=%s,
                     codigo_interno=%s, n_serie=%s, modelo_parte=%s, fecha_certificado=%s, anio_fab=%s,
                     ultimo_mantto=%s, proximo_mantto=%s, estatus_certificacion=%s, proveedor=%s,
-                    observacion=%s, certificado_url=%s
+                    observacion=%s, certificado_url=%s, stock_minimo=%s
                     WHERE id=%s''',
                     (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
                      int(request.form.get('cantidad') or 0), float(request.form.get('costo_unitario') or 0),
@@ -2355,13 +2410,14 @@ def inventarios_catalogo():
                      request.form.get('fecha_certificado'), request.form.get('anio_fab'),
                      request.form.get('ultimo_mantto'), request.form.get('proximo_mantto'),
                      request.form.get('estatus_certificacion'), request.form.get('proveedor'),
-                     request.form.get('observacion'), certificado_url, item_id))
+                     request.form.get('observacion'), certificado_url,
+                     int(request.form.get('stock_minimo') or 5), item_id))
             else:
                 c.execute('''UPDATE inventario_items SET tipo=%s, descripcion=%s, categoria=%s,
                     cantidad=%s, costo_unitario=%s, estado=%s,
                     codigo_interno=%s, n_serie=%s, modelo_parte=%s, fecha_certificado=%s, anio_fab=%s,
                     ultimo_mantto=%s, proximo_mantto=%s, estatus_certificacion=%s, proveedor=%s,
-                    observacion=%s
+                    observacion=%s, stock_minimo=%s
                     WHERE id=%s''',
                     (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
                      int(request.form.get('cantidad') or 0), float(request.form.get('costo_unitario') or 0),
@@ -2370,7 +2426,7 @@ def inventarios_catalogo():
                      request.form.get('fecha_certificado'), request.form.get('anio_fab'),
                      request.form.get('ultimo_mantto'), request.form.get('proximo_mantto'),
                      request.form.get('estatus_certificacion'), request.form.get('proveedor'),
-                     request.form.get('observacion'), item_id))
+                     request.form.get('observacion'), int(request.form.get('stock_minimo') or 5), item_id))
             conn.commit()
 
         elif accion == 'eliminar':
@@ -2400,14 +2456,14 @@ def inventarios_catalogo():
         query += ' AND estatus_certificacion = %s'
         params.append(filtro_estatus)
     if filtro_critico == 'CRITICO':
-        query += ' AND cantidad < 5'
+        query += ' AND cantidad < COALESCE(stock_minimo, 5)'
     elif filtro_critico == 'NORMAL':
-        query += ' AND cantidad >= 5'
+        query += ' AND cantidad >= COALESCE(stock_minimo, 5)'
     if busqueda:
         query += ' AND (LOWER(descripcion) LIKE %s OR LOWER(tipo) LIKE %s OR LOWER(COALESCE(n_serie,\'\')) LIKE %s)'
         like = f'%{busqueda.lower()}%'
         params += [like, like, like]
-    query += ' ORDER BY tipo'
+    query += ' ORDER BY ubicacion, tipo'
     c.execute(query, params)
     cols = [d[0] for d in c.description]
     items = [dict(zip(cols, row)) for row in c.fetchall()]
