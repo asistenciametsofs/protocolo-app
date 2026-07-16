@@ -2197,6 +2197,17 @@ def init_inventario_db():
                 fecha_registro TIMESTAMP DEFAULT NOW()
             )
         ''')
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS codigo_interno TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS n_serie TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS modelo_parte TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS fecha_certificado TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS anio_fab TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS ultimo_mantto TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS proximo_mantto TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS estatus_certificacion TEXT DEFAULT 'SIN CERTIFICACION'")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS proveedor TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS observacion TEXT")
+        c.execute("ALTER TABLE inventario_items ADD COLUMN IF NOT EXISTS certificado_url TEXT")
         c.execute('''
             CREATE TABLE IF NOT EXISTS inventario_movimientos (
                 id SERIAL PRIMARY KEY,
@@ -2283,6 +2294,10 @@ def inventarios_dashboard():
         total_unidades=total_unidades, por_ubicacion=por_ubicacion,
         prestamos=prestamos)
 
+# ══════════════════════════════════════════════════════════════
+# REEMPLAZA tu función @app.route('/inventarios/catalogo') completa por esta
+# ══════════════════════════════════════════════════════════════
+
 @app.route('/inventarios/catalogo', methods=['GET', 'POST'])
 def inventarios_catalogo():
     rol = _inv_requiere_rol()
@@ -2295,27 +2310,78 @@ def inventarios_catalogo():
 
     if request.method == 'POST' and rol == 'almacenero':
         accion = request.form.get('accion')
+
+        certificado_url = None
+        archivo = request.files.get('certificado')
+        if archivo and archivo.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    archivo, folder='certificados', resource_type='auto'
+                )
+                certificado_url = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo certificado: {e}')
+
         if accion == 'agregar':
-            c.execute('''INSERT INTO inventario_items (tipo, descripcion, categoria, ubicacion, cantidad, costo_unitario, estado)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s)''',
-                      (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
-                       request.form.get('ubicacion'), int(request.form.get('cantidad') or 0),
-                       float(request.form.get('costo_unitario') or 0), request.form.get('estado')))
+            c.execute('''INSERT INTO inventario_items
+                (tipo, descripcion, categoria, ubicacion, cantidad, costo_unitario, estado,
+                 codigo_interno, n_serie, modelo_parte, fecha_certificado, anio_fab,
+                 ultimo_mantto, proximo_mantto, estatus_certificacion, proveedor,
+                 observacion, certificado_url)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+                (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
+                 request.form.get('ubicacion'), int(request.form.get('cantidad') or 0),
+                 float(request.form.get('costo_unitario') or 0), request.form.get('estado'),
+                 request.form.get('codigo_interno'), request.form.get('n_serie'), request.form.get('modelo_parte'),
+                 request.form.get('fecha_certificado'), request.form.get('anio_fab'),
+                 request.form.get('ultimo_mantto'), request.form.get('proximo_mantto'),
+                 request.form.get('estatus_certificacion'), request.form.get('proveedor'),
+                 request.form.get('observacion'), certificado_url))
             conn.commit()
+
         elif accion == 'editar':
             item_id = request.form.get('item_id')
-            c.execute('''UPDATE inventario_items SET tipo=%s, descripcion=%s, categoria=%s,
-                         cantidad=%s, costo_unitario=%s, estado=%s WHERE id=%s''',
-                      (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
-                       int(request.form.get('cantidad') or 0), float(request.form.get('costo_unitario') or 0),
-                       request.form.get('estado'), item_id))
+            if certificado_url:
+                c.execute('''UPDATE inventario_items SET tipo=%s, descripcion=%s, categoria=%s,
+                    cantidad=%s, costo_unitario=%s, estado=%s,
+                    codigo_interno=%s, n_serie=%s, modelo_parte=%s, fecha_certificado=%s, anio_fab=%s,
+                    ultimo_mantto=%s, proximo_mantto=%s, estatus_certificacion=%s, proveedor=%s,
+                    observacion=%s, certificado_url=%s
+                    WHERE id=%s''',
+                    (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
+                     int(request.form.get('cantidad') or 0), float(request.form.get('costo_unitario') or 0),
+                     request.form.get('estado'),
+                     request.form.get('codigo_interno'), request.form.get('n_serie'), request.form.get('modelo_parte'),
+                     request.form.get('fecha_certificado'), request.form.get('anio_fab'),
+                     request.form.get('ultimo_mantto'), request.form.get('proximo_mantto'),
+                     request.form.get('estatus_certificacion'), request.form.get('proveedor'),
+                     request.form.get('observacion'), certificado_url, item_id))
+            else:
+                c.execute('''UPDATE inventario_items SET tipo=%s, descripcion=%s, categoria=%s,
+                    cantidad=%s, costo_unitario=%s, estado=%s,
+                    codigo_interno=%s, n_serie=%s, modelo_parte=%s, fecha_certificado=%s, anio_fab=%s,
+                    ultimo_mantto=%s, proximo_mantto=%s, estatus_certificacion=%s, proveedor=%s,
+                    observacion=%s
+                    WHERE id=%s''',
+                    (request.form.get('tipo'), request.form.get('descripcion'), request.form.get('categoria'),
+                     int(request.form.get('cantidad') or 0), float(request.form.get('costo_unitario') or 0),
+                     request.form.get('estado'),
+                     request.form.get('codigo_interno'), request.form.get('n_serie'), request.form.get('modelo_parte'),
+                     request.form.get('fecha_certificado'), request.form.get('anio_fab'),
+                     request.form.get('ultimo_mantto'), request.form.get('proximo_mantto'),
+                     request.form.get('estatus_certificacion'), request.form.get('proveedor'),
+                     request.form.get('observacion'), item_id))
             conn.commit()
+
         elif accion == 'eliminar':
             item_id = request.form.get('item_id')
             c.execute('DELETE FROM inventario_items WHERE id=%s', (item_id,))
             conn.commit()
 
     filtro_ubic = request.args.get('ubicacion', 'TODAS')
+    filtro_tipo = request.args.get('tipo', 'TODOS')
+    filtro_estado = request.args.get('estado', 'TODOS')
+    filtro_estatus = request.args.get('estatus', 'TODOS')
     filtro_critico = request.args.get('critico', 'TODOS')
     busqueda = request.args.get('q', '').strip()
 
@@ -2324,23 +2390,36 @@ def inventarios_catalogo():
     if filtro_ubic != 'TODAS':
         query += ' AND ubicacion = %s'
         params.append(filtro_ubic)
+    if filtro_tipo != 'TODOS':
+        query += ' AND tipo = %s'
+        params.append(filtro_tipo)
+    if filtro_estado != 'TODOS':
+        query += ' AND estado = %s'
+        params.append(filtro_estado)
+    if filtro_estatus != 'TODOS':
+        query += ' AND estatus_certificacion = %s'
+        params.append(filtro_estatus)
     if filtro_critico == 'CRITICO':
         query += ' AND cantidad < 5'
     elif filtro_critico == 'NORMAL':
         query += ' AND cantidad >= 5'
     if busqueda:
-        query += ' AND (LOWER(descripcion) LIKE %s OR LOWER(tipo) LIKE %s)'
+        query += ' AND (LOWER(descripcion) LIKE %s OR LOWER(tipo) LIKE %s OR LOWER(COALESCE(n_serie,\'\')) LIKE %s)'
         like = f'%{busqueda.lower()}%'
-        params += [like, like]
+        params += [like, like, like]
     query += ' ORDER BY tipo'
     c.execute(query, params)
     cols = [d[0] for d in c.description]
     items = [dict(zip(cols, row)) for row in c.fetchall()]
+
+    c.execute('SELECT DISTINCT tipo FROM inventario_items ORDER BY tipo')
+    tipos_lista = [r[0] for r in c.fetchall()]
     conn.close()
 
     return render_template('inventarios_catalogo.html',
-        rol=rol, items=items, ubicaciones=UBICACIONES_INV,
-        filtro_ubic=filtro_ubic, filtro_critico=filtro_critico, busqueda=busqueda)
+        rol=rol, items=items, ubicaciones=UBICACIONES_INV, tipos_lista=tipos_lista,
+        filtro_ubic=filtro_ubic, filtro_tipo=filtro_tipo, filtro_estado=filtro_estado,
+        filtro_estatus=filtro_estatus, filtro_critico=filtro_critico, busqueda=busqueda)
 
 @app.route('/inventarios/movimientos', methods=['GET', 'POST'])
 def inventarios_movimientos():
@@ -2438,6 +2517,10 @@ def inventarios_devolver(mov_id):
     conn.close()
     return redirect(url_for('inventarios_movimientos'))
 
+# ══════════════════════════════════════════════════════════════
+# REEMPLAZA tu función @app.route('/inventarios/exportar') completa por esta
+# ══════════════════════════════════════════════════════════════
+
 @app.route('/inventarios/exportar')
 def inventarios_exportar():
     rol = _inv_requiere_rol()
@@ -2446,14 +2529,19 @@ def inventarios_exportar():
     import psycopg2, io
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
-    c.execute('SELECT tipo, descripcion, categoria, ubicacion, cantidad, costo_unitario, estado FROM inventario_items ORDER BY tipo')
+    c.execute('''SELECT ubicacion, cantidad, tipo, descripcion, codigo_interno, n_serie, modelo_parte,
+                 fecha_certificado, anio_fab, ultimo_mantto, proximo_mantto, estatus_certificacion,
+                 proveedor, estado, observacion, categoria, costo_unitario
+                 FROM inventario_items ORDER BY tipo''')
     items = c.fetchall()
     conn.close()
     output = io.StringIO()
-    output.write('TIPO,DESCRIPCION,CATEGORIA,UBICACION,CANTIDAD,COSTO UNITARIO,ESTADO,CRITICO\n')
+    output.write('UBICACION,CANT.,TIPO,DESCRIPCION,CODIGO INTERNO METSO,N SERIE,MODELO/N PARTE,FECHA CERTIFICADO,AÑO FAB,ULTIMO MANTTO,PROXIMO MANTTO,ESTATUS CERTIFICACION,PROVEEDOR,ESTADO,OBSERVACION,CATEGORIA,COSTO UNITARIO (S/),CRITICO\n')
     for r in items:
-        critico = 'SI' if r[4] < 5 else 'NO'
-        output.write(f'{r[0]},{r[1]},{r[2]},{r[3]},{r[4]},{r[5]},{r[6]},{critico}\n')
+        vals = [str(v) if v is not None else '' for v in r]
+        critico = 'SI' if r[1] is not None and r[1] < 5 else 'NO'
+        linea = ','.join(v.replace(',', ';') for v in vals) + f',{critico}'
+        output.write(linea + '\n')
     output.seek(0)
     return send_file(
         io.BytesIO(output.getvalue().encode('utf-8-sig')),
