@@ -146,9 +146,10 @@
         const registros = {{ registros | tojson }};
         window.registros = registros;
         const LIMITE = 9.0;
-        const fechas = registros.map(r => String(r[0]));
-        const alturas = registros.map(r => parseFloat(r[1]));
-        const diasParada = registros.map(r => parseInt(r[3]) || 0);
+        const fechas = registros.map(r => String(r[1]));
+        console.log('fechas:', fechas, 'alturas:', alturas);
+        const alturas = registros.map(r => parseFloat(r[2]));
+        const diasParada = registros.map(r => parseInt(r[4]) || 0);
         const partes0 = fechas[0].split('-');
         const t0 = new Date(partes0[0], partes0[1]-1, partes0[2]);
         const diasCalendario = fechas.map(f => { const p = f.split('-'); return (new Date(p[0],p[1]-1,p[2]) - t0)/86400000; });
