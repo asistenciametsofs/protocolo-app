@@ -147,7 +147,6 @@
         window.registros = registros;
         const LIMITE = 9.0;
         const fechas = registros.map(r => String(r[1]));
-        console.log('fechas:', fechas, 'alturas:', alturas);
         const alturas = registros.map(r => parseFloat(r[2]));
         const diasParada = registros.map(r => parseInt(r[4]) || 0);
         const partes0 = fechas[0].split('-');
