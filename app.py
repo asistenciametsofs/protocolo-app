@@ -1021,7 +1021,7 @@ def alturas():
     chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
     chancadora_sel = request.args.get('chancadora', request.form.get('chancadora', 'CR011'))
     
-    c.execute('''SELECT fecha, altura, operador, dias_parada FROM altura_bowl
+    c.execute('''SELECT id, fecha, altura, operador, dias_parada FROM altura_bowl
              WHERE chancadora = %s AND (ciclo_cerrado = FALSE OR ciclo_cerrado IS NULL)
              ORDER BY fecha ASC''', (chancadora_sel,))
     registros = c.fetchall()
@@ -1032,6 +1032,40 @@ def alturas():
                            chancadora_sel=chancadora_sel,
                            chancadoras=chancadoras)
 
+@app.route('/alturas/editar/<int:id>', methods=['POST'])
+def alturas_editar(id):
+    import psycopg2
+    clave = request.form.get('clave')
+    admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    if clave != admin_pass:
+        return redirect(request.referrer)
+    fecha = request.form.get('fecha')
+    altura = request.form.get('altura')
+    operador = request.form.get('operador')
+    dias_parada = request.form.get('dias_parada', 0)
+    chancadora = request.form.get('chancadora')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('''UPDATE altura_bowl SET fecha=%s, altura=%s, operador=%s, dias_parada=%s
+                 WHERE id=%s''', (fecha, altura, operador, dias_parada, id))
+    conn.commit()
+    conn.close()
+    return redirect(f'/alturas?chancadora={chancadora}')
+
+@app.route('/alturas/eliminar/<int:id>', methods=['POST'])
+def alturas_eliminar(id):
+    import psycopg2
+    clave = request.form.get('clave')
+    admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    if clave != admin_pass:
+        return redirect(request.referrer)
+    chancadora = request.form.get('chancadora')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('DELETE FROM altura_bowl WHERE id=%s', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(f'/alturas?chancadora={chancadora}')
 
 @app.route('/alturas/nuevo_ciclo', methods=['POST'])
 def alturas_nuevo_ciclo():
