@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Protocolo Armado</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #0f5132; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #0f5132; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-title { font-size: 15px; font-weight: bold; color: #0f5132; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #d1e7dd; }
+        label { display: block; font-size: 12px; color: #555; margin-bottom: 3px; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-submit { display: block; width: 100%; padding: 14px; background: #0f5132; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; }
+        .aviso { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>✏️ Editar Protocolo de Armado</h1>
+</div>
+<div class="container">
+    <a href="/historial/armado" class="btn-back">← Volver al historial</a>
+    
+    <div class="aviso">⚠️ Solo edita los campos que necesitan corrección. Los demás déjalos igual.</div>
+
+    <form method="POST" action="/editar/armado/{{ datos.id }}/guardar">
+        
+        <div class="card">
+            <div class="card-title">Datos Generales</div>
+            <div class="grid2">
+                <div><label>Equipo</label><input type="text" name="equipo" value="{{ datos.equipo or '' }}"></div>
+                <div><label>Cliente</label><input type="text" name="cliente" value="{{ datos.cliente or '' }}"></div>
+                <div><label>ID Bowl</label><input type="text" name="id_bowl" value="{{ datos.id_bowl or '' }}"></div>
+                <div><label>ID Head</label><input type="text" name="id_head" value="{{ datos.id_head or '' }}"></div>
+                <div><label>Supervisor Metso</label><input type="text" name="supervisor_metso" value="{{ datos.supervisor_metso or '' }}"></div>
+                <div><label>Supervisor Cliente</label><input type="text" name="supervisor_cliente" value="{{ datos.supervisor_cliente or '' }}"></div>
+                <div><label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{ datos.fecha_inicio or '' }}"></div>
+                <div><label>Fecha Término</label><input type="date" name="fecha_termino" value="{{ datos.fecha_termino or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Upper Bushing</div>
+            <div class="grid2">
+                <div><label>A1</label><input type="number" step="0.01" name="upper_a1" value="{{ datos.upper_a1 or '' }}"></div>
+                <div><label>B1</label><input type="number" step="0.01" name="upper_b1" value="{{ datos.upper_b1 or '' }}"></div>
+                <div><label>A2</label><input type="number" step="0.01" name="upper_a2" value="{{ datos.upper_a2 or '' }}"></div>
+                <div><label>B2</label><input type="number" step="0.01" name="upper_b2" value="{{ datos.upper_b2 or '' }}"></div>
+                <div><label>A3</label><input type="number" step="0.01" name="upper_a3" value="{{ datos.upper_a3 or '' }}"></div>
+                <div><label>B3</label><input type="number" step="0.01" name="upper_b3" value="{{ datos.upper_b3 or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Lower Bushing</div>
+            <div class="grid2">
+                <div><label>A1</label><input type="number" step="0.01" name="lower_a1" value="{{ datos.lower_a1 or '' }}"></div>
+                <div><label>B1</label><input type="number" step="0.01" name="lower_b1" value="{{ datos.lower_b1 or '' }}"></div>
+                <div><label>A2</label><input type="number" step="0.01" name="lower_a2" value="{{ datos.lower_a2 or '' }}"></div>
+                <div><label>B2</label><input type="number" step="0.01" name="lower_b2" value="{{ datos.lower_b2 or '' }}"></div>
+                <div><label>A3</label><input type="number" step="0.01" name="lower_a3" value="{{ datos.lower_a3 or '' }}"></div>
+                <div><label>B3</label><input type="number" step="0.01" name="lower_b3" value="{{ datos.lower_b3 or '' }}"></div>
+                <div><label>A4</label><input type="number" step="0.01" name="lower_a4" value="{{ datos.lower_a4 or '' }}"></div>
+                <div><label>B4</label><input type="number" step="0.01" name="lower_b4" value="{{ datos.lower_b4 or '' }}"></div>
+                <div><label>A5</label><input type="number" step="0.01" name="lower_a5" value="{{ datos.lower_a5 or '' }}"></div>
+                <div><label>B5</label><input type="number" step="0.01" name="lower_b5" value="{{ datos.lower_b5 or '' }}"></div>
+                <div><label>A6</label><input type="number" step="0.01" name="lower_a6" value="{{ datos.lower_a6 or '' }}"></div>
+                <div><label>B6</label><input type="number" step="0.01" name="lower_b6" value="{{ datos.lower_b6 or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Feed Plate</div>
+            <div class="grid2">
+                <div><label>Altura Feed Plate (mm)</label><input type="number" step="0.01" name="feed_plate_altura" value="{{ datos.feed_plate_altura or '' }}"></div>
+                <div><label>Desgaste Feed Plate</label><input type="number" step="0.01" name="feed_plate_desgaste" value="{{ datos.feed_plate_desgaste or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Recomendaciones</div>
+            <textarea name="recomendaciones" rows="4">{{ datos.recomendaciones or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">💾 Guardar cambios</button>
+    </form>
+</div>
+</body>
+</html>

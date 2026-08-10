@@ -3215,6 +3215,31 @@ def editar_cambio_guardar(id):
     conn.commit()
     conn.close()
     return redirect('/historial/cambio')
+@app.route('/editar/armado/<int:id>', methods=['GET'])
+def editar_armado(id):
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('SELECT * FROM armado_hb WHERE id = %s', (id,))
+    registro = c.fetchone()
+    cols = [desc[0] for desc in c.description]
+    conn.close()
+    datos = dict(zip(cols, registro))
+    return render_template('editar_armado.html', datos=datos)
+
+@app.route('/editar/armado/<int:id>/guardar', methods=['POST'])
+def editar_armado_guardar(id):
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    campos = request.form.keys()
+    sets = ', '.join([f'{campo} = %s' for campo in campos])
+    valores = [request.form.get(campo) for campo in campos]
+    valores.append(id)
+    c.execute(f'UPDATE armado_hb SET {sets} WHERE id = %s', valores)
+    conn.commit()
+    conn.close()
+    return redirect('/historial/armado')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
