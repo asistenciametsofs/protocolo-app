@@ -3190,6 +3190,32 @@ def inventarios_importar():
     flash(f'✅ Se importaron {len(DATOS_INVENTARIO_INICIAL)} ítems reales del inventario')
     return redirect(url_for('inventarios_catalogo'))
 
+@app.route('/editar/cambio/<int:id>', methods=['GET'])
+def editar_cambio(id):
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    c.execute('SELECT * FROM cambio_hb WHERE id = %s', (id,))
+    registro = c.fetchone()
+    cols = [desc[0] for desc in c.description]
+    conn.close()
+    datos = dict(zip(cols, registro))
+    return render_template('editar_cambio.html', datos=datos)
+
+@app.route('/editar/cambio/<int:id>/guardar', methods=['POST'])
+def editar_cambio_guardar(id):
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    campos = request.form.keys()
+    sets = ', '.join([f'{campo} = %s' for campo in campos])
+    valores = [request.form.get(campo) for campo in campos]
+    valores.append(id)
+    c.execute(f'UPDATE cambio_hb SET {sets} WHERE id = %s', valores)
+    conn.commit()
+    conn.close()
+    return redirect('/historial/cambio')
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Protocolo Cambio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .header { background: #0f5132; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 18px; }
+        .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+        .btn-back { display: block; text-align: center; padding: 12px; color: #0f5132; text-decoration: none; font-size: 14px; margin-bottom: 16px; }
+        .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-title { font-size: 15px; font-weight: bold; color: #0f5132; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #d1e7dd; }
+        label { display: block; font-size: 12px; color: #555; margin-bottom: 3px; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-submit { display: block; width: 100%; padding: 14px; background: #0f5132; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; }
+        .aviso { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>✏️ Editar Protocolo de Cambio</h1>
+</div>
+<div class="container">
+    <a href="/historial/cambio" class="btn-back">← Volver al historial</a>
+    
+    <div class="aviso">⚠️ Solo edita los campos que necesitan corrección. Los demás déjalos igual.</div>
+
+    <form method="POST" action="/editar/cambio/{{ datos.id }}/guardar">
+        
+        <div class="card">
+            <div class="card-title">Datos Generales</div>
+            <div class="grid2">
+                <div><label>Chancadora</label><input type="text" name="chancadora" value="{{ datos.chancadora or '' }}"></div>
+                <div><label>Cliente</label><input type="text" name="cliente" value="{{ datos.cliente or '' }}"></div>
+                <div><label>Supervisor Metso</label><input type="text" name="supervisor_metso" value="{{ datos.supervisor_metso or '' }}"></div>
+                <div><label>Supervisor Cliente</label><input type="text" name="supervisor_cliente" value="{{ datos.supervisor_cliente or '' }}"></div>
+                <div><label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{ datos.fecha_inicio or '' }}"></div>
+                <div><label>Fecha Término</label><input type="date" name="fecha_termino" value="{{ datos.fecha_termino or '' }}"></div>
+                <div><label>Head Saliente</label><input type="text" name="head_saliente" value="{{ datos.head_saliente or '' }}"></div>
+                <div><label>Bowl Saliente</label><input type="text" name="bowl_saliente" value="{{ datos.bowl_saliente or '' }}"></div>
+                <div><label>Head Entrante</label><input type="text" name="head_entrante" value="{{ datos.head_entrante or '' }}"></div>
+                <div><label>Bowl Entrante</label><input type="text" name="bowl_entrante" value="{{ datos.bowl_entrante or '' }}"></div>
+                <div><label>Altura Bowl Saliente</label><input type="number" step="0.01" name="altura_bowl_saliente" value="{{ datos.altura_bowl_saliente or '' }}"></div>
+                <div><label>Altura Final Bowl</label><input type="number" step="0.01" name="altura_final_bowl" value="{{ datos.altura_final_bowl or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Socket Liner</div>
+            <div class="grid2">
+                <div><label>GAP Interior (mm)</label><input type="number" step="0.01" name="sl_gap_interior" value="{{ datos.sl_gap_interior or '' }}"></div>
+                <div><label>GAP Exterior (mm)</label><input type="number" step="0.01" name="sl_gap_exterior" value="{{ datos.sl_gap_exterior or '' }}"></div>
+                <div><label>Medida A</label><input type="number" step="0.01" name="socket_med_a" value="{{ datos.socket_med_a or '' }}"></div>
+                <div><label>Medida B</label><input type="number" step="0.01" name="socket_med_b" value="{{ datos.socket_med_b or '' }}"></div>
+                <div><label>Medida C</label><input type="number" step="0.01" name="socket_med_c" value="{{ datos.socket_med_c or '' }}"></div>
+                <div><label>Medida D</label><input type="number" step="0.01" name="socket_med_d" value="{{ datos.socket_med_d or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Main Frame Liners</div>
+            <div class="grid2">
+                <div><label>MFL A (mm)</label><input type="number" step="0.01" name="mfl_med_a" value="{{ datos.mfl_med_a or '' }}"></div>
+                <div><label>MFL B (mm)</label><input type="number" step="0.01" name="mfl_med_b" value="{{ datos.mfl_med_b or '' }}"></div>
+                <div><label>MFL C (mm)</label><input type="number" step="0.01" name="mfl_med_c" value="{{ datos.mfl_med_c or '' }}"></div>
+                <div><label>MFL D (mm)</label><input type="number" step="0.01" name="mfl_med_d" value="{{ datos.mfl_med_d or '' }}"></div>
+                <div><label>MFL E (mm)</label><input type="number" step="0.01" name="mfl_med_e" value="{{ datos.mfl_med_e or '' }}"></div>
+                <div><label>MFL F (mm)</label><input type="number" step="0.01" name="mfl_med_f" value="{{ datos.mfl_med_f or '' }}"></div>
+                <div><label>MFL G (mm)</label><input type="number" step="0.01" name="mfl_med_g" value="{{ datos.mfl_med_g or '' }}"></div>
+                <div><label>MFL H (mm)</label><input type="number" step="0.01" name="mfl_med_h" value="{{ datos.mfl_med_h or '' }}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Guard Pins</div>
+            <div class="grid2">
+                {% for i in range(1,7) %}
+                <div><label>Guard Pin {{ i }} (mm)</label><input type="number" step="0.01" name="gp{{ i }}_medida" value="{{ datos['gp' ~ i ~ '_medida'] or '' }}"></div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Recomendaciones</div>
+            <textarea name="recomendaciones" rows="4">{{ datos.recomendaciones or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">💾 Guardar cambios</button>
+    </form>
+</div>
+</body>
+</html>
