@@ -131,8 +131,7 @@
                         <button onclick="abrirEditar({{ r[0] }}, '{{ r[1] }}', {{ r[2] }}, '{{ r[3] or '' }}', {{ r[4] or 0 }})" style="background:#f39c12;color:white;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11px">✏️</button>
                         <form method="POST" action="/alturas/eliminar/{{ r[0] }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta medición?')">
                             <input type="hidden" name="chancadora" value="{{ chancadora_sel }}">
-                            <input type="hidden" name="clave" id="clave_del_{{ r[0] }}">
-                            <button type="submit" onclick="document.getElementById('clave_del_{{ r[0] }}').value=prompt('Clave admin:')" style="background:#e74c3c;color:white;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11px">🗑️</button>
+                            <button type="submit" style="background:#e74c3c;color:white;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11px">🗑️</button>
                         </form>
                     </td>
                 </tr>
