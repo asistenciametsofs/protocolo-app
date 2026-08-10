@@ -1035,10 +1035,6 @@ def alturas():
 @app.route('/alturas/editar/<int:id>', methods=['POST'])
 def alturas_editar(id):
     import psycopg2
-    clave = request.form.get('clave')
-    admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
-    if clave != admin_pass:
-        return redirect(request.referrer)
     fecha = request.form.get('fecha')
     altura = request.form.get('altura')
     operador = request.form.get('operador')
@@ -1055,10 +1051,6 @@ def alturas_editar(id):
 @app.route('/alturas/eliminar/<int:id>', methods=['POST'])
 def alturas_eliminar(id):
     import psycopg2
-    clave = request.form.get('clave')
-    admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
-    if clave != admin_pass:
-        return redirect(request.referrer)
     chancadora = request.form.get('chancadora')
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
