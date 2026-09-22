@@ -188,7 +188,7 @@ def init_db():
 def guardar_DB(datos):
     conn = get_db()
     c = conn.cursor()
-    datos['fecha'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    #datos['fecha'] = datetime.now().strftime('%Y-%m-%d %H:%M') #POSTGRESQL pone la fecha automatico
     columnas = ', '.join(datos.keys())
     ph = '%s' if os.environ.get('DATABASE_URL') else '?'
     placeholders = ', '.join([ph for _ in datos])

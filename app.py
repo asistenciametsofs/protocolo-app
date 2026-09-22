@@ -28,7 +28,7 @@ def home():
 #Chinalco comienzo
 
 @app.route('/chinalco')
-def Chinalco():
+def chinalco():
     return render_template('chinalco.html')
 
 @app.route('/chinalco_checklist')
@@ -39,7 +39,7 @@ def Chinalco_checklist():
 def guardar_chinalco_checklist():
     tabla = "chinalco_checklist"
     datos = {}
-    campos = ['observaciones','alimentacion','medicion_bowl','setting_actual']
+    campos = ['obs_para','alimentacion','medicion_bowl','setting_actual']
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
@@ -70,6 +70,7 @@ def guardar_chinalco_checklist():
                 print(f'Error subiendo foto {key}: {e}')
 
     guardar_DB(datos)
+
     """
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
