@@ -69,7 +69,7 @@ def guardar_chinalco_checklist():
             except Exception as e:
                 print(f'Error subiendo foto {key}: {e}')
 
-    guardar_DB(datos,tabla)
+    guardar_DB(datos)
     """
     datos_word = dict(datos)
     datos_word.update(fotos_paths)
