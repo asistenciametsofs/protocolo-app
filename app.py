@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
-from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias
+from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias, guardar_DB
 from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
 import os
@@ -34,6 +34,68 @@ def Chinalco():
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')
+
+@app.route('/chinalco_checklist/guardar', methods=['POST'])
+def guardar_chinalco_checklist():
+    tabla = "chinalco_checklist"
+    datos = {}
+    campos = ['observaciones','alimentacion','medicion_bowl','setting_actual']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
+        except:
+            datos[campo] = valor
+
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
+
+    guardar_DB(datos,tabla)
+    """
+    datos_word = dict(datos)
+    datos_word.update(fotos_paths)
+    ruta_word = generar_word_armado(datos_word)
+
+    correos = []
+    for key in ['correo_raul', 'correo_jason', 'correo_joselyn', 'correo_mauricio', 'correo_miguel', 'correo_francisco', 'correo_edgar', 'correo_juan', 'correo_marco', 'correo_luis', 'correo_jorge', 'correo_richard', 'correo_jaime', 'correo_elvis', 'correo_gabriel']:
+        val = request.form.get(key, '')
+        if val:
+            correos.append(val)
+    correo_extra = request.form.get('correo_destino', '').strip()
+    if correo_extra:
+        correos.append(correo_extra)
+    correo_destino = ', '.join(correos)
+
+    if correo_destino:
+        try:
+            ruta_correo = generar_word_armado(datos_word)
+            asunto = f"Protocolo Armado H&B | {str(datos.get('fecha_termino') or '')} | {str(datos.get('equipo') or '')} | {str(datos.get('supervisor_metso') or '')}"
+            enviar_correo(correo_destino, asunto, ruta_correo)
+        except Exception as e:
+            print(f'Error correo: {e}')
+    """
+    flash('✅ Protocolo guardado y enviado por correo!')
+    return redirect(url_for('chinalco'))
+
 
 #Chinalco fin 
 

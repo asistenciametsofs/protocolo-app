@@ -403,7 +403,7 @@
         <div class="metso-logo">Metso</div>
     </div>
     <div class="container">
-        <a href="/" class="btn-back">← Volver al inicio</a>
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
         <!-- FORMS !!! -->
         <form action="/chinalco_checklist/guardar" method="POST" enctype="multipart/form-data" id="form-armado">
 
@@ -413,21 +413,21 @@
                 <div class="grid2">
                     
                     <label>Medición de setting actual (mm)</label>
-                    <input type="number" name="settingActual" placeholder="milimetros">
+                    <input type="number" step="0.1" min="0" name="setting_actual" placeholder="milimetros">
                     <label>Medición de la altura Bowl (A)</label>
-                    <input type="number" name="alturaBowl" placeholder="milimetros">
-                    <label>Medición de la altura Bowl (A)</label>
-                    <select type="number" name="alturaBowl" placeholder="milimetros">
+                    <input type="number" step="0.1" min="0" name="medicion_bowl" placeholder="milimetros">
+                    <label>Verificar que la distribución de la alimentación sea uniforme</label>
+                    <select type="number" name="alimentacion" placeholder="milimetros">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                 </div>
 
-                <label>Observaciones al momento de tomar los parámetros</label>
-                <input type="text" name="ObsParametros" placeholder="Obsevaciones de los parámetros">
+                <label><strong>Observaciones al momento de tomar los parámetros</strong></label>
+                <input type="text" name="observaciones" placeholder="Aquí los hallazgos encontrados">
             </div>
-
+            <button type="submit" class="btn-submit">💾 Guardar checklist</button>
         </form>
     </div>
 </body>
