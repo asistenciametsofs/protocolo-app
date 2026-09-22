@@ -25,6 +25,18 @@ with app.app_context():
 def home():
     return render_template('home.html')
 
+#Chinalco comienzo
+
+@app.route('/chinalco')
+def Chinalco():
+    return render_template('chinalco.html')
+
+@app.route('/chinalco_checklist')
+def Chinalco_checklist():
+    return render_template('chinalco_checklist.html')
+
+#Chinalco fin 
+
 @app.route('/mantenimiento')
 def mantenimiento():
     return render_template('index.html')
@@ -99,9 +111,7 @@ def guardar_armado_route():
 def cambio():
     return render_template('cambio.html')
 
-@app.route('/chinalco')
-def Chinalco():
-    return render_template('chinalco.html')
+
 
 @app.route('/cambio/guardar', methods=['POST'])
 def guardar_cambio_route():
