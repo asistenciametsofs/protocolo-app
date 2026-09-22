@@ -185,14 +185,14 @@ def init_db():
 
 #CHINALCO !!!
 
-def guardar_DB(datos,tabla):
+def guardar_DB(datos):
     conn = get_db()
     c = conn.cursor()
     datos['fecha_registro'] = datetime.now().strftime('%Y-%m-%d %H:%M')
     columnas = ', '.join(datos.keys())
     ph = '%s' if os.environ.get('DATABASE_URL') else '?'
     placeholders = ', '.join([ph for _ in datos])
-    c.execute(f'INSERT INTO {tabla} ({columnas}) VALUES ({placeholders})',
+    c.execute(f'INSERT INTO chinalco_checklist ({columnas}) VALUES ({placeholders})',
               list(datos.values()))
     conn.commit()
     conn.close()
