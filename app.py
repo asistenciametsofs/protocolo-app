@@ -33,6 +33,10 @@ def mantenimiento():
 def armado():
     return render_template('armado.html')
 
+@app.route('/resumen')
+def resumen():
+    return render_template('resumen.html')
+
 @app.route('/armado/guardar', methods=['POST'])
 def guardar_armado_route():
     datos = {}
@@ -94,6 +98,10 @@ def guardar_armado_route():
 @app.route('/cambio')
 def cambio():
     return render_template('cambio.html')
+
+@app.route('/chinalco')
+def Chinalco():
+    return render_template('chinalco.html')
 
 @app.route('/cambio/guardar', methods=['POST'])
 def guardar_cambio_route():

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolos MP1250</title>
+    <title>Protocolos Chinalco</title>
     <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,8 +28,8 @@
 <body>
     <div class="header">
         <span class="metso-brand">METSO</span>
-        <h1>⚙️ Protocolos Chancadoras MP1250</h1>
-        <h1>E-Check360 - HP</h1>
+        <h1>⚙️ Protocolos Chinalco</h1>
+        <h1>-</h1>
         <p>Sistema de registro de protocolos</p>
         <p style="margin-top:8px;"><a href="{{ url_for('home') }}" style="color:#1a3a5c; font-size:12px; font-weight:bold; text-decoration:none;">🏠 Volver al inicio</a></p>
     </div>
@@ -42,37 +42,6 @@
             {% endif %}
         {% endwith %}
 
-        <div class="card">
-            <h2>📋 Nuevo protocolo</h2>
-            <p>Selecciona el tipo de protocolo a llenar</p>
-            <a href="/armado" class="btn btn-primary">Armado de Head y Bowl</a>
-            <a href="/cambio" class="btn btn-secondary">Cambio de Head y Bowl</a>
-        </div>
-
-        <div class="card">
-            <h2>📏 Alturas de Bowl</h2>
-            <p>Registro y pronóstico de desgaste por chancadora</p>
-            <a href="/alturas" class="btn btn-primary" style="background:#c0392b;">Ver Alturas</a>
-        </div>
-        
-        <div class="card">
-            <h2>📅 Proyecciones de Cambio</h2>
-            <p>Calendario con fechas estimadas de cambio por chancadora</p>
-            <a href="/proyecciones" class="btn btn-primary" style="background:#1a3a5c;">Ver Calendario</a>
-        </div>
-
-        <div class="card">
-            <h2>📋 Resumen Semanal SMCV</h2>
-            <p>Resumen Semanal SMCV</p>
-            <a href="/resumen" class="btn btn-primary" style="background:#1a3a5c;">Ver Calendario</a>
-        </div>
-
-        <div class="card">
-            <h2>📂 Historial</h2>
-            <p>Ver registros anteriores</p>
-            <a href="/historial/armado" class="btn btn-green">Historial Armado</a>
-            <a href="/historial/cambio" class="btn btn-green">Historial Cambio</a>
-        </div>  
     </div>
 </body>
 </html>
