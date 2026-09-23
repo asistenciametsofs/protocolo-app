@@ -82,7 +82,7 @@ def chinalco_head_assembly():
 def guardar_chinalco_head():
     tabla = str('chinalco_head')
     datos = {}
-    campos = ['equipo','fecha','up_a1','up_b1','up_a2','up_b2','up_a3','up_b3','low_a1','low_b1','low_a2','low_b2','low_a3','low_b3','low_a4','low_b4','low_a5','low_b5','low_a6','low_b6','low_a7','low_b7','low_a8','low_b8','obs','supervisor']
+    campos = ['equipo','up_a1','up_b1','up_a2','up_b2','up_a3','up_b3','low_a1','low_b1','low_a2','low_b2','low_a3','low_b3','low_a4','low_b4','low_a5','low_b5','low_a6','low_b6','low_a7','low_b7','low_a8','low_b8','obs','supervisor']
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
