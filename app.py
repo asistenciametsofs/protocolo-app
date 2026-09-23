@@ -35,6 +35,7 @@ def chinalco():
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')
 
+#REVISAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @app.route('/chinalco_checklist/guardar', methods=['POST'])
 def guardar_chinalco_checklist():
     tabla = "chinalco_checklist"
@@ -97,6 +98,9 @@ def guardar_chinalco_checklist():
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('chinalco'))
 
+@app.route('/chinalco_head_assembly')
+def chinalco_head_assembly():
+    return render_template('chinalco_head_assembly.html')
 
 #Chinalco fin 
 
