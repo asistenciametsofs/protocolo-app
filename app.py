@@ -38,7 +38,7 @@ def Chinalco_checklist():
 #REVISAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @app.route('/chinalco_checklist/guardar', methods=['POST'])
 def guardar_chinalco_checklist():
-    tabla = "chinalco_checklist"
+    tabla = str('chinalco_checklist')
     datos = {}
     campos = ['obs_para','alimentacion','medicion_bowl','setting_actual']
     for campo in campos:
@@ -70,31 +70,7 @@ def guardar_chinalco_checklist():
             except Exception as e:
                 print(f'Error subiendo foto {key}: {e}')
 
-    guardar_DB(datos)
-
-    """
-    datos_word = dict(datos)
-    datos_word.update(fotos_paths)
-    ruta_word = generar_word_armado(datos_word)
-
-    correos = []
-    for key in ['correo_raul', 'correo_jason', 'correo_joselyn', 'correo_mauricio', 'correo_miguel', 'correo_francisco', 'correo_edgar', 'correo_juan', 'correo_marco', 'correo_luis', 'correo_jorge', 'correo_richard', 'correo_jaime', 'correo_elvis', 'correo_gabriel']:
-        val = request.form.get(key, '')
-        if val:
-            correos.append(val)
-    correo_extra = request.form.get('correo_destino', '').strip()
-    if correo_extra:
-        correos.append(correo_extra)
-    correo_destino = ', '.join(correos)
-
-    if correo_destino:
-        try:
-            ruta_correo = generar_word_armado(datos_word)
-            asunto = f"Protocolo Armado H&B | {str(datos.get('fecha_termino') or '')} | {str(datos.get('equipo') or '')} | {str(datos.get('supervisor_metso') or '')}"
-            enviar_correo(correo_destino, asunto, ruta_correo)
-        except Exception as e:
-            print(f'Error correo: {e}')
-    """
+    guardar_DB(datos, tabla)
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('chinalco'))
 

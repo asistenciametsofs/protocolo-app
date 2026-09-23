@@ -185,14 +185,14 @@ def init_db():
 
 #CHINALCO !!!
 
-def guardar_DB(datos):
+def guardar_DB(datos,tabla):
     conn = get_db()
     c = conn.cursor()
-    #datos['fecha'] = datetime.now().strftime('%Y-%m-%d %H:%M') #POSTGRESQL pone la fecha automatico
+    #datos['fecha'] = datetime.now().strftime('%Y-%m-%d %H:%M') #POSTGRESQL pone la fecha automatico pero sin hora
     columnas = ', '.join(datos.keys())
     ph = '%s' if os.environ.get('DATABASE_URL') else '?'
     placeholders = ', '.join([ph for _ in datos])
-    c.execute(f'INSERT INTO chinalco_checklist ({columnas}) VALUES ({placeholders})',
+    c.execute(f'INSERT INTO {tabla} ({columnas}) VALUES ({placeholders})',
               list(datos.values()))
     conn.commit()
     conn.close()
