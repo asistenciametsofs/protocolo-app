@@ -35,12 +35,12 @@ def chinalco():
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')
 
-#REVISAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 @app.route('/chinalco_checklist/guardar', methods=['POST'])
 def guardar_chinalco_checklist():
     tabla = str('chinalco_checklist')
     datos = {}
-    campos = ['obs_para','alimentacion','medicion_bowl','setting_actual']
+    campos = ['param_set_act','param_alt_bowl','param_dist_alim','param_obs','lub_lvl_oil','lub_temp_oil','lub_ceje_bar','lub_temp_sum','lub_temp_ret','lub_oil_sts','lub_filtros','lub_extras','lub_malla','lub_obs','hyd_lvl_oil','hyd_clam_bar','hyd_trmp_bar','hyd_extras','hyd_obs','trt_vibracion','trt_uniones','trt_obs','tms_faja_pole','tms_sts','tms_obs','mot_current','mot_kw','mot_vb_nde','mot_vb_de','mot_temp_mtll','mot_temp_mtla','mot_obs','other_general','other_extras','other_obs']
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
