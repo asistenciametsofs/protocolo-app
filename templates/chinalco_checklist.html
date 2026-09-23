@@ -413,11 +413,11 @@
                 <div class="grid2">
                     
                     <label>Medición de setting actual (mm)</label>
-                    <input type="number" step="0.1" min="0" name="param_set_act" placeholder="milimetros">
+                    <input type="number" step="0.001" min="0" name="param_set_act" placeholder="milimetros">
                     <label>Medición de la altura Bowl (A)</label>
-                    <input type="number" step="0.1" min="0" name="param_alt_bowl" placeholder="milimetros">
+                    <input type="number" step="0.001" min="0" name="param_alt_bowl" placeholder="milimetros">
                     <label>Verificar que la distribución de la alimentación sea uniforme</label>
-                    <select type="number" name="param_dist_alim" placeholder="">
+                    <select name="param_dist_alim" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
@@ -445,25 +445,25 @@
                     <label>Temperatura de retorno de aceite de lub.</label>
                     <input type="number" step="1" name="lub_temp_ret" placeholder="grados centigrados C°">
                     <label>Estado del aceite (color, contaminacion,espuma)</label>
-                    <select type="number" name="lub_oil_sts" placeholder="">
+                    <select name="lub_oil_sts" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                     <label>Filtros (Unidad de Lubricación y Contraeje)</label>
-                    <select type="number" name="lub_filtros" placeholder="">
+                    <select name="lub_filtros" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                     <label>Tuberías, mangueras, conexiones y accesorios</label>
-                    <select type="number" name="lub_extras" placeholder="">
+                    <select name="lub_extras" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                     <label>Malla de Sistema de Lubricación - Verificar</label>
-                    <select type="number" name="lub_malla" placeholder="">
+                    <select name="lub_malla" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
@@ -488,14 +488,14 @@
                     <label>Registrar Presión hidráulica (Circuito Tramp Release)</label>
                     <input type="number" step="1" min="0" name="hyd_trmp_bar" placeholder="bar">
                     <label>Tuberías, mangueras, conexiones y accesorios</label>
-                    <select type="number" name="hyd_extras" placeholder="">
+                    <select name="hyd_extras" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                 </div>
                 <label><strong>Observaciones en el sistema de hidráulico</strong></label>
-                <input type="text" name="hyd_obs" placeholder="Aquí los hallazgos encontrados">
+                <input name="hyd_obs" placeholder="Aquí los hallazgos encontrados">
             </div>
 
             <!-- Cuerpo de trituradora  -->
@@ -504,13 +504,13 @@
 
                 <div class="grid2">
                     <label>Vibraciones inusuales</label>
-                    <select type="number" name="trt_vibracion" placeholder="">
+                    <select name="trt_vibracion" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                     <label>Uniones enpernadas</label>
-                    <select type="number" name="trt_uniones" placeholder="">
+                    <select name="trt_uniones" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
@@ -526,13 +526,13 @@
 
                 <div class="grid2">
                     <label>Estado de fajas y poleas</label>
-                    <select type="number" name="tms_faja_pole" placeholder="">
+                    <select name="tms_faja_pole" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                     <label>Verifica alineamiento - visualmente</label>
-                    <select type="number" name="tms_sts" placeholder="">
+                    <select name="tms_sts" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
@@ -552,9 +552,9 @@
                     <label>Potencia motor principal</label>
                     <input type="number" step="0.1" name="mot_kw" placeholder="Kilo Watts (kW)">
                     <label>Vibración motor lado NDE</label>
-                    <input type="number" step="0.1" name="mot_vb_nde" placeholder="milimetros/segundos">
+                    <input type="number" step="0.001" name="mot_vb_nde" placeholder="milimetros/segundos">
                     <label>Vibración motor lado D.E</label>
-                    <input type="number" step="0.1" name="mot_vb_de" placeholder="milimetros/segundos">
+                    <input type="number" step="0.001" name="mot_vb_de" placeholder="milimetros/segundos">
                     <label>Temperatura Rodamientos del motor lado libre</label>
                     <input type="number" step="0.1" name="mot_temp_mtll" placeholder="grados centigrados C°">
                     <label>Temperatura Rodamientos del motor lado acople</label>
@@ -570,13 +570,13 @@
 
                 <div class="grid2">
                     <label>Guardas de equipos en general</label>
-                    <select type="number" name="other_general" placeholder="">
+                    <select name="other_general" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
                     </select>
                     <label>Barandas - Plataformas - Escaleras</label>
-                    <select type="number" name="other_extras" placeholder="">
+                    <select name="other_extras" placeholder="">
                         <option>Buen estado</option>
                         <option>Mal estado</option>
                         <option>N/A</option>
