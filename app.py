@@ -40,7 +40,7 @@ def Chinalco_checklist():
 def guardar_chinalco_checklist():
     tabla = str('chinalco_checklist')
     datos = {}
-    campos = ['param_set_act','param_alt_bowl','param_dist_alim','param_obs','lub_lvl_oil','lub_temp_oil','lub_ceje_bar','lub_temp_sum','lub_temp_ret','lub_oil_sts','lub_filtros','lub_extras','lub_malla','lub_obs','hyd_lvl_oil','hyd_clam_bar','hyd_trmp_bar','hyd_extras','hyd_obs','trt_vibracion','trt_uniones','trt_obs','tms_faja_pole','tms_sts','tms_obs','mot_current','mot_kw','mot_vb_nde','mot_vb_de','mot_temp_mtll','mot_temp_mtla','mot_obs','other_general','other_extras','other_obs']
+    campos = ['supervisor','equipo','param_set_act','param_alt_bowl','param_dist_alim','param_obs','lub_lvl_oil','lub_temp_oil','lub_ceje_bar','lub_temp_sum','lub_temp_ret','lub_oil_sts','lub_filtros','lub_extras','lub_malla','lub_obs','hyd_lvl_oil','hyd_clam_bar','hyd_trmp_bar','hyd_extras','hyd_obs','trt_vibracion','trt_uniones','trt_obs','tms_faja_pole','tms_sts','tms_obs','mot_current','mot_kw','mot_vb_nde','mot_vb_de','mot_temp_mtll','mot_temp_mtla','mot_obs','other_general','other_extras','other_obs']
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
@@ -77,6 +77,44 @@ def guardar_chinalco_checklist():
 @app.route('/chinalco_head_assembly')
 def chinalco_head_assembly():
     return render_template('chinalco_head_assembly.html')
+
+@app.route('/chinalco_head_assembly/guardar', methods=['POST'])
+def guardar_chinalco_head():
+    tabla = str('chinalco_head')
+    datos = {}
+    campos = ['equipo','fecha','up_a1','up_b1','up_a2','up_b2','up_a3','up_b3','low_a1','low_b1','low_a2','low_b2','low_a3','low_b3','low_a4','low_b4','low_a5','low_b5','low_a6','low_b6','low_a7','low_b7','low_a8','low_b8','obs','supervisor']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
+        except:
+            datos[campo] = valor
+
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
+
+    guardar_DB(datos, tabla)
+    flash('✅ Protocolo guardado y enviado por correo!')
+    return redirect(url_for('chinalco'))
 
 #Chinalco fin 
 

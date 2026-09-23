@@ -292,7 +292,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
-            border:3px solid #333;
+            border: 3px solid #333;
         }
 
         .metro-tabla th {
@@ -415,6 +415,17 @@
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
         <!-- FORMS !!! -->
         <form action="/chinalco_head_assembly/guardar" method="POST" enctype="multipart/form-data" id="form-armado">
+            <!-- CHANCADORA  -->
+            <div class="seccion">
+                <div class="grid1">
+                    <div class="seccion-titulo">Seleccionar equipo</div>
+                    <label>Guardas de equipos en general</label>
+                    <select name="equipo" placeholder="">
+                        <option>BR-01</option>
+                        <option>BR-02</option>
+                    </select>
+                </div>
+            </div>
             <!-- PARAMETROS -->
             <div class="seccion">
                 <div class="seccion-titulo">HEAD ASSEMBLY</div>
@@ -423,27 +434,85 @@
 
                 <div class="seccion-subtitulo">Upper bushing</div>
                 <table class="metro-tabla">
-                    <tr><th style="background-color:#555;"></th><th>A (0°)</th><th>B (90°)</th></tr>
-                    <tr><td class="metro-label">1</td><td><input type="number" step="0.01" name="upper_A1" placeholder="A1"></td><td><input type="number" step="0.01" name="upper_B1" placeholder="B1"></td></tr>
-                    <tr><td class="metro-label">2</td><td><input type="number" step="0.01" name="upper_A2" placeholder="A2"></td><td><input type="number" step="0.01" name="upper_B2" placeholder="B2"></td></tr>
-                    <tr><td class="metro-label">3</td><td><input type="number" step="0.01" name="upper_A3" placeholder="A3"></td><td><input type="number" step="0.01" name="upper_B3" placeholder="B3"></td></tr>
+                    <tr>
+                        <th style="background-color:#555;"></th>
+                        <th>A (0°)</th>
+                        <th>B (90°)</th>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">1</td>
+                        <td><input type="number" step="0.001" name="up_a1" placeholder="A1"></td>
+                        <td><input type="number" step="0.001" name="up_b1" placeholder="B1"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">2</td>
+                        <td><input type="number" step="0.001" name="up_a2" placeholder="A2"></td>
+                        <td><input type="number" step="0.001" name="up_b2" placeholder="B2"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">3</td>
+                        <td><input type="number" step="0.001" name="up_a3" placeholder="A3"></td>
+                        <td><input type="number" step="0.001" name="up_b3" placeholder="B3"></td>
+                    </tr>
                 </table>
 
                 <div class="seccion-subtitulo">Lower bushing</div>
                 <table class="metro-tabla">
-                    <tr><th style="background-color:#555;"></th><th>A (0°)</th><th>B (90°)</th></tr>
-                    <tr><td class="metro-label">1</td><td><input type="number" step="0.01" name="upper_A1" placeholder="A1"></td><td><input type="number" step="0.01" name="upper_B1" placeholder="B1"></td></tr>
-                    <tr><td class="metro-label">2</td><td><input type="number" step="0.01" name="upper_A2" placeholder="A2"></td><td><input type="number" step="0.01" name="upper_B2" placeholder="B2"></td></tr>
-                    <tr><td class="metro-label">3</td><td><input type="number" step="0.01" name="upper_A3" placeholder="A3"></td><td><input type="number" step="0.01" name="upper_B3" placeholder="B3"></td></tr>
-                    <tr><td class="metro-label">4</td><td><input type="number" step="0.01" name="upper_A4" placeholder="A4"></td><td><input type="number" step="0.01" name="upper_B1" placeholder="B4"></td></tr>
-                    <tr><td class="metro-label">5</td><td><input type="number" step="0.01" name="upper_A5" placeholder="A5"></td><td><input type="number" step="0.01" name="upper_B2" placeholder="B5"></td></tr>
-                    <tr><td class="metro-label">6</td><td><input type="number" step="0.01" name="upper_A6" placeholder="A6"></td><td><input type="number" step="0.01" name="upper_B3" placeholder="B6"></td></tr>
-                    <tr><td class="metro-label">7</td><td><input type="number" step="0.01" name="upper_A7" placeholder="A7"></td><td><input type="number" step="0.01" name="upper_B1" placeholder="B7"></td></tr>
-                    <tr><td class="metro-label">8</td><td><input type="number" step="0.01" name="upper_A8" placeholder="A8"></td><td><input type="number" step="0.01" name="upper_B2" placeholder="B8"></td></tr>
+                    <tr>
+                        <th style="background-color:#555;"></th>
+                        <th>A (0°)</th>
+                        <th>B (90°)</th>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">1</td>
+                        <td><input type="number" step="0.001" name="low_a1" placeholder="A1"></td>
+                        <td><input type="number" step="0.001" name="low_b1" placeholder="B1"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">2</td>
+                        <td><input type="number" step="0.001" name="low_a2" placeholder="A2"></td>
+                        <td><input type="number" step="0.001" name="low_b2" placeholder="B2"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">3</td>
+                        <td><input type="number" step="0.001" name="low_a3" placeholder="A3"></td>
+                        <td><input type="number" step="0.001" name="low_b3" placeholder="B3"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">4</td>
+                        <td><input type="number" step="0.001" name="low_a4" placeholder="A4"></td>
+                        <td><input type="number" step="0.001" name="low_b4" placeholder="B4"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">5</td>
+                        <td><input type="number" step="0.001" name="low_a5" placeholder="A5"></td>
+                        <td><input type="number" step="0.001" name="low_b5" placeholder="B5"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">6</td>
+                        <td><input type="number" step="0.001" name="low_a6" placeholder="A6"></td>
+                        <td><input type="number" step="0.001" name="low_b6" placeholder="B6"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">7</td>
+                        <td><input type="number" step="0.001" name="low_a7" placeholder="A7"></td>
+                        <td><input type="number" step="0.001" name="low_b7" placeholder="B7"></td>
+                    </tr>
+                    <tr>
+                        <td class="metro-label">8</td>
+                        <td><input type="number" step="0.001" name="low_a8" placeholder="A8"></td>
+                        <td><input type="number" step="0.001" name="low_b8" placeholder="B8"></td>
+                    </tr>
                 </table>
 
                 <label class="seccion-subtitulo">Observaciones al momento de tomar los parámetros</label>
-                <input type="text" name="obs_para" placeholder="Aquí los hallazgos encontrados">
+                <input type="text" name="obs" placeholder="Aquí los hallazgos encontrados">
+            </div>
+
+            <!-- Personal  -->
+            <div class="seccion">
+                <div class="seccion-titulo">Supervisor encargado</div>
+                <input type="text" name="supervisor" placeholder="Aquí los hallazgos encontrados">
             </div>
 
 

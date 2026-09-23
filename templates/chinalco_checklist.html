@@ -406,6 +406,17 @@
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
         <!-- FORMS !!! -->
         <form action="/chinalco_checklist/guardar" method="POST" enctype="multipart/form-data" id="form-armado">
+            <!-- CHANCADORA  -->
+            <div class="seccion">
+                <div class="grid1">
+                    <div class="seccion-titulo">Seleccionar equipo</div>
+                    <label>Guardas de equipos en general</label>
+                    <select name="equipo" placeholder="">
+                        <option>BR-01</option>
+                        <option>BR-02</option>
+                    </select>
+                </div>
+            </div>
             <!-- PARAMETROS -->
             <div class="seccion">
                 <div class="seccion-titulo">MONITOREO DE PARÁMETROS</div>
@@ -584,6 +595,12 @@
                 </div>
                 <label><strong>Observaciones en general</strong></label>
                 <input type="text" name="other_obs" placeholder="Aquí los hallazgos encontrados">
+            </div>
+
+            <!-- Personal  -->
+            <div class="seccion">
+                <div class="seccion-titulo">Supervisor encargado</div>
+                <input type="text" name="supervisor" placeholder="Aquí los hallazgos encontrados">
             </div>
 
             <button type="submit" class="btn-submit">💾 Guardar checklist</button>
