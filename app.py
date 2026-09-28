@@ -31,6 +31,48 @@ def home():
 def chinalco():
     return render_template('chinalco.html')
 
+@app.route('/chinalco_faja')
+def chinalco_faja():
+    return render_template('chinalco_faja.html')
+
+@app.route('/chinalco_checklist/guardar', methods=['POST'])
+def guardar_chinalco_checklist():
+    tabla = str('chinalco_faja')
+    datos = {}
+    campos = ['equipo','supervisor','obs','obs_check','fecha','temp_pol_cab_ll','temp_pol_cab_lf','temp_pol_col_ll','temp_pol_col_lf','temp_ten_cab_ll','temp_ten_cab_lf','temp_ten_col_ll','temp_ten_col_lf','temp_pol_cps_ll','temp_pol_cps_lf','temp_mtr_rdc','vbcn_cab','vbcn_col','vbcn_cent']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
+        except:
+            datos[campo] = valor
+
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
+
+    guardar_DB(datos, tabla)
+    flash('✅ Protocolo guardado y enviado por correo!')
+    return redirect(url_for('chinalco'))
+
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')

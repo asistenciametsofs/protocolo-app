@@ -12,10 +12,11 @@
         .header h1 { font-size: 22px; color: black; }
         .header p { font-size: 13px; color: #444; margin-top: 4px; }
         .metso-brand { font-weight: 900; color: black; font-size: 28px; letter-spacing: 2px; display: block; margin-bottom: 8px; }
-        .container { max-width: 500px; margin: 30px auto; padding: 0 16px; }
+        .container { gap: 24px; display: flex; flex-wrap: wrap; /*max-width: 1000px*/; align-items: stretch; margin: 30px auto; padding: 0 16px; justify-content: center; }
         .flash { background: #d4edda; color: #155724; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
-        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card { flex: 1 1 420px; background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .card h2 { font-size: 16px; color: #1a3a5c; margin-bottom: 8px; }
+        .title {width: 100%; text-align: left; border-bottom: 2px solid #444; margin-left: 1em; margin-right: 1em; padding-left: 10px;}
         .card p { font-size: 13px; color: #666; margin-bottom: 16px; }
         .btn { display: block; width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; margin-bottom: 10px; }
         .btn-primary { background: #1a3a5c; color: white; }
@@ -42,6 +43,8 @@
             {% endif %}
         {% endwith %}
 
+
+    <h2 class="title">Protocolos</h2>    
     <div class="card">
         <h2>📋 Checklist Diario</h2>
         <a href="/chinalco_checklist" class="btn btn-primary">Checklist CHANCADORA CÓNICA HP400</a>
@@ -53,6 +56,25 @@
     </div>
 
     <div class="card">
+        <h2>⛔Protocolo de MAIN FRAME LINER-MONTURAS-SELLO T-U</h2>
+        <a href="" class="btn btn-primary">Inspección de MAIN FRAME</a>
+    </div>
+
+    <div class="card">
+        <h2>⛔Protocolo GAP DE SOCKET LINER Y SOCKET</h2>
+        <a href="" class="btn btn-primary">Protocolo de inspección y/o cambio de SOCKET, SOCKET LINER  HP400</a>
+    </div>
+
+        <div class="card">
+        <h2>🛝CHECKLIST FAJAS TRANSPORTADORAS</h2>
+        <a href="/chinalco_faja" class="btn btn-primary">Checklist Fajas Transpotadoras</a>
+    </div>
+
+
+
+    <h2 class="title">Gráficos</h2> 
+
+        <div class="card">
         <h2>⛔Protocolo de MAIN FRAME LINER-MONTURAS-SELLO T-U</h2>
         <a href="" class="btn btn-primary">Inspección de MAIN FRAME</a>
     </div>
