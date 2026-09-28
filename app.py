@@ -35,7 +35,7 @@ def chinalco():
 def chinalco_faja():
     return render_template('chinalco_faja.html')
 
-@app.route('/chinalco_checklist/guardar', methods=['POST'])
+@app.route('/chinalco_faja/guardar', methods=['POST'])
 def guardar_chinalco_checklist():
     tabla = str('chinalco_faja')
     datos = {}
