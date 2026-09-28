@@ -31,12 +31,13 @@ def home():
 def chinalco():
     return render_template('chinalco.html')
 
+
 @app.route('/chinalco_faja')
 def chinalco_faja():
     return render_template('chinalco_faja.html')
 
 @app.route('/chinalco_faja/guardar', methods=['POST'])
-def guardar_chinalco_checklist():
+def guardar_chinalco_faja():
     tabla = str('chinalco_faja')
     datos = {}
     campos = ['equipo','supervisor','obs','obs_check','fecha','temp_pol_cab_ll','temp_pol_cab_lf','temp_pol_col_ll','temp_pol_col_lf','temp_ten_cab_ll','temp_ten_cab_lf','temp_ten_col_ll','temp_ten_col_lf','temp_pol_cps_ll','temp_pol_cps_lf','temp_mtr_rdc','vbcn_cab','vbcn_col','vbcn_cent']
@@ -73,10 +74,10 @@ def guardar_chinalco_checklist():
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('chinalco'))
 
+
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')
-
 
 @app.route('/chinalco_checklist/guardar', methods=['POST'])
 def guardar_chinalco_checklist():
@@ -115,6 +116,7 @@ def guardar_chinalco_checklist():
     guardar_DB(datos, tabla)
     flash('✅ Protocolo guardado y enviado por correo!')
     return redirect(url_for('chinalco'))
+
 
 @app.route('/chinalco_head_assembly')
 def chinalco_head_assembly():
