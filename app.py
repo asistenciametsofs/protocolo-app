@@ -71,7 +71,7 @@ def guardar_chinalco_faja():
                 print(f'Error subiendo foto {key}: {e}')
 
     guardar_DB(datos, tabla)
-    flash('✅ Protocolo guardado y enviado por correo!')
+    flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
 
 
@@ -114,7 +114,7 @@ def guardar_chinalco_checklist():
                 print(f'Error subiendo foto {key}: {e}')
 
     guardar_DB(datos, tabla)
-    flash('✅ Protocolo guardado y enviado por correo!')
+    flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
 
 
@@ -157,7 +157,7 @@ def guardar_chinalco_head():
                 print(f'Error subiendo foto {key}: {e}')
 
     guardar_DB(datos, tabla)
-    flash('✅ Protocolo guardado y enviado por correo!')
+    flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
 
 #Chinalco fin 
