@@ -3,6 +3,7 @@ from database import init_db, guardar_armado, guardar_cambio, obtener_registros,
 from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
 import os
+import json
 import uuid
 import threading
 import cloudinary
@@ -30,6 +31,27 @@ def home():
 @app.route('/chinalco')
 def chinalco():
     return render_template('chinalco.html')
+
+# @app.route('/chinalco_graf')
+# def chinalco_graf():
+#     return render_template('chinalco_graf.html')
+
+@app.route('/chinalco_graf', methods=['GET', 'POST'])
+def chinalco_graf():
+    # with open('static/data/fajatest.json', 'r', encoding='utf-8') as archivo:
+    #     registros = json.load(archivo)
+    import psycopg2
+    from datetime import datetime
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    # chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
+    chancadora_sel = request.args.get('equipo', request.form.get('equipo', 'TC-01'))
+    c.execute('SELECT equipo, fecha, obs, supervisor, temp_mtr_rdc, temp_pol_cab_lf, temp_pol_cab_ll, temp_pol_col_lf, temp_pol_col_ll, temp_pol_cps_lf, temp_pol_cps_ll, temp_ten_cab_lf, temp_ten_cab_ll, temp_ten_col_lf, temp_ten_col_ll, vbcn_cab, vbcn_cent, vbcn_col FROM chinalco_faja WHERE equipo = %s ORDER BY fecha ASC', (chancadora_sel,))
+    registros = c.fetchall()
+    conn.close()
+    return render_template('chinalco_graf.html', registros=registros)
+
 
 
 @app.route('/chinalco_faja')
