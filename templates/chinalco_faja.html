@@ -508,11 +508,17 @@
             <!-- Personal  -->
             <div class="seccion">
                 <div class="seccion-titulo">Supervisor encargado</div>
-                <input type="text" name="supervisor" placeholder="Aquí los hallazgos encontrados">
-
+                <!--input type="text" name="supervisor" placeholder="Aquí los hallazgos encontrados"-->
+                <select name="equipo" placeholder="" >
+                    <option value="" disabled hidden>Seleccionar Supervisor</option>
+                    <option>Edwin Díaz</option>
+                    <option>Celso Burgos</option>
+                    <option>Alex Arroni</option>
+                    <option>Joel Coronel</option>
+                </select>
             </div>
 
-            <div><input type="date" id="datePicker" name="fecha">
+            <div><input type="date" id="datePicker" name="fecha"></div>
 
 <script>
 const datePicker = document.getElementById('datePicker');
