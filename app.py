@@ -49,8 +49,11 @@ def chinalco_graf():
     chancadora_sel = request.args.get('equipo', request.form.get('equipo', 'TC-01'))
     c.execute('SELECT equipo, fecha, obs, supervisor, temp_mtr_rdc, temp_pol_cab_lf, temp_pol_cab_ll, temp_pol_col_lf, temp_pol_col_ll, temp_pol_cps_lf, temp_pol_cps_ll, temp_ten_cab_lf, temp_ten_cab_ll, temp_ten_col_lf, temp_ten_col_ll, vbcn_cab, vbcn_cent, vbcn_col FROM chinalco_faja WHERE equipo = %s ORDER BY fecha ASC', (chancadora_sel,))
     registros = c.fetchall()
+    c.execute('select distinct equipo from chinalco_faja order by equipo')
+    equipos = c.fetchall()
     conn.close()
-    return render_template('chinalco_graf.html', registros=registros)
+
+    return render_template('chinalco_graf.html', registros=registros, equipos=equipos)
 
 
 

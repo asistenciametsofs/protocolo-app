@@ -36,15 +36,23 @@
 
     {% endfor %}
 
+    <div class="contenedor">
+        {% for e in equipos %}
+            <p>{{ e[0] }}</p>
+            <br>
+        {% endfor %}
+    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
     <script>
-        
-        registros = {{registros | tojson }};
+
+        registros = {{ registros | tojson }};
         window.registros = registros;
 
         const fecha = registros.map(r => new Date(r[1]).toLocaleDateString('es-PE'));
         const tempmr = registros.map(r => r[4]);
-    
+
 
         option = {
             xAxis: {
@@ -60,7 +68,26 @@
                     type: 'line',
                     smooth: true
                 }
-            ]
+            ],
+            dataZoom: [
+                {
+                    type: 'slider',
+                    xAxisIndex: 'all',
+                    left: '10%',
+                    right: '10%',
+                    bottom: 30,
+                    height: 30,
+                    throttle: 120
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: 'all',
+                    throttle: 120
+                }
+            ],
+            tooltip: {
+                trigger: 'axis'
+            },
         };
 
         const initCharts = () => {
@@ -72,7 +99,7 @@
             ///console.log("ok");
         });
 
-        
+
         console.log(registros);
         console.log(registros[0].equipo)
 

@@ -1,4 +1,6 @@
-
+.contenedor {
+    display: flex;
+}
 
 .imagen-container {
     width: 300px;
