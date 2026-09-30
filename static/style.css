@@ -1,3 +1,5 @@
+
+
 .imagen-container {
     width: 300px;
     height: 200px;
@@ -211,7 +213,7 @@ textarea {
     border: 1px solid #ddd;
     border-radius: 7px;
     font-size: 13px;
-    background: #fafafa;
+    /*background: #fafafa;*/
 }
 
 input:focus,
@@ -414,7 +416,7 @@ textarea:focus {
     font-size: 12px;
     text-align: center;
     border: none;
-    background: transparent;
+    /*background: transparent;*/
 }
 
 .metro-label {
