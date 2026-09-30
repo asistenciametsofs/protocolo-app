@@ -38,8 +38,9 @@
 
     <div class="contenedor">
         {% for e in equipos %}
-            <p>{{ e[0] }}</p>
-            <br>
+            <div class="boton">
+                <a href="/chinalco_graf?equipo={{ e[0] }}">{{ e[0] }}</a>
+            </div>
         {% endfor %}
     </div>
 
