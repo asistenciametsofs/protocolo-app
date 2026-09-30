@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist Fajas</title>
     <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        
         .checkbox-group {
             display: flex;
             flex-direction: column;
@@ -406,28 +406,43 @@
         }
     </style>
     <script>
-        const equipo = ["TC-02","TC-04"]
-        function opciones(){
+        const equipo = ["TC-02", "TC-04"]
+        function opciones() {
             const value = document.getElementById("equipo").value;
             const toenable = document.querySelectorAll(".toenable")
 
             toenable.forEach(element => {
-                if (equipo.includes(value)){
-                    element.disabled = false ;
-                    element.style.background = "none";                   
+                if (equipo.includes(value)) {
+                    element.disabled = false;
+                    element.style.background = "none";
                 } else {
                     element.value = ""
-                    element.disabled = true ;
-                    element.style.background = "#bbb";  
+                    element.disabled = true;
+                    element.style.background = "#bbb";
                 };
-
             });
-                
+        }
+
+        function abrirImagen(imagen) {
+            const modal = document.getElementById("modalImagen");
+            const imagenGrande = document.getElementById("imagenGrande");
+            imagenGrande.src = imagen.src;
+            modal.style.display = "flex";
+        }
+
+        function cerrarImagen() {
+            document.getElementById("modalImagen").style.display = "none";
         }
     </script>
 </head>
 
 <body>
+    <!-- Modal -->
+    <div id="modalImagen" class="modal-imagen" onclick="cerrarImagen()">
+        <span class="cerrar">&times;</span>
+
+        <img id="imagenGrande" class="imagen-grande">
+    </div>
     <div class="header">
         <div class="header-left">
             <h1>Checklist Fajas</h1>
@@ -438,7 +453,8 @@
     <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
         <!-- FORMS !!! -->
-        <form action="/chinalco_faja/guardar" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Confirmar datos')">
+        <form action="/chinalco_faja/guardar" method="POST" enctype="multipart/form-data"
+            onsubmit="return confirm('Confirmar datos')">
             <!-- CHANCADORA  -->
             <div class="seccion">
                 <div class="grid1">
@@ -461,7 +477,7 @@
             <div class="seccion">
                 <div class="seccion-titulo">FAJA TRANSPORTADORA</div>
 
-                <img src="static/fotos_chinalco/chinalco_faja.png" class="img-tecnica" alt="HEAD ASSEMBLY">
+                <img src="static/fotos_chinalco/chinalco_faja.png" class="imagen-preview" onclick="abrirImagen(this)" alt="HEAD ASSEMBLY">
 
                 <div class="seccion-subtitulo"></div>
                 <table class="metro-tabla">
@@ -486,23 +502,30 @@
                     </tr>
                     <tr>
                         <td class="metro-label">Polea tensor - lado cabeza (si aplica)</td>
-                        <td><input type="number" step="0.1" name="temp_ten_cab_ll" placeholder="C°" required disabled class="toenable"></td>
-                        <td><input type="number" step="0.1" name="temp_ten_cab_lf" placeholder="C°" required disabled class="toenable"></td>
+                        <td><input type="number" step="0.1" name="temp_ten_cab_ll" placeholder="C°" required disabled
+                                class="toenable"></td>
+                        <td><input type="number" step="0.1" name="temp_ten_cab_lf" placeholder="C°" required disabled
+                                class="toenable"></td>
                     </tr>
                     <tr>
                         <td class="metro-label">Polea tensor - lado cola (si aplica)</td>
-                        <td><input type="number" step="0.1" name="temp_ten_col_ll" placeholder="C°" required disabled class="toenable"></td>
-                        <td><input type="number" step="0.1" name="temp_ten_col_lf" placeholder="C°" required disabled class="toenable"></td>
+                        <td><input type="number" step="0.1" name="temp_ten_col_ll" placeholder="C°" required disabled
+                                class="toenable"></td>
+                        <td><input type="number" step="0.1" name="temp_ten_col_lf" placeholder="C°" required disabled
+                                class="toenable"></td>
                     </tr>
                     <tr>
                         <td class="metro-label">Polea contrapeso (si aplica)</td>
-                        <td><input type="number" step="0.1" name="temp_pol_cps_ll" placeholder="C°" required disabled class="toenable"></td>
-                        <td><input type="number" step="0.1" name="temp_pol_cps_lf" placeholder="C°" required disabled class="toenable"></td>
+                        <td><input type="number" step="0.1" name="temp_pol_cps_ll" placeholder="C°" required disabled
+                                class="toenable"></td>
+                        <td><input type="number" step="0.1" name="temp_pol_cps_lf" placeholder="C°" required disabled
+                                class="toenable"></td>
                     </tr>
 
                     <tr>
                         <td class="metro-label">Motoreductor</td>
-                        <td colspan="2"><input type="number" step="0.1" name="temp_mtr_rdc" placeholder="C°" required></td>
+                        <td colspan="2"><input type="number" step="0.1" name="temp_mtr_rdc" placeholder="C°" required>
+                        </td>
                     </tr>
                 </table>
                 <table class="metro-tabla">
@@ -557,7 +580,7 @@
     </div>
 
 
-    
+
     </form>
     </div>
 </body>
