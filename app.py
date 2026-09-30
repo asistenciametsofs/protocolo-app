@@ -45,15 +45,14 @@ def chinalco_graf():
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
     
-    # chancadoras = ['CR011','CR012','CR013','CR014','CR021','CR022','CR023','CR024']
-    chancadora_sel = request.args.get('equipo', request.form.get('equipo', 'TC-01'))
-    c.execute('SELECT equipo, fecha, obs, supervisor, temp_mtr_rdc, temp_pol_cab_lf, temp_pol_cab_ll, temp_pol_col_lf, temp_pol_col_ll, temp_pol_cps_lf, temp_pol_cps_ll, temp_ten_cab_lf, temp_ten_cab_ll, temp_ten_col_lf, temp_ten_col_ll, vbcn_cab, vbcn_cent, vbcn_col FROM chinalco_faja WHERE equipo = %s ORDER BY fecha ASC', (chancadora_sel,))
+    sel = request.args.get('equipo', request.form.get('equipo', 'TC-01'))
+    c.execute('SELECT equipo, fecha, obs, supervisor, temp_mtr_rdc, temp_pol_cab_lf, temp_pol_cab_ll, temp_pol_col_lf, temp_pol_col_ll, temp_pol_cps_lf, temp_pol_cps_ll, temp_ten_cab_lf, temp_ten_cab_ll, temp_ten_col_lf, temp_ten_col_ll, vbcn_cab, vbcn_cent, vbcn_col FROM chinalco_faja WHERE equipo = %s ORDER BY fecha ASC', (sel,))
     registros = c.fetchall()
     c.execute('select distinct equipo from chinalco_faja order by equipo')
     equipos = c.fetchall()
     conn.close()
 
-    return render_template('chinalco_graf.html', registros=registros, equipos=equipos)
+    return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel)
 
 
 
@@ -260,8 +259,6 @@ def guardar_armado_route():
 @app.route('/cambio')
 def cambio():
     return render_template('cambio.html')
-
-
 
 @app.route('/cambio/guardar', methods=['POST'])
 def guardar_cambio_route():

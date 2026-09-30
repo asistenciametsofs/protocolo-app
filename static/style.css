@@ -3,7 +3,26 @@
     margin: 0 auto;
 }
 
-.boton{
+.btn-chancadora {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 3px;
+    border-radius: 20px;
+    background: #f0f2f5;
+    color: #1a3a5c;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid transparent;
+}
+
+.btn-chancadora.activo {
+    background: #1a3a5c;
+    color: white;
+}
+
+
+.boton {
     flex: auto;
     background: white;
     border-radius: 12px;
