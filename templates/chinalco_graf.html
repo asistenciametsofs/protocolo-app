@@ -22,27 +22,17 @@
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
         <div class="card">
+            {% for e in equipos %}
+            <a class="btn-chancadora {% if e[0] == sel %}activo{% endif %}" href="/chinalco_graf?equipo={{ e[0] }}">{{
+                e[0] }}</a>
+            {% endfor %}
+        </div>
+        <div class="card">
             <div class="chart" id="C1"></div>
         </div>
 
     </div>
 
-    {% for r in registros %}
-    <div>
-        <p>{{ r[0] }}</p>
-        <br>
-
-    </div>
-
-    {% endfor %}
-
-    <div class="contenedor">
-        {% for e in equipos %}
-            <div class="boton">
-                <a href="/chinalco_graf?equipo={{ e[0] }}">{{ e[0] }}</a>
-            </div>
-        {% endfor %}
-    </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
@@ -89,6 +79,24 @@
             tooltip: {
                 trigger: 'axis'
             },
+            markarea: {
+                silent: false,
+
+                data: [
+                    {
+                        yAxis: 65,
+                        itemStyle: {
+                            color: 'rgba(255, 0, 0, 0.2)'
+                        }
+                    },
+                    {
+                        yAxis: 1000
+                    }
+                ]
+            },
+            markLine: {
+                yAxis: 65,
+            }
         };
 
         const initCharts = () => {
