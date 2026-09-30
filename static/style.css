@@ -280,6 +280,7 @@ textarea:focus {
     padding: 24px;
     margin-bottom: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-align: center;
 }
 
 .card h2 {

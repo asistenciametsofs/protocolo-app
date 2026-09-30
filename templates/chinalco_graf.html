@@ -50,16 +50,45 @@
                 type: 'category',
                 data: fecha
             },
+
             yAxis: {
                 type: 'value'
             },
+
             series: [
                 {
                     data: tempmr,
                     type: 'line',
-                    smooth: true
+                    smooth: true,
+
+                    markArea: {
+                        silent: true,
+
+                        data: [
+                            [
+                                {
+                                    yAxis: 65,
+                                    itemStyle: {
+                                        color: 'rgba(255, 0, 0, 0.2)'
+                                    }
+                                },
+                                {
+                                    yAxis: 1000
+                                }
+                            ]
+                        ]
+                    },
+
+                    markLine: {
+                        data: [
+                            {
+                                yAxis: 65
+                            }
+                        ]
+                    }
                 }
             ],
+
             dataZoom: [
                 {
                     type: 'slider',
@@ -76,26 +105,9 @@
                     throttle: 120
                 }
             ],
+
             tooltip: {
                 trigger: 'axis'
-            },
-            markarea: {
-                silent: false,
-
-                data: [
-                    {
-                        yAxis: 65,
-                        itemStyle: {
-                            color: 'rgba(255, 0, 0, 0.2)'
-                        }
-                    },
-                    {
-                        yAxis: 1000
-                    }
-                ]
-            },
-            markLine: {
-                yAxis: 65,
             }
         };
 
