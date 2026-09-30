@@ -62,7 +62,7 @@ def chinalco_faja():
 def guardar_chinalco_faja():
     tabla = str('chinalco_faja')
     datos = {}
-    campos = ['equipo','supervisor','obs','fecha','temp_pol_cab_ll','temp_pol_cab_lf','temp_pol_col_ll','temp_pol_col_lf','temp_ten_cab_ll','temp_ten_cab_lf','temp_ten_col_ll','temp_ten_col_lf','temp_pol_cps_ll','temp_pol_cps_lf','temp_mtr_rdc','vbcn_cab','vbcn_col','vbcn_cent']
+    campos = ['equipo','supervisor','obs','temp_pol_cab_ll','temp_pol_cab_lf','temp_pol_col_ll','temp_pol_col_lf','temp_ten_cab_ll','temp_ten_cab_lf','temp_ten_col_ll','temp_ten_col_lf','temp_pol_cps_ll','temp_pol_cps_lf','temp_mtr_rdc','vbcn_cab','vbcn_col','vbcn_cent']
     for campo in campos:
         valor = request.form.get(campo, '')
         try:
