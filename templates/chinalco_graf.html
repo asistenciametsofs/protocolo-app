@@ -18,7 +18,7 @@
         </div>
         <div class="metso-logo">Metso</div>
     </div>
-    <div class="containergrf">
+    <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
         <div class="card">
@@ -27,10 +27,10 @@
                 e[0] }}</a>
             {% endfor %}
         </div>
-        <div class="cardgrf">
+        <div class="containergrf">
             {% for i in range(0, ttdt) %}
             <div class="card-title"> {{ title[i] }} </div>
-            <div class="chart" id="C{{ i }}"></div>
+            <div class="cardgrf" id="C{{ i }}"></div>
             {% endfor %}
         </div>
     </div>

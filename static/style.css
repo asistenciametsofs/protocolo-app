@@ -5,7 +5,10 @@
     padding: 24px;
     margin-bottom: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-width: 100px;
+    min-height: 400px;
 }
+
 
 .containergrf {
     gap: 24px;
@@ -323,10 +326,7 @@ textarea:focus {
     margin-bottom: 16px;
 }
 
-.chart {
-    min-width: 100px;
-    min-height: 400px;
-}
+
 
 .hora-group {
     display: flex;
