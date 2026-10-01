@@ -1,3 +1,23 @@
+.cardgrf {
+    flex: 1 1 420px;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.containergrf {
+    gap: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1000px;
+    align-items: stretch;
+    margin: 30px auto;
+    padding: 0 16px;
+    justify-content: center;
+}
+
 .contenedor {
     display: flex;
     margin: 0 auto;
