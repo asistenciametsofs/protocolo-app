@@ -21,7 +21,6 @@
     max-width: 1000px;
     align-items: stretch;
     margin: 30px auto;
-    padding: 0 16px;
     justify-content: center;
 }
 
@@ -315,6 +314,7 @@ textarea:focus {
     font-weight: bold;
     color: #1a3a5c;
     margin-bottom: 5px;
+    text-align: center;
 }
 
 
