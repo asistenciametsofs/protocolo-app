@@ -28,9 +28,10 @@
             {% endfor %}
         </div>
         <div class="card">
-            <div class="chart" id="C1"></div>
+            {% for i in range(1, ttdt + 1) %}
+            <div class="chart" id="C{{ i }}"></div>
+            {% endfor %}
         </div>
-
     </div>
 
 
@@ -38,91 +39,93 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
     <script>
 
-        registros = {{ registros | tojson }};
+        const registros = {{ registros | tojson }};
+        const ttdt = {{ ttdt }};
+
         window.registros = registros;
+        window.ttdt = ttdt;
 
-        const fecha = registros.map(r => new Date(r[1]).toLocaleDateString('es-PE'));
-        const tempmr = registros.map(r => r[4]);
+        for (let i = 0; i < ttdt; i++) {
+            console.log(i)
+            const fecha = registros.map(r =>
+                new Date(r[1]).toLocaleDateString('es-PE')
+            );
 
+            const tempmr = registros.map(r => r[i + 4]);
 
-        option = {
-            xAxis: {
-                type: 'category',
-                data: fecha
-            },
+            const option = {
+                xAxis: {
+                    type: 'category',
+                    data: fecha
+                },
 
-            yAxis: {
-                type: 'value'
-            },
+                yAxis: {
+                    type: 'value'
+                },
 
-            series: [
-                {
-                    data: tempmr,
-                    type: 'line',
-                    smooth: true,
+                series: [
+                    {
+                        data: tempmr,
+                        type: 'line',
+                        smooth: true,
 
-                    markArea: {
-                        silent: true,
+                        markArea: {
+                            silent: true,
 
-                        data: [
-                            [
-                                {
-                                    yAxis: 65,
-                                    itemStyle: {
-                                        color: 'rgba(255, 0, 0, 0.2)'
+                            data: [
+                                [
+                                    {
+                                        yAxis: 65,
+                                        itemStyle: {
+                                            color: 'rgba(255, 0, 0, 0.2)'
+                                        }
+                                    },
+                                    {
+                                        yAxis: 1000
                                     }
-                                },
+                                ]
+                            ]
+                        },
+
+                        markLine: {
+                            data: [
                                 {
-                                    yAxis: 1000
+                                    yAxis: 65
                                 }
                             ]
-                        ]
-                    },
-
-                    markLine: {
-                        data: [
-                            {
-                                yAxis: 65
-                            }
-                        ]
+                        }
                     }
-                }
-            ],
+                ],
 
-            dataZoom: [
-                {
-                    type: 'slider',
-                    xAxisIndex: 'all',
-                    left: '10%',
-                    right: '10%',
-                    bottom: 30,
-                    height: 30,
-                    throttle: 120
-                },
-                {
-                    type: 'inside',
-                    xAxisIndex: 'all',
-                    throttle: 120
-                }
-            ],
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        xAxisIndex: 'all',
+                        left: '10%',
+                        right: '10%',
+                        bottom: 30,
+                        height: 30,
+                        throttle: 120
+                    },
+                    {
+                        type: 'inside',
+                        xAxisIndex: 'all',
+                        throttle: 120
+                    }
+                ],
 
-            tooltip: {
-                trigger: 'axis'
+                tooltip: {
+                    trigger: 'axis'
+                }
+            };
+
+            const elemento = document.getElementById("C" + i);
+
+            if (elemento) {
+                const chart = echarts.init(elemento);
+                chart.setOption(option);
             }
-        };
-
-        const initCharts = () => {
-            const chart1 = echarts.init(document.getElementById("C1"));
-            chart1.setOption(option);
-        };
-        window.addEventListener("load", () => {
-            initCharts();
-            ///console.log("ok");
-        });
-
-
-        console.log(registros);
-        console.log(registros[0].equipo)
+        }
 
     </script>
 
