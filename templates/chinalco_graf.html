@@ -54,6 +54,18 @@
                 new Date(r[1]).toLocaleDateString('es-PE')
             );
 
+            const valueok = 60
+            const valuemid = 105
+            const colorok = 'rgba(0, 255, 0, 0.2)'
+            const colormid = 'rgba(255, 150, 0, 0.2)'
+            const colorbad = 'rgba(255, 0, 0, 0.2)'
+
+            if (i == 5 || i == 6 || i == 7  ) {
+                valueok = 3
+                valuemid = 5
+            }
+            
+            
             const tempmr = registros.map(r => r[i + 4]);
 
             const option = {
@@ -78,9 +90,27 @@
                             data: [
                                 [
                                     {
-                                        yAxis: 65,
+                                        yAxis: -20,
                                         itemStyle: {
-                                            color: 'rgba(255, 0, 0, 0.2)'
+                                            color: colorok
+                                        }
+                                    },
+                                    {
+                                        yAxis: valueok
+                                    },
+                                    {
+                                        yAxis: valueok,
+                                        itemStyle: {
+                                            color: colormid
+                                        }
+                                    },
+                                    {
+                                        yAxis: valuemid
+                                    },
+                                    {
+                                        yAxis: valuemid,
+                                        itemStyle: {
+                                            color: colorbad
                                         }
                                     },
                                     {
@@ -93,7 +123,8 @@
                         markLine: {
                             data: [
                                 {
-                                    yAxis: 65
+                                    yAxis: valueok,
+                                    yAxis: valuemid,
                                 }
                             ]
                         }
