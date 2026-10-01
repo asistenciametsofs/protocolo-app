@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metso Field Services - Inicio</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
@@ -29,11 +30,16 @@
         .option h2 { font-size: 17px; color: #1a3a5c; margin-bottom: 6px; }
         .option.inventarios h2 { color: #E8622C; }
         .option p { font-size: 13px; color: #666; }
+        .icon img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <span class="metso-brand">METSO</span>
+        <span class="metso-brand">Metso / Sistema en pruebas</span>
         <h1>Sistema SMCV</h1>
         <p>Selecciona el módulo al que deseas ingresar</p>
     </div>
@@ -43,7 +49,30 @@
             <h2>Gestión de Mantenimiento Chancadoras</h2>
             <p>Protocolos, dashboard, historial, alturas de bowl y planificación MP1250</p>
         </a>
-
     </div>
+
+    <div class="container">
+        <a href=/chinalco class="option">
+                <span class="icon">
+                    <img src="static\fotos_chinalco\chinalco-chinalco-logo-png_seeklogo-222550.png" alt="Chinalco">
+                </span>
+            <h2>Chinalco</h2>
+            <p>Protocolos</p>
+        </a>
+    </div>
+
+    
+    </div>
+        <div class="container">
+        <a href="https://pgweb-demo.fly.dev/" class="option">
+            <span class="icon">🌐</span>
+            <h2>Acceso a la Base de datos</h2>
+            <p>Accesos requeridos</p>
+        </a>
+    </div>
+
+
+
+
 </body>
 </html>

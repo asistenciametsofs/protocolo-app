@@ -183,6 +183,23 @@ def init_db():
     conn.commit()
     conn.close()
 
+#CHINALCO !!!
+
+def guardar_DB(datos,tabla):
+    conn = get_db()
+    c = conn.cursor()
+    #datos['fecha'] = datetime.now().strftime('%Y-%m-%d %H:%M') #POSTGRESQL pone la fecha automatico pero sin hora
+    columnas = ', '.join(datos.keys())
+    ph = '%s' if os.environ.get('DATABASE_URL') else '?'
+    placeholders = ', '.join([ph for _ in datos])
+    c.execute(f'INSERT INTO {tabla} ({columnas}) VALUES ({placeholders})',
+              list(datos.values()))
+    conn.commit()
+    conn.close()
+
+
+#CHINALCO END
+
 def guardar_armado(datos):
     conn = get_db()
     c = conn.cursor()

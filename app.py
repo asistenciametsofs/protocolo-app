@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
-from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias
+from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias, guardar_DB
 from word_generator import generar_word_armado, generar_word_cambio
 from email_sender import enviar_correo
 import os
+import json
 import uuid
 import threading
 import cloudinary
@@ -25,6 +26,187 @@ with app.app_context():
 def home():
     return render_template('home.html')
 
+#Chinalco comienzo
+
+@app.route('/chinalco')
+def chinalco():
+    return render_template('chinalco.html')
+
+# @app.route('/chinalco_graf')
+# def chinalco_graf():
+#     return render_template('chinalco_graf.html')
+
+@app.route('/chinalco_graf', methods=['GET', 'POST'])
+def chinalco_graf():
+    # with open('static/data/fajatest.json', 'r', encoding='utf-8') as archivo:
+    #     registros = json.load(archivo)
+    import psycopg2
+    from datetime import datetime
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    sel = request.args.get('equipo', request.form.get('equipo', 'TC-01'))
+    c.execute('SELECT equipo, fecha, obs, supervisor, temp_mtr_rdc, temp_pol_cab_lf, temp_pol_cab_ll, temp_pol_col_lf, temp_pol_col_ll, vbcn_cab, vbcn_cent, vbcn_col, temp_pol_cps_lf, temp_pol_cps_ll, temp_ten_cab_lf, temp_ten_cab_ll, temp_ten_col_lf, temp_ten_col_ll FROM chinalco_faja WHERE equipo = %s ORDER BY fecha ASC', (sel,))
+    registros = c.fetchall()
+    c.execute('select distinct equipo from chinalco_faja order by equipo')
+    equipos = c.fetchall()
+    conn.close()
+
+    ttdt = 8
+    if sel in ["TC-02","TC-04"]:
+        ttdt = 14
+
+    nombres_variables = {
+    0: "Temperatura moto reductor",
+    1: "Temperatura polea de cabeza lado fijo",
+    2: "Temperatura polea de cabeza lado libre",
+    3: "Temperatura polea de cola lado fijo",
+    4: "Temperatura polea de cola lado libre",
+    5: "Vibraciones lado cabeza",
+    6: "Vibraciones lado central",
+    7: "Vibraciones lado cola",
+    8: "Temperatura polea contrapeso lado fijo",
+    9: "Temperatura polea contrapeso lado libre",
+    10: "Temperatura tensor - lado cabeza lado fijo",
+    11: "Temperatura tensor - lado cabeza lado libre",
+    12: "Temperatura tensor - lado cola lado fijo",
+    13: "Temperatura tensor - lado cola lado libre"
+    }
+
+    return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel, ttdt=ttdt, title=nombres_variables)
+
+
+
+@app.route('/chinalco_faja')
+def chinalco_faja():
+    return render_template('chinalco_faja.html')
+
+@app.route('/chinalco_faja/guardar', methods=['POST'])
+def guardar_chinalco_faja():
+    tabla = str('chinalco_faja')
+    datos = {}
+    campos = ['equipo','supervisor','obs','temp_pol_cab_ll','temp_pol_cab_lf','temp_pol_col_ll','temp_pol_col_lf','temp_ten_cab_ll','temp_ten_cab_lf','temp_ten_col_ll','temp_ten_col_lf','temp_pol_cps_ll','temp_pol_cps_lf','temp_mtr_rdc','vbcn_cab','vbcn_col','vbcn_cent']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
+        except:
+            datos[campo] = valor
+
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
+
+    guardar_DB(datos, tabla)
+    flash('✅ Protocolo guardado!')
+    return redirect(url_for('chinalco'))
+
+
+@app.route('/chinalco_checklist')
+def Chinalco_checklist():
+    return render_template('chinalco_checklist.html')
+
+@app.route('/chinalco_checklist/guardar', methods=['POST'])
+def guardar_chinalco_checklist():
+    tabla = str('chinalco_checklist')
+    datos = {}
+    campos = ['supervisor','equipo','param_set_act','param_alt_bowl','param_dist_alim','param_obs','lub_lvl_oil','lub_temp_oil','lub_ceje_bar','lub_temp_sum','lub_temp_ret','lub_oil_sts','lub_filtros','lub_extras','lub_malla','lub_obs','hyd_lvl_oil','hyd_clam_bar','hyd_trmp_bar','hyd_extras','hyd_obs','trt_vibracion','trt_uniones','trt_obs','tms_faja_pole','tms_sts','tms_obs','mot_current','mot_kw','mot_vb_nde','mot_vb_de','mot_temp_mtll','mot_temp_mtla','mot_obs','other_general','other_extras','other_obs']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
+        except:
+            datos[campo] = valor
+
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
+
+    guardar_DB(datos, tabla)
+    flash('✅ Protocolo guardado!')
+    return redirect(url_for('chinalco'))
+
+
+@app.route('/chinalco_head_assembly')
+def chinalco_head_assembly():
+    return render_template('chinalco_head_assembly.html')
+
+@app.route('/chinalco_head_assembly/guardar', methods=['POST'])
+def guardar_chinalco_head():
+    tabla = str('chinalco_head')
+    datos = {}
+    campos = ['equipo','up_a1','up_b1','up_a2','up_b2','up_a3','up_b3','low_a1','low_b1','low_a2','low_b2','low_a3','low_b3','low_a4','low_b4','low_a5','low_b5','low_a6','low_b6','low_a7','low_b7','low_a8','low_b8','obs','supervisor']
+    for campo in campos:
+        valor = request.form.get(campo, '')
+        try:
+            if valor == '':
+                datos[campo] = None
+            elif '.' in str(valor):
+                datos[campo] = float(valor)
+            else:
+                try:
+                    datos[campo] = int(valor)
+                except:
+                    datos[campo] = valor
+        except:
+            datos[campo] = valor
+
+    fotos_paths = {}
+    for key in request.files:
+        foto = request.files[key]
+        if foto and foto.filename:
+            try:
+                resultado = cloudinary.uploader.upload(
+                    foto,
+                    folder='protocolos',
+                    transformation=[{'width': 800, 'height': 600, 'crop': 'limit', 'quality': 60}]
+                )
+                fotos_paths[f'foto_path_{key.replace("foto_", "")}'] = resultado['secure_url']
+            except Exception as e:
+                print(f'Error subiendo foto {key}: {e}')
+
+    guardar_DB(datos, tabla)
+    flash('✅ Protocolo guardado!')
+    return redirect(url_for('chinalco'))
+
+#Chinalco fin 
+
 @app.route('/mantenimiento')
 def mantenimiento():
     return render_template('index.html')
@@ -32,6 +214,10 @@ def mantenimiento():
 @app.route('/armado')
 def armado():
     return render_template('armado.html')
+
+@app.route('/resumen')
+def resumen():
+    return render_template('resumen.html')
 
 @app.route('/armado/guardar', methods=['POST'])
 def guardar_armado_route():
@@ -735,5 +921,6 @@ def editar_armado_guardar(id):
     return redirect('/historial/armado')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    #port = int(os.environ.get('PORT', 5000))
+    #app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)

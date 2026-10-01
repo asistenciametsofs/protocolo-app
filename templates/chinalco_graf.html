@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>---</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>---</h1>
+            <p id="folio-header">HB-...</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+    <div class="container">
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        <div class="card">
+            {% for e in equipos %}
+            <a class="btn-chancadora {% if e[0] == sel %}activo{% endif %}" href="/chinalco_graf?equipo={{ e[0] }}">{{
+                e[0] }}</a>
+            {% endfor %}
+        </div>
+        <div class="containergrf">
+            {% for i in range(0, ttdt) %}
+            <div class="cardgrf" {% if i in [0, 7] %}style="flex-basis: 100%;"{% endif %}>
+                <p class="card-title">{{ title[i] }}</p>
+                <div class="chart" id="C{{ i }}"></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
+    <script>
+
+        const registros = {{ registros | tojson }};
+        const ttdt = {{ ttdt }};
+
+        window.registros = registros;
+        window.ttdt = ttdt;
+
+        for (let i = 0; i < ttdt; i++) {
+            console.log(i)
+            const fecha = registros.map(r =>
+                new Date(r[1]).toLocaleDateString('es-PE')
+            );
+
+            var valueok = 60
+            var valuemid = 105
+            const colorok = 'rgba(0, 255, 0, 0.2)'
+            const colormid = 'rgba(255, 150, 0, 0.2)'
+            const colorbad = 'rgba(255, 0, 0, 0.2)'
+
+            if (i === 5 || i === 6 || i === 7  ) {
+                valueok = 2
+                valuemid = 3
+                console.log("ok")
+            }
+            
+            
+            const tempmr = registros.map(r => r[i + 4]);
+
+            const option = {
+                xAxis: {
+                    type: 'category',
+                    data: fecha
+                },
+
+                yAxis: {
+                    type: 'value'
+                },
+
+                series: [
+                    {
+                        data: tempmr,
+                        type: 'line',
+                        smooth: true,
+
+                        markArea: {
+                            silent: true,
+
+                            data: [
+                                [
+                                    {
+                                        yAxis: -20,
+                                        itemStyle: {
+                                            color: colorok
+                                        }
+                                    },
+                                    {
+                                        yAxis: valueok
+                                    },
+                                ],
+                                [
+                                    {
+                                        yAxis: valueok,
+                                        itemStyle: {
+                                            color: colormid
+                                        }
+                                    },
+                                    {
+                                        yAxis: valuemid
+                                    },
+                                ],
+                                [
+                                    {
+                                        yAxis: valuemid,
+                                        itemStyle: {
+                                            color: colorbad
+                                        }
+                                    },
+                                    {
+                                        yAxis: 1000
+                                    }
+                                ]
+                            ]
+                        },
+
+                        markLine: {
+                            data: [
+                                {
+                                    yAxis: valueok,
+                                    
+                                },
+                                {
+                                    yAxis: valuemid,
+                                }
+                            ]
+                        }
+                    }
+                ],
+
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        xAxisIndex: 'all',
+                        left: '5%',
+                        right: '5%',
+                        bottom: 20,
+                        height: 30,
+                        throttle: 120
+                    },
+                    {
+                        type: 'inside',
+                        xAxisIndex: 'all',
+                        throttle: 120
+                    }
+                ],
+
+                tooltip: {
+                    trigger: 'axis'
+                }
+            };
+
+            const elemento = document.getElementById("C" + i);
+
+            if (elemento) {
+                const chart = echarts.init(elemento);
+                chart.setOption(option);
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
