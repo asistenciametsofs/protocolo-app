@@ -56,7 +56,24 @@ def chinalco_graf():
     if sel in ["TC-02","TC-04"]:
         ttdt = 14
 
-    return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel, ttdt=ttdt)
+    nombres_variables = {
+    0: "Temperatura moto reductor",
+    1: "Temperatura polea de cabeza lado fijo",
+    2: "Temperatura polea de cabeza lado libre",
+    3: "Temperatura polea de cola lado fijo",
+    4: "Temperatura polea de cola lado libre",
+    5: "Vibraciones lado cabeza",
+    6: "Vibraciones lado central",
+    7: "Vibraciones lado cola",
+    8: "Temperatura polea contrapeso lado fijo",
+    9: "Temperatura polea contrapeso lado libre",
+    10: "Temperatura tensor - lado cabeza lado fijo",
+    11: "Temperatura tensor - lado cabeza lado libre",
+    12: "Temperatura tensor - lado cola lado fijo",
+    13: "Temperatura tensor - lado cola lado libre"
+    }
+
+    return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel, ttdt=ttdt, title=nombres_variables)
 
 
 

@@ -29,6 +29,7 @@
         </div>
         <div class="card">
             {% for i in range(1, ttdt + 1) %}
+            <div class="card-title"> {{ title[i] }} </div>
             <div class="chart" id="C{{ i }}"></div>
             {% endfor %}
         </div>
@@ -51,7 +52,7 @@
                 new Date(r[1]).toLocaleDateString('es-PE')
             );
 
-            const tempmr = registros.map(r => r[i + 4]);
+            const tempmr = registros.map(r => r[i + 3]);
 
             const option = {
                 xAxis: {
