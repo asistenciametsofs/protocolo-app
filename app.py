@@ -53,7 +53,7 @@ def chinalco_graf():
     conn.close()
 
     ttdt = 8
-    if registros[0]["equipo"] in ["TC-02","TC-04"]:
+    if sel in ["TC-02","TC-04"]:
         ttdt = 14
 
     return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel, ttdt=ttdt)
