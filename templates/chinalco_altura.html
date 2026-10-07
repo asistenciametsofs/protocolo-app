@@ -449,9 +449,11 @@
             <script>
                 const registros = {{ registros | tojson }};
                 const promedio = {{ promedio }};
+                const camp = {{ camp }};
 
                 window.registros = registros;
                 window.promedio = promedio;
+                window.camp = camp;
 
                 const datePicker = document.getElementById('datePicker');
                 const today = new Date();
