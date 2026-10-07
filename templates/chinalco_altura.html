@@ -404,6 +404,15 @@
     </div>
     <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="flash">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
         <!-- FORMS !!! -->
         <form action="/chinalco_altura" method="POST" enctype="multipart/form-data" id="form-armado">
             <!-- CHANCADORA  -->
@@ -422,7 +431,7 @@
                 <div class="seccion-titulo">MEDICIÓN DE ALTURA DE CAMPAÑA N° {{ camp }}</div>
 
                 <div class="grid2">
-                    
+
                     <label>Medición de altura actual (mm)</label>
                     <input type="number" step="0.1" min="0" name="alt" placeholder="milimetros">
                     <label>Toneladas acumuladas</label>
@@ -430,6 +439,16 @@
                     <label>Fecha de medición</label>
                     <input type="date" id="datePicker" name="fecha">
                 </div>
+                
+                
+                <label for="newCycle">Iniciar nueva campaña (¿Hubo cambio de Head y Bowl?)</label>
+                <input type="checkbox" name="newCycle" onclick="show()">
+
+                <div id="newCycleFields" style="display:none;">
+                    <label>Fecha de medición</label>
+                    <input type="number" step="1" min="0" name="newAlt">
+                </div>
+
             </div>
 
             <!-- Personal  -->
@@ -460,8 +479,18 @@
                 const dd = String(today.getDate()).padStart(2, '0');
 
                 datePicker.value = `${yyyy}-${mm}-${dd}`;
+
+                function show() {
+                    var checkBox = document.getElementsByName("newCycle")[0];
+                    var newCycleFields = document.getElementById("newCycleFields");
+                    if (checkBox.checked == true) {
+                        newCycleFields.style.display = "block";
+                    } else {
+                        newCycleFields.style.display = "none";
+                    }
+                }
             </script>
-                    
+
         </form>
     </div>
 </body>

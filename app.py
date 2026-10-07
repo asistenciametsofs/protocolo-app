@@ -1,3 +1,6 @@
+import datetime
+from time import time
+
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias, guardar_DB
 from word_generator import generar_word_armado, generar_word_cambio
@@ -68,6 +71,17 @@ def chinalco_altura():
         c.execute('INSERT INTO chinalco_altura_med ( id_camp, fecha, equipo, alt, tons_acum) VALUES (%s, %s, %s, %s, %s);', (camp, fecha, equipo, altura_actual, toneladas_acumuladas))
         conn.commit()
         flash('✅ Registro guardado!')
+
+        if request.form.get('newCycle'):
+            c.execute('UPDATE chinalco_altura SET fecha_fin = %s, actual = FALSE, alt_fin = %s WHERE equipo = %s AND id_camp = %s;', (fecha, altura_actual, equipo, camp))
+            conn.commit()
+            flash('✅ Campaña finalizada!')
+
+            newalt = request.form.get('newAlt')
+
+            c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp, equipo, fecha, newalt))
+            conn.commit()
+            flash('✅ Nueva campaña iniciada!')
             
     return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp)
 
