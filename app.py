@@ -50,8 +50,10 @@ def chinalco_altura():
     for i in registros:
         temp += i[8]
             
-    promedio = temp / len(registros)
-    promedio = round(promedio, 5)
+    promedio = round(temp / len(registros), 5)
+    camp = registros[len(registros)-1][1]
+
+
 
     if request.method == 'POST':
         fecha = request.form.get('fecha')
@@ -63,7 +65,7 @@ def chinalco_altura():
         conn.commit()
         flash('✅ Registro guardado!')
             
-    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel)
+    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp)
 
 @app.route('/chinalco_graf', methods=['GET', 'POST'])
 def chinalco_graf():
