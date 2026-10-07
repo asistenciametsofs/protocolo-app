@@ -36,7 +36,7 @@ def chinalco():
 # def chinalco_graf():
 #     return render_template('chinalco_graf.html')
 
-@app.route('/chinalco_altura')
+@app.route('/chinalco_altura', methods=['GET', 'POST'])
 def chinalco_altura():
     import psycopg2
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
