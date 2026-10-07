@@ -61,7 +61,7 @@ def chinalco_altura():
         altura_actual = request.form.get('alt')
         toneladas_acumuladas = request.form.get('tons_acum')
 
-        c.execute('INSERT INTO chinalco_altura_med ( equipo, alt, tons_acum) VALUES (%s, %s, %s, %s);', (fecha, equipo, altura_actual, toneladas_acumuladas))
+        c.execute('INSERT INTO chinalco_altura_med ( fecha,equipo, alt, tons_acum) VALUES (%s, %s, %s, %s);', (fecha, equipo, altura_actual, toneladas_acumuladas))
         conn.commit()
         flash('✅ Registro guardado!')
             
