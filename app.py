@@ -36,6 +36,25 @@ def chinalco():
 # def chinalco_graf():
 #     return render_template('chinalco_graf.html')
 
+@app.route('/chinalco_altura')
+def chinalco_altura():
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    sel = request.args.get('equipo', request.form.get('equipo', 'BR-01'))
+    c.execute('SELECT * FROM chinalco_altura WHERE equipo = %s ORDER BY fecha_ini ASC;', (sel,))
+    registros = c.fetchall()    
+
+    temp = 0
+    for i in registros:
+        temp += i[8]
+            
+    promedio = temp / len(registros)
+    promedio = round(promedio, 2)
+            
+    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel)
+
 @app.route('/chinalco_graf', methods=['GET', 'POST'])
 def chinalco_graf():
     # with open('static/data/fajatest.json', 'r', encoding='utf-8') as archivo:
