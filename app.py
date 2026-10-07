@@ -45,13 +45,17 @@ def chinalco_altura():
     sel = request.args.get('equipo', request.form.get('equipo', 'BR-01'))
     c.execute('SELECT * FROM chinalco_altura WHERE equipo = %s ORDER BY fecha_ini ASC;', (sel,))
     registros = c.fetchall()    
-
     temp = 0
     for i in registros:
         temp += i[8]
             
     promedio = round(temp / len(registros), 5)
-    camp = registros[len(registros)-1][1]
+    
+
+    if registros[len(registros)-1][10]:
+        camp = registros[len(registros)-1][1] + 1
+    else:
+        camp = registros[len(registros)-1][1]
 
 
 
@@ -61,7 +65,7 @@ def chinalco_altura():
         altura_actual = request.form.get('alt')
         toneladas_acumuladas = request.form.get('tons_acum')
 
-        c.execute('INSERT INTO chinalco_altura_med ( fecha,equipo, alt, tons_acum) VALUES (%s, %s, %s, %s);', (fecha, equipo, altura_actual, toneladas_acumuladas))
+        c.execute('INSERT INTO chinalco_altura_med ( id_camp, fecha, equipo, alt, tons_acum) VALUES (%s, %s, %s, %s, %s);', (camp, fecha, equipo, altura_actual, toneladas_acumuladas))
         conn.commit()
         flash('✅ Registro guardado!')
             
