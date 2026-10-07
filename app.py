@@ -51,7 +51,17 @@ def chinalco_altura():
         temp += i[8]
             
     promedio = temp / len(registros)
-    promedio = round(promedio, 2)
+    promedio = round(promedio, 5)
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha')
+        equipo = request.form.get('equipo')
+        altura_actual = request.form.get('alt')
+        toneladas_acumuladas = request.form.get('tons_acum')
+
+        c.execute('INSERT INTO chinalco_altura_med ( equipo, alt, tons_acum) VALUES (%s, %s, %s, %s);', (fecha, equipo, altura_actual, toneladas_acumuladas))
+        conn.commit()
+        flash('✅ Registro guardado!')
             
     return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel)
 

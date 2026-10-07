@@ -424,10 +424,10 @@
                 <div class="grid2">
                     
                     <label>Medición de altura actual (mm)</label>
-                    <input type="number" step="0.1" min="0" name="" placeholder="milimetros">
+                    <input type="number" step="0.1" min="0" name="alt" placeholder="milimetros">
                     <label>Toneladas acumuladas</label>
-                    <input type="number" step="1" min="0" name="" placeholder="toneladas">
-                    label>Fecha de medición</label>
+                    <input type="number" step="1" min="0" name="tons_acum" placeholder="toneladas">
+                    <label>Fecha de medición</label>
                     <input type="date" id="datePicker" name="fecha">
                 </div>
             </div>
@@ -452,6 +452,14 @@
 
                 window.registros = registros;
                 window.promedio = promedio;
+
+                const datePicker = document.getElementById('datePicker');
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months start at 0
+                const dd = String(today.getDate()).padStart(2, '0');
+
+                datePicker.value = `${yyyy}-${mm}-${dd}`;
             </script>
                     
         </form>
