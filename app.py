@@ -53,9 +53,9 @@ def chinalco_altura():
     
 
     if registros[len(registros)-1][10]:
-        camp = registros[len(registros)-1][1] + 1
+        camp = registros[len(registros)-1][1] 
     else:
-        camp = registros[len(registros)-1][1]
+        camp = registros[len(registros)-1][1] + 1 
 
 
 
