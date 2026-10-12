@@ -56,14 +56,15 @@ def chinalco_altura():
             
     promedio = round(temp / len(registros), 5)
 
-    tons = max(r[12] for r in registros if r[12] is not None)
+    
 
     if registros[len(registros)-1][10]:
         camp = registros[len(registros)-1][1] 
     else:
         camp = registros[len(registros)-1][1] + 1 
 
-
+    c.execute('SELECT tons_acum FROM chinalco_altura_med WHERE equipo = %s ORDER BY fecha_ini ASC; LIMIT 1', (sel,))
+    tons = c.fetchone()
 
     if request.method == 'POST':
         fecha = request.form.get('fecha')
