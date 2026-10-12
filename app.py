@@ -63,7 +63,7 @@ def chinalco_altura():
     else:
         camp = registros[len(registros)-1][1] + 1 
 
-    c.execute('SELECT tons_acum FROM chinalco_altura_med WHERE equipo = %s ORDER BY fecha_ini ASC LIMIT 1;', (sel,))
+    c.execute('SELECT tons_acum FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum ASC LIMIT 1;', (sel,))
     tons = c.fetchone()
 
     if request.method == 'POST':
