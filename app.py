@@ -56,7 +56,7 @@ def chinalco_altura():
             
     promedio = round(temp / len(registros), 5)
 
-    tons = registros[len(registros)-1][12]
+    tons = max(r[12] for r in registros if r[12] is not None)
 
     if registros[len(registros)-1][10]:
         camp = registros[len(registros)-1][1] 
