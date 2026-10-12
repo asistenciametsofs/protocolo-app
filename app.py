@@ -50,7 +50,9 @@ def chinalco_altura():
     registros = c.fetchall()    
     temp = 0
     for i in registros:
-        temp += i[8]
+        if i[8] is not None:
+            temp += i[8]
+            
             
     promedio = round(temp / len(registros), 5)
     
