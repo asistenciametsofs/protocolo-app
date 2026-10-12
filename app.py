@@ -55,7 +55,8 @@ def chinalco_altura():
 
             
     promedio = round(temp / len(registros), 5)
-    
+
+    tons = registros[len(registros)-1][12]
 
     if registros[len(registros)-1][10]:
         camp = registros[len(registros)-1][1] 
@@ -90,7 +91,7 @@ def chinalco_altura():
 
     conn.close()
 
-    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp)
+    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp, tons=tons)
 
 # @app.route('/chinalco_graf_BR', methods=['GET', 'POST'])
 # def chinalco_graf_br():
@@ -169,7 +170,6 @@ def chinalco_graf_br():
                 FROM chinalco_altura_med
                 WHERE equipo = %s
                   AND alt IS NOT NULL
-                  AND tons_acum IS NOT NULL
                 ORDER BY fecha ASC
             """, (equipo,))
 
