@@ -84,7 +84,12 @@ def chinalco_altura():
             c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp+1, equipo, fecha, newalt))
             conn.commit()
             flash('✅ Nueva campaña iniciada!')
-            
+
+        conn.close()
+        return redirect(url_for('chinalco_altura', registros=registros, promedio=promedio, sel=sel, camp=camp))
+
+    conn.close()
+
     return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp)
 
 @app.route('/chinalco_graf', methods=['GET', 'POST'])
