@@ -52,7 +52,7 @@ def chinalco_altura():
     for i in registros:
         if i[8] is not None:
             temp += i[8]
-            
+
             
     promedio = round(temp / len(registros), 5)
     
@@ -81,7 +81,7 @@ def chinalco_altura():
 
             newalt = request.form.get('newAlt')
 
-            c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp, equipo, fecha, newalt))
+            c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp+1, equipo, fecha, newalt))
             conn.commit()
             flash('✅ Nueva campaña iniciada!')
             
