@@ -433,7 +433,7 @@
                 <div class="grid2">
 
                     <label>Medición de altura actual (mm)</label>
-                    <input type="number" step="0.1" min="0" name="alt" placeholder="milimetros" required>
+                    <input type="number" step="0.1" min="0" max="{{ alt }}" name="alt" placeholder="milimetros" required>
                     <label>Toneladas acumuladas</label>
                     <input type="number" step="1" min="{{ tons }}" name="tons_acum" placeholder="toneladas" required>
                     <label>Fecha de medición</label>

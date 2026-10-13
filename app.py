@@ -63,8 +63,9 @@ def chinalco_altura():
     else:
         camp = registros[len(registros)-1][1] + 1 
 
-    c.execute('SELECT tons_acum FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum DESC LIMIT 1;', (sel,))
+    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum DESC LIMIT 1;', (sel,))
     tons = c.fetchone()[0] 
+    alt = c.fetchone()[0]
 
     if request.method == 'POST':
         fecha = request.form.get('fecha')
@@ -92,7 +93,7 @@ def chinalco_altura():
 
     conn.close()
 
-    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp, tons=tons)
+    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp, tons=tons, alt=alt)
 
 # @app.route('/chinalco_graf_BR', methods=['GET', 'POST'])
 # def chinalco_graf_br():
