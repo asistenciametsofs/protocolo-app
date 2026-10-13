@@ -176,7 +176,7 @@ def chinalco_graf_br():
                 WHERE equipo = %s
                   AND alt IS NOT NULL
                 ORDER BY fecha ASC
-            """, (equipo,actualcamp))
+            """, (equipo,))
 
             mediciones = c.fetchall()
 
