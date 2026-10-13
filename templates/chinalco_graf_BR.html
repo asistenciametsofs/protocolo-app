@@ -32,7 +32,7 @@
             <div class="kpi-grid" id="kpi-grid">
                 <div class="kpi">
                     <div class="kpi-label">Última altura</div>
-                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.ultima_altura }} mm</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.altura_actual }} mm</div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Toneladas restantes</div>
@@ -45,7 +45,7 @@
                 <div class="kpi">
                     <div class="kpi-label">Desgaste por día</div>
                     <div class="kpi-valor" style="color:#555; font-size:16px">
-                        {{ datos.pendiente }} mm/1000T
+                        {{ datos.pendiente | round(3) }} mm/1000T
                     </div>
                 </div>
             </div>
@@ -181,7 +181,7 @@
                         formatter: value =>
                             Number(value).toLocaleString('es-PE')
                     },
-                    min: datos.toneladas_objetivo - 90000,
+                    min: datos.datos.toneladas_objetivo - ((datos.toneladas_objetivo - datos.toneladas_actuales) * 1.05),
                 },
 
                 yAxis: {

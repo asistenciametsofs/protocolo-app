@@ -85,6 +85,10 @@ def chinalco_altura():
 
             c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp+1, equipo, fecha, newalt))
             conn.commit()
+
+            c.execute('INSERT INTO chinalco_altura_med ( id_camp, fecha, equipo, alt, tons_acum) VALUES (%s, %s, %s, %s, %s);', (camp+1, fecha, equipo, newalt, toneladas_acumuladas))
+            conn.commit()
+
             flash('✅ Nueva campaña iniciada!')
 
         conn.close()
