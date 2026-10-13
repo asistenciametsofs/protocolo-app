@@ -162,8 +162,6 @@ def chinalco_graf_br():
         """)
         campañas = c.fetchall()
 
-        actualcamp = campañas[-1][2] if campañas else None
-
         # 2. Obtener todos los equipos
         equipos = sorted(set(r[0] for r in campañas if r[0]))
 
@@ -177,7 +175,6 @@ def chinalco_graf_br():
                 FROM chinalco_altura_med
                 WHERE equipo = %s
                   AND alt IS NOT NULL
-                  AND id_camp = %s
                 ORDER BY fecha ASC
             """, (equipo,actualcamp))
 
