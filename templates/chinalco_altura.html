@@ -420,10 +420,13 @@
                 <div class="grid1">
                     <div class="seccion-titulo">Seleccionar equipo</div>
                     <label>Guardas de equipos en general</label>
-                    <select name="equipo" placeholder="">
-                        <option>BR-01</option>
-                        <option>BR-02</option>
-                    </select>
+                    <form action="/chinalco_altura" method="GET" onchange="this.form.submit()">
+                        <select name="equipo" placeholder="">
+                            <option>BR-01</option>
+                            <option>BR-02</option>
+                        </select>
+                    </form>
+
                 </div>
             </div>
             <!-- PARAMETROS -->
