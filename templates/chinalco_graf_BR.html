@@ -21,140 +21,159 @@
     <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
+        <div id="graficos-container" class="containergrf">
+            {% for equipo in graficos %}
+            <div class="cardgrf">
+                <h3>{{ equipo }}</h3>
+                <div id="grafico-{{ loop.index0 }}" class="grafico"></div>
+            </div>
+            {% endfor %}
+        </div>
+
 
     </div>
 
 
 
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
-    <script>
 
+    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script> -->
+    <script>
         const graficos = {{ graficos | tojson }};
+        const instancias = [];
 
         window.graficos = graficos;
 
-        // for (let i = 0; i < ttdt; i++) {
-        //     console.log(i)
-        //     const fecha = graficos.map(r =>
-        //         new Date(r[1]).toLocaleDateString('es-PE')
-        //     );
+        Object.entries(graficos).forEach(([equipo, datos], i) => {
+            const elemento = document.getElementById(`grafico-${i}`);
 
-        //     var valueok = 60
-        //     var valuemid = 105
-        //     const colorok = 'rgba(0, 255, 0, 0.2)'
-        //     const colormid = 'rgba(255, 150, 0, 0.2)'
-        //     const colorbad = 'rgba(255, 0, 0, 0.2)'
+            if (!elemento) return;
 
-        //     if (i === 5 || i === 6 || i === 7  ) {
-        //         valueok = 2
-        //         valuemid = 3
-        //         console.log("ok")
-        //     }
-            
-            
-        //     const tempmr = registros.map(r => r[i + 4]);
+            const chart = echarts.init(elemento);
+            instancias.push(chart);
 
-        //     const option = {
-        //         xAxis: {
-        //             type: 'category',
-        //             data: fecha
-        //         },
+            const puntos = datos.puntos || [];
+            const proyeccion = datos.linea_proyectada || [];
+            const alturaMinima = datos.altura_minima ?? 65;
 
-        //         yAxis: {
-        //             type: 'value'
-        //         },
+            const series = [
+                {
+                    name: 'Altura medida',
+                    type: 'line',
+                    data: puntos,
+                    smooth: false,
+                    showSymbol: true,
+                    symbolSize: 7,
+                    lineStyle: {
+                        width: 2
+                    },
+                    markLine: {
+                        silent: true,
+                        symbol: 'none',
+                        data: [
+                            {
+                                name: 'Altura mínima',
+                                yAxis: alturaMinima,
+                                lineStyle: {
+                                    color: '#e74c3c',
+                                    type: 'dashed',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: `Mínimo: ${alturaMinima} mm`
+                                }
+                            }
+                        ]
+                    }
+                }
+            ];
 
-        //         series: [
-        //             {
-        //                 data: tempmr,
-        //                 type: 'line',
-        //                 smooth: true,
+            if (proyeccion.length === 2) {
+                series.push({
+                    name: 'Proyección',
+                    type: 'line',
+                    data: proyeccion,
+                    showSymbol: true,
+                    symbolSize: 7,
+                    lineStyle: {
+                        color: '#e74c3c',
+                        type: 'dashed',
+                        width: 3
+                    }
+                });
+            }
 
-        //                 markArea: {
-        //                     silent: true,
+            const option = {
+                title: {
+                    text: equipo,
+                    subtext: datos.toneladas_objetivo != null
+                        ? `Cambio estimado: ${Number(datos.toneladas_objetivo).toLocaleString('es-PE')} toneladas`
+                        : 'Sin proyección disponible',
+                    left: 'center'
+                },
 
-        //                     data: [
-        //                         [
-        //                             {
-        //                                 yAxis: -20,
-        //                                 itemStyle: {
-        //                                     color: colorok
-        //                                 }
-        //                             },
-        //                             {
-        //                                 yAxis: valueok
-        //                             },
-        //                         ],
-        //                         [
-        //                             {
-        //                                 yAxis: valueok,
-        //                                 itemStyle: {
-        //                                     color: colormid
-        //                                 }
-        //                             },
-        //                             {
-        //                                 yAxis: valuemid
-        //                             },
-        //                         ],
-        //                         [
-        //                             {
-        //                                 yAxis: valuemid,
-        //                                 itemStyle: {
-        //                                     color: colorbad
-        //                                 }
-        //                             },
-        //                             {
-        //                                 yAxis: 1000
-        //                             }
-        //                         ]
-        //                     ]
-        //                 },
+                tooltip: {
+                    trigger: 'axis',
+                    valueFormatter: value =>
+                        value == null ? '-' : `${Number(value).toFixed(2)} mm`
+                },
 
-        //                 markLine: {
-        //                     data: [
-        //                         {
-        //                             yAxis: valueok,
-                                    
-        //                         },
-        //                         {
-        //                             yAxis: valuemid,
-        //                         }
-        //                     ]
-        //                 }
-        //             }
-        //         ],
+                legend: {
+                    bottom: 0,
+                    data: ['Altura medida', 'Proyección']
+                },
 
-        //         dataZoom: [
-        //             {
-        //                 type: 'slider',
-        //                 xAxisIndex: 'all',
-        //                 left: '5%',
-        //                 right: '5%',
-        //                 bottom: 20,
-        //                 height: 30,
-        //                 throttle: 120
-        //             },
-        //             {
-        //                 type: 'inside',
-        //                 xAxisIndex: 'all',
-        //                 throttle: 120
-        //             }
-        //         ],
+                grid: {
+                    left: 70,
+                    right: 30,
+                    top: 85,
+                    bottom: 85
+                },
 
-        //         tooltip: {
-        //             trigger: 'axis'
-        //         }
-        //     };
+                xAxis: {
+                    type: 'value',
+                    name: 'Toneladas acumuladas',
+                    nameLocation: 'middle',
+                    nameGap: 45,
+                    axisLabel: {
+                        formatter: value =>
+                            Number(value).toLocaleString('es-PE')
+                    }
+                },
 
-        //     const elemento = document.getElementById("C" + i);
+                yAxis: {
+                    type: 'value',
+                    name: 'Altura (mm)',
+                    min: 0,
+                    axisLabel: {
+                        formatter: '{value} mm'
+                    }
+                },
 
-        //     if (elemento) {
-        //         const chart = echarts.init(elemento);
-        //         chart.setOption(option);
-        //     }
-        // }
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: 0
+                    },
+                    {
+                        type: 'slider',
+                        xAxisIndex: 0,
+                        bottom: 35
+                    }
+                ],
 
+                series
+            };
+
+            chart.setOption(option);
+        });
+
+        // Adaptar los gráficos cuando cambie el tamaño de la ventana.
+        window.addEventListener('resize', () => {
+            instancias.forEach(chart => chart.resize());
+        });
     </script>
+
 
 </body>
 
