@@ -21,7 +21,7 @@
     <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
-        <div id="graficos-container" class="containergrf">
+        <div id="graficos-container" class="containergrf" style="flex-basis: 100%;">
             {% for equipo in graficos %}
             <div class="cardgrf">
                 <div id="grafico-{{ loop.index0 }}" class="chart"></div>
@@ -31,7 +31,7 @@
                 <div class="kpi-grid" id="kpi-grid">
                     <div class="kpi">
                         <div class="kpi-label">Última altura</div>
-                        <div class="kpi-valor" style="color:#1a3a5c"> {{ ultima_altura }} mm</div>
+                        <div class="kpi-valor" style="color:#1a3a5c"> {{ graficos }} mm</div>
                     </div>
                     <div class="kpi">
                         <div class="kpi-label">Toneladas restantes</div>
@@ -95,7 +95,7 @@
                                 {
                                     yAxis: 0,
                                     itemStyle: {
-                                        color: '#FF0000'
+                                        color: 'rgba(255, 0, 0, 0.2)'
                                     }
                                 },
                                 {
@@ -167,8 +167,8 @@
                 },
 
                 grid: {
-                    left: 70,
-                    right: 60,
+                    left: 60,
+                    right: 70,
                     top: 85,
                     bottom: 85
                 },
