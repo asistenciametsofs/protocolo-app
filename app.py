@@ -53,10 +53,7 @@ def chinalco_altura():
         if i[8] is not None:
             temp += i[8]
 
-            
     promedio = round(temp / len(registros), 5)
-
-    
 
     if registros[len(registros)-1][10]:
         camp = registros[len(registros)-1][1] 
