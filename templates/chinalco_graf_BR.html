@@ -36,7 +36,13 @@
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Toneladas restantes</div>
-                    <div class="kpi-valor" style="color:#1a3a5c">  </div>
+                    <div class="kpi-valor" style="color:#1a3a5c">
+                        {% if datos.toneladas_objetivo is not none %}
+                        {{ (datos.toneladas_objetivo - datos.toneladas_actuales) | round(2) }}
+                        {% else %}
+                        Sin proyección (se deben tener al menos 2 mediciones para proyectar)
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Fecha estimada cambio</div>
@@ -45,7 +51,11 @@
                 <div class="kpi">
                     <div class="kpi-label">Desgaste por día</div>
                     <div class="kpi-valor" style="color:#555; font-size:16px">
-                         mm/1000T
+                        {% if datos.pendiente is not none %}
+                        {{ datos.pendiente | round(2) }} mm/1000 tons
+                        {% else %}
+                        Sin proyección (se deben tener al menos 2 mediciones para proyectar)
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -59,8 +69,6 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
-
-    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script> -->
     <script>
         const graficos = {{ graficos | tojson }};
         const instancias = [];
