@@ -33,7 +33,7 @@
     </div>
 
 
-<!--<script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script> -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script> -->
 
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script>
@@ -96,9 +96,9 @@
                     showSymbol: true,
                     symbolSize: 7,
                     lineStyle: {
-                        color: '#e74c3c',
+                        color: '#16FF29',
                         type: 'dashed',
-                        width: 3
+                        width: 1
                     }
                 });
             }
@@ -125,7 +125,7 @@
 
                 grid: {
                     left: 70,
-                    right: 30,
+                    right: 60,
                     top: 85,
                     bottom: 85
                 },
@@ -139,7 +139,7 @@
                         formatter: value =>
                             Number(value).toLocaleString('es-PE')
                     },
-                    min: datos.toneladas_objetivo - 180000,
+                    min: datos.toneladas_objetivo - 90000,
                 },
 
                 yAxis: {
@@ -162,6 +162,24 @@
                         bottom: 35
                     }
                 ],
+
+                markArea: {
+                    silent: true,
+
+                    data: [
+                        [
+                            {
+                                yAxis: 0,
+                                itemStyle: {
+                                    color: '#FF0000'
+                                }
+                            },
+                            {
+                                yAxis: alturaMinima
+                            },
+                        ],
+                    ]
+                },
 
                 series
             };
