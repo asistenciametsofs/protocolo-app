@@ -25,7 +25,7 @@
             {% for equipo in graficos %}
             <div class="cardgrf">
                 <h3>{{ equipo }}</h3>
-                <div id="grafico-{{ loop.index0 }}" class="grafico"></div>
+                <div id="grafico-{{ loop.index0 }}" class="chart"></div>
             </div>
             {% endfor %}
         </div>
@@ -45,8 +45,10 @@
 
         Object.entries(graficos).forEach(([equipo, datos], i) => {
             const elemento = document.getElementById(`grafico-${i}`);
+            
 
             if (!elemento) return;
+            console.log(`Renderizando gráfico para ${equipo} en el elemento:`, elemento);
 
             const chart = echarts.init(elemento);
             instancias.push(chart);
@@ -167,7 +169,6 @@
             chart.setOption(option);
         });
 
-        // Adaptar los gráficos cuando cambie el tamaño de la ventana.
         window.addEventListener('resize', () => {
             instancias.forEach(chart => chart.resize());
         });

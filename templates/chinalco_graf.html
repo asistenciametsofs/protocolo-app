@@ -168,6 +168,10 @@
                 chart.setOption(option);
             }
         }
+        
+        window.addEventListener('resize', () => {
+            instancias.forEach(chart => chart.resize());
+        });
 
     </script>
 
