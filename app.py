@@ -408,7 +408,7 @@ def chinalco_graf_br():
 
             # 5. Punto de referencia: última medición actual
             if puntos:
-                toneladas_actuales, altura_actual = puntos[1]
+                toneladas_actuales, altura_actual = puntos[-1]
             else:
                 # Si aún no hay mediciones, usar el inicio
                 # de la campaña actual como referencia
