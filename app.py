@@ -398,8 +398,8 @@ def chinalco_graf_br():
 
             # Valores de salida
             pendiente = None
-            toneladas_actuales = None
-            altura_actual = None
+            toneladas_inicial = None
+            altura_inicial = None
             toneladas_objetivo = None
             toneladas_objetivo_historico = None
 
@@ -408,20 +408,22 @@ def chinalco_graf_br():
 
             # 5. Punto de referencia: última medición actual
             if puntos:
-                toneladas_actuales, altura_actual = puntos[0]
+                toneladas_inicial, altura_inicial = puntos[0]
+                toneladas_actual, altura_actual = puntos[-1]
+                  
             else:
                 # Si aún no hay mediciones, usar el inicio
                 # de la campaña actual como referencia
                 try:
-                    altura_actual = float(campaña_actual[2])
-                    toneladas_actuales = (
+                    altura_inicial = float(campaña_actual[2])
+                    toneladas_inicial = (
                         float(campaña_actual[6])
                         if campaña_actual[6] is not None
                         else None
                     )
                 except (TypeError, ValueError):
-                    altura_actual = None
-                    toneladas_actuales = None
+                    altura_inicial = None
+                    toneladas_inicial = None
 
             # 6. Proyección por regresión lineal
             # Utiliza exclusivamente los puntos de la campaña actual
@@ -450,19 +452,19 @@ def chinalco_graf_br():
                     # Proyectar solo si existe desgaste
                     if (
                         m < 0
-                        and altura_actual is not None
-                        and toneladas_actuales is not None
-                        and altura_actual > ALTURA_MINIMA
+                        and altura_inicial is not None
+                        and toneladas_inicial is not None
+                        and altura_inicial > ALTURA_MINIMA
                     ):
                         x_objetivo = (
                             ALTURA_MINIMA - b
                         ) / m
 
-                        if x_objetivo >= toneladas_actuales:
+                        if x_objetivo >= toneladas_inicial:
                             toneladas_objetivo = x_objetivo
 
                             linea_proyectada = [
-                                [toneladas_actuales, altura_actual],
+                                [toneladas_inicial, altura_inicial],
                                 [toneladas_objetivo, ALTURA_MINIMA]
                             ]
 
@@ -471,18 +473,18 @@ def chinalco_graf_br():
             if (
                 tasa_historica is not None
                 # and tasa_historica > 0
-                and toneladas_actuales is not None
-                and altura_actual is not None
-                and altura_actual > ALTURA_MINIMA
+                and toneladas_inicial is not None
+                and altura_inicial is not None
+                and altura_inicial > ALTURA_MINIMA
             ):
                 toneladas_objetivo_historico = (
-                    toneladas_actuales
-                    + (altura_actual - ALTURA_MINIMA)
+                    toneladas_inicial
+                    + (altura_inicial - ALTURA_MINIMA)
                     / tasa_historica * 1000
                 )
 
                 linea_historica = [
-                    [toneladas_actuales, altura_actual],
+                    [toneladas_inicial, altura_inicial],
                     [toneladas_objetivo_historico, ALTURA_MINIMA]
                 ]
 
@@ -491,14 +493,16 @@ def chinalco_graf_br():
                 'puntos': puntos,
                 'pendiente': pendiente,
                 'tasa_historica': tasa_historica,
-                'toneladas_actuales': toneladas_actuales,
-                'altura_actual': altura_actual,
+                'toneladas_inicial': toneladas_inicial,
+                'altura_inicial': altura_inicial,
                 'toneladas_objetivo': toneladas_objetivo,
                 'toneladas_objetivo_historico':
                     toneladas_objetivo_historico,
                 'altura_minima': ALTURA_MINIMA,
                 'linea_proyectada': linea_proyectada,
-                'linea_historica': linea_historica
+                'linea_historica': linea_historica,
+                'toneladas_actual': toneladas_actual,
+                'altura_actual': altura_actual
             }
 
     finally:
