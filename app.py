@@ -374,8 +374,7 @@ def chinalco_graf_br():
             historico = []
 
             for r in campañas:
-                eq, id_camp, alt_ini, alt_fin, actual, \
-                    tons_prod, tons_acum, fecha_fin = r
+                eq, id_camp, alt_ini, alt_fin, actual, tons_prod, tons_acum, fecha_fin = r
 
                 if eq != equipo or actual or fecha_fin is None:
                     continue
@@ -409,7 +408,7 @@ def chinalco_graf_br():
 
             # 5. Punto de referencia: última medición actual
             if puntos:
-                toneladas_actuales, altura_actual = puntos[-1]
+                toneladas_actuales, altura_actual = puntos[1]
             else:
                 # Si aún no hay mediciones, usar el inicio
                 # de la campaña actual como referencia
@@ -471,7 +470,7 @@ def chinalco_graf_br():
             # Se calcula aunque también exista la regresión
             if (
                 tasa_historica is not None
-                and tasa_historica > 0
+                # and tasa_historica > 0
                 and toneladas_actuales is not None
                 and altura_actual is not None
                 and altura_actual > ALTURA_MINIMA
