@@ -36,7 +36,7 @@
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Toneladas restantes</div>
-                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.toneladas_objetivo - datos.toneladas_actuales | round(2) }} </div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.toneladas_objetivo - datos.toneladas_actuales }} </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Fecha estimada cambio</div>
@@ -85,9 +85,33 @@
 
             const series = [
                 {
-                    name: 'Altura medida',
+                    name: 'Mediciones actuales',
                     type: 'line',
-                    data: puntos,
+                    data: datos.puntos,
+                    showSymbol: true,
+                    smooth: false
+                },
+                {
+                    name: 'Proyección por regresión',
+                    type: 'line',
+                    data: datos.linea_proyectada,
+                    showSymbol: false,
+                    connectNulls: true,
+                    lineStyle: {
+                        type: 'dashed',
+                        width: 2
+                    }
+                },
+                {
+                    name: 'Proyección por promedio histórico',
+                    type: 'line',
+                    data: datos.linea_historica,
+                    showSymbol: false,
+                    connectNulls: true,
+                    lineStyle: {
+                        type: 'dotted',
+                        width: 3
+                    },
                     markArea: {
                         silent: true,
 
@@ -129,6 +153,7 @@
                             }
                         ]
                     }
+
                 }
             ];
 
