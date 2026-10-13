@@ -21,7 +21,7 @@
     <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
-        {% for equipo in graficos %}
+        {% for equipo, datos in graficos.items() %}
         <div id="graficos-container" class="containergrf" style="flex-basis: 100%;">
 
             <div class="cardgrf">
@@ -32,17 +32,15 @@
             <div class="kpi-grid" id="kpi-grid">
                 <div class="kpi">
                     <div class="kpi-label">Última altura</div>
-                    <div class="kpi-valor" style="color:#1a3a5c"> {{ graficos }} mm</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.ultima_altura }} mm</div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Toneladas restantes</div>
-                    <div class="kpi-valor" style="color:#1a3a5c"> {{ equipo.toneladas_actuales }} </div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.toneladas_actuales }} </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Fecha estimada cambio</div>
-                    <div class="kpi-valor" style="color:#1a3a5c">
-
-                    </div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos }}</div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Desgaste por día</div>
