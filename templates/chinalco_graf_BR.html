@@ -71,6 +71,8 @@
             const elemento = document.getElementById(`grafico-${i}`);
             console.log(1, elemento)
 
+            console.log(datos.datos.toneladas_objetivo - ((datos.toneladas_objetivo - datos.toneladas_actuales) * 1.05));
+
             if (!elemento) return;
             console.log(`Renderizando gráfico para ${equipo} en el elemento:`, elemento);
 
