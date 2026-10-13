@@ -21,39 +21,40 @@
     <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
+        {% for equipo in graficos %}
         <div id="graficos-container" class="containergrf" style="flex-basis: 100%;">
-            {% for equipo in graficos %}
+
             <div class="cardgrf">
                 <div id="grafico-{{ loop.index0 }}" class="chart"></div>
             </div>
+        </div>
+        <div class="card">
+            <div class="kpi-grid" id="kpi-grid">
+                <div class="kpi">
+                    <div class="kpi-label">Última altura</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ graficos }} mm</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Toneladas restantes</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ equipo.toneladas_actuales }} </div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Fecha estimada cambio</div>
+                    <div class="kpi-valor" style="color:#1a3a5c">
 
-            <div class="card">
-                <div class="kpi-grid" id="kpi-grid">
-                    <div class="kpi">
-                        <div class="kpi-label">Última altura</div>
-                        <div class="kpi-valor" style="color:#1a3a5c"> {{ graficos }} mm</div>
                     </div>
-                    <div class="kpi">
-                        <div class="kpi-label">Toneladas restantes</div>
-                        <div class="kpi-valor" style="color:#1a3a5c"> {{ equipo }} </div>
-                    </div>
-                    <div class="kpi">
-                        <div class="kpi-label">Fecha estimada cambio</div>
-                        <div class="kpi-valor" style="color:#1a3a5c">
-                            
-                        </div>
-                    </div>
-                    <div class="kpi">
-                        <div class="kpi-label">Desgaste por día</div>
-                        <div class="kpi-valor" style="color:#555; font-size:16px">
-                             mm/1000T
-                        </div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Desgaste por día</div>
+                    <div class="kpi-valor" style="color:#555; font-size:16px">
+                        mm/1000T
                     </div>
                 </div>
             </div>
-            {% endfor %}
-
         </div>
+        {% endfor %}
+
+
 
 
     </div>

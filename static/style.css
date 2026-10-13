@@ -47,6 +47,31 @@
     color: white;
 }
 
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.kpi {
+    background: #f0f4ff;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.kpi-label {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.kpi-valor {
+    font-size: 22px;
+    font-weight: 700;
+}
+
 
 .boton {
     flex: auto;
