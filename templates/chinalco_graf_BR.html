@@ -36,16 +36,16 @@
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Toneladas restantes</div>
-                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.toneladas_actuales }} </div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.toneladas_objetivo - datos.toneladas_actuales }} </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Fecha estimada cambio</div>
-                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos }}</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Desgaste por día</div>
                     <div class="kpi-valor" style="color:#555; font-size:16px">
-                        mm/1000T
+                        {{ datos.pendiente }} mm/1000T
                     </div>
                 </div>
             </div>
