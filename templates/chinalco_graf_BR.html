@@ -24,7 +24,6 @@
         <div id="graficos-container" class="containergrf">
             {% for equipo in graficos %}
             <div class="cardgrf">
-                <h3>{{ equipo }}</h3>
                 <div id="grafico-{{ loop.index0 }}" class="chart"></div>
             </div>
             {% endfor %}
@@ -45,7 +44,7 @@
 
         Object.entries(graficos).forEach(([equipo, datos], i) => {
             const elemento = document.getElementById(`grafico-${i}`);
-            
+            console.log(1, elemento)
 
             if (!elemento) return;
             console.log(`Renderizando gráfico para ${equipo} en el elemento:`, elemento);
@@ -108,7 +107,7 @@
                 title: {
                     text: equipo,
                     subtext: datos.toneladas_objetivo != null
-                        ? `Cambio estimado: ${Number(datos.toneladas_objetivo).toLocaleString('es-PE')} toneladas`
+                        ? `Cambio estimado: ${Number(datos.toneladas_objetivo).toLocaleString('es-PE', { maximumFractionDigits: 0 })} toneladas`
                         : 'Sin proyección disponible',
                     left: 'center'
                 },
@@ -139,7 +138,8 @@
                     axisLabel: {
                         formatter: value =>
                             Number(value).toLocaleString('es-PE')
-                    }
+                    },
+                    min: datos.toneladas_objetivo - 180000,
                 },
 
                 yAxis: {
