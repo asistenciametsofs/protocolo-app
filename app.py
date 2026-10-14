@@ -67,7 +67,9 @@ def chinalco_altura():
     c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (sel,))
     avg_tons = c.fetchone()[0]
 
-    flash('campaña :' + str(camp) + ' <br> ' + str(datos_med[-1]) + ' <br> ' + len(datos_med) > 1 + ' <br> ' + str(avg_tons) + '\n \n hol')
+    a = len(datos_med) > 1
+    
+    flash('campaña :' + str(camp) + ' <br> ' + str(datos_med[-1]) + ' <br> ' + a + ' <br> ' + str(avg_tons) + '\n \n hol')
 
     c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum DESC LIMIT 1;', (sel,))
     data = c.fetchone()
