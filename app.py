@@ -61,10 +61,10 @@ def chinalco_altura():
     else:
         camp = 1
 
-    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (equipo, camp))
+    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (sel, camp))
     datos_med = c.fetchall()
     
-    c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (equipo,))
+    c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (sel,))
     avg_tons = c.fetchone()[0]
 
     flash('campaña :' + str(camp), '\n' + str(datos_med) + '\n' + str(avg_tons))
