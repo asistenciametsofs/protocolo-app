@@ -61,16 +61,6 @@ def chinalco_altura():
     else:
         camp = 1
 
-    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (sel, camp))
-    datos_med = c.fetchall()
-    
-    c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (sel,))
-    avg_tons = c.fetchone()[0]
-
-    a = len(datos_med) > 1
-    
-    flash('campaña :' + str(camp) + ' <br> ' + str(datos_med[-1]) + ' <br> ' + a + ' <br> ' + str(avg_tons) + '\n \n hol')
-
     c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum DESC LIMIT 1;', (sel,))
     data = c.fetchone()
 
@@ -93,15 +83,55 @@ def chinalco_altura():
 
             # Calcular avg_tons
 
-            c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (equipo, camp))
-            avg_tons = c.fetchone()[0]
+            # c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (sel, camp))
+            # datos_med = c.fetchall()
+    
+            # c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (sel,))
+            # his_avg_tons = c.fetchone()[0]
 
-            c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (equipo,))
-            avg_tons = c.fetchone()[0]
+            c.execute("""
+                SELECT tons_acum, alt
+                FROM chinalco_altura_med
+                WHERE equipo = %s AND id_camp = %s;
+            """, (sel, camp))
+
+            datos_med = c.fetchall()
+
+            if len(datos_med) >= 2:
+                # Separar los valores X e Y
+                xs = [float(row[0]) for row in datos_med]
+                ys = [float(row[1]) for row in datos_med]
+
+                n = len(datos_med)
+
+                # Aplicar la fórmula de regresión lineal
+                numerador = (
+                    n * sum(x * y for x, y in zip(xs, ys))
+                    - sum(xs) * sum(ys)
+                )
+
+                denominador = (
+                    n * sum(x ** 2 for x in xs)
+                    - sum(xs) ** 2
+                )
+
+                if denominador != 0:
+                    pendiente = numerador / denominador
+                else:
+                    pendiente = 0  # Todos los valores X son iguales
+
+            else:
+                # Menos de 2 mediciones: obtener el promedio histórico
+                c.execute("""
+                    SELECT AVG(tons_acum)
+                    FROM chinalco_altura
+                    WHERE equipo = %s;
+                """, (sel,))
+
+                pendiente = c.fetchone()[0]
 
 
-
-            c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp+1, equipo, fecha, newalt))
+            c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini, avg_tons) VALUES (%s, %s, %s, TRUE, %s, %s);', (camp+1, equipo, fecha, newalt, pendiente))
             conn.commit()
 
             c.execute('INSERT INTO chinalco_altura_med ( id_camp, fecha, equipo, alt, tons_acum) VALUES (%s, %s, %s, %s, %s);', (camp+1, fecha, equipo, newalt, toneladas_acumuladas))
