@@ -46,6 +46,7 @@ def chinalco_altura():
     c = conn.cursor()
     
     sel = request.args.get('equipo', request.form.get('equipo', 'BR-01'))
+
     c.execute('SELECT * FROM chinalco_altura WHERE equipo = %s ORDER BY fecha_ini ASC;', (sel,))
     registros = c.fetchall()    
     temp = 0
@@ -53,12 +54,20 @@ def chinalco_altura():
         if i[8] is not None:
             temp += i[8]
 
-    promedio = round(temp / len(registros), 5)
+    promedio = round(temp / len(registros), 10) if len(registros) > 0 else None
 
     if registros[len(registros)-1][10]:
         camp = registros[len(registros)-1][1] 
     else:
-        camp = registros[len(registros)-1][1] + 1 
+        camp = 1
+
+    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (equipo, camp))
+    datos_med = c.fetchall()
+    
+    c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (equipo,))
+    avg_tons = c.fetchone()[0]
+
+    flash('campaña :' + str(camp), '\n' + str(datos_med) + '\n' + str(avg_tons))
 
     c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum DESC LIMIT 1;', (sel,))
     data = c.fetchone()
@@ -79,6 +88,16 @@ def chinalco_altura():
             flash('✅ Campaña finalizada!')
 
             newalt = request.form.get('newAlt')
+
+            # Calcular avg_tons
+
+            c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (equipo, camp))
+            avg_tons = c.fetchone()[0]
+
+            c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (equipo,))
+            avg_tons = c.fetchone()[0]
+
+
 
             c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini) VALUES (%s, %s, %s, TRUE, %s);', (camp+1, equipo, fecha, newalt))
             conn.commit()
