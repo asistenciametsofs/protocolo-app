@@ -36,9 +36,7 @@
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Toneladas restantes</div>
-                    <div class="kpi-valor" 
-                        {% if datos.toneladas_objetivo is not none %}
-                        style="color:#1a3a5c">
+                    <div class="kpi-valor" {% if datos.toneladas_objetivo is not none %} style="color:#1a3a5c">
                         {{ (datos.toneladas_objetivo - datos.toneladas_actual) | round(2) }}
                         {% else %}
                         style="color:#555; font-size:16px">
@@ -59,9 +57,10 @@
                         Sin proyección (se deben tener al menos 2 mediciones para proyectar)
                         {% endif %}
                     </div>
-                </div>
+                </div> 
             </div>
         </div>
+        <p style="border-style: none none outset none; border-width: 2px;"> </p>
         {% endfor %}
 
 
