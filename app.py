@@ -61,7 +61,7 @@ def chinalco_altura():
     else:
         camp = 1
 
-    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s ORDER BY tons_acum DESC AND id_camp = %s LIMIT 1;', (sel, camp))
+    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s ORDER BY tons_acum DESC LIMIT 1;', (sel, camp))
     data = c.fetchone()
 
     if request.method == 'POST':
