@@ -57,11 +57,44 @@
                         Sin proyección (se deben tener al menos 2 mediciones para proyectar)
                         {% endif %}
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
         <p style="border-style: none none outset none; border-width: 2px;"> </p>
         {% endfor %}
+
+        <section class="proyeccion-calendario">
+            <h2>Calendario estimado de cambio de repuesto</h2>
+
+            <div class="calendario-controles">
+                <div>
+                    <label for="equipo-cal">Equipo</label>
+                    <select id="equipo-cal">
+                        {% for equipo in graficos %}
+                        <option value="{{ equipo }}">{{ equipo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="tons-dia">Toneladas procesadas por día</label>
+                    <input type="number" id="tons-dia" min="1" step="1" placeholder="Ej. 45000">
+                </div>
+
+                <div>
+                    <label for="tipo-proyeccion">Método de proyección</label>
+                    <select id="tipo-proyeccion">
+                        <option value="auto">Automático</option>
+                        <option value="regresion">Regresión lineal</option>
+                        <option value="historico">Promedio histórico</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="resultado-cambio"></div>
+
+            <div id="calendarios" class="calendarios-grid"></div>
+        </section>
 
 
 
@@ -71,6 +104,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
     <script>
+        // Graficos
         const graficos = {{ graficos | tojson }};
         const instancias = [];
 
@@ -252,6 +286,198 @@
         window.addEventListener('resize', () => {
             instancias.forEach(chart => chart.resize());
         });
+
+
+
+        //Calendario de proyeccion
+        const selectorEquipo = document.getElementById('equipo-cal');
+        const inputTonsDia = document.getElementById('tons-dia');
+        const selectorMetodo = document.getElementById('tipo-proyeccion');
+        const resultado = document.getElementById('resultado-cambio');
+        const contenedor = document.getElementById('calendarios');
+
+        function fechaLocal(fecha) {
+            return new Date(
+                fecha.getFullYear(),
+                fecha.getMonth(),
+                fecha.getDate()
+            );
+        }
+
+        function formatearFecha(fecha) {
+            return fecha.toLocaleDateString('es-PE', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function generarCalendario(fechaObjetivo) {
+            contenedor.innerHTML = '';
+
+            const hoy = fechaLocal(new Date());
+            const nombresMeses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril',
+                'Mayo', 'Junio', 'Julio', 'Agosto',
+                'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+
+            const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+            for (let i = 0; i < 3; i++) {
+                const inicioMes = new Date(
+                    hoy.getFullYear(),
+                    hoy.getMonth() + i,
+                    1
+                );
+
+                const diasMes = new Date(
+                    inicioMes.getFullYear(),
+                    inicioMes.getMonth() + 1,
+                    0
+                ).getDate();
+
+                // Ajustar para que la semana comience el lunes
+                const desplazamiento = (inicioMes.getDay() + 6) % 7;
+
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'mes-calendario';
+
+                const titulo = document.createElement('h3');
+                titulo.textContent =
+                    `${nombresMeses[inicioMes.getMonth()]} ${inicioMes.getFullYear()}`;
+
+                tarjeta.appendChild(titulo);
+
+                const cuadrilla = document.createElement('div');
+                cuadrilla.className = 'dias-calendario';
+
+                diasSemana.forEach(dia => {
+                    const celda = document.createElement('div');
+                    celda.className = 'dia-semana';
+                    celda.textContent = dia;
+                    cuadrilla.appendChild(celda);
+                });
+
+                for (let j = 0; j < desplazamiento; j++) {
+                    const vacio = document.createElement('div');
+                    vacio.className = 'dia vacio';
+                    cuadrilla.appendChild(vacio);
+                }
+
+                for (let dia = 1; dia <= diasMes; dia++) {
+                    const fecha = new Date(
+                        inicioMes.getFullYear(),
+                        inicioMes.getMonth(),
+                        dia
+                    );
+
+                    const celda = document.createElement('div');
+                    celda.className = 'dia';
+                    celda.textContent = dia;
+
+                    if (fecha.getTime() === hoy.getTime()) {
+                        celda.classList.add('hoy');
+                        celda.title = 'Hoy';
+                    }
+
+                    if (
+                        fechaObjetivo &&
+                        fecha.getTime() === fechaObjetivo.getTime()
+                    ) {
+                        celda.classList.add('fecha-cambio');
+                        celda.title = 'Fecha estimada de cambio';
+                    }
+
+                    cuadrilla.appendChild(celda);
+                }
+
+                tarjeta.appendChild(cuadrilla);
+                contenedor.appendChild(tarjeta);
+            }
+        }
+
+        function actualizarCalendario() {
+            const equipo = selectorEquipo.value;
+            const datos = graficos[equipo];
+            const tonsDia = Number(inputTonsDia.value);
+            const metodo = selectorMetodo.value;
+
+            let toneladasObjetivo = null;
+            let nombreMetodo = '';
+
+            if (metodo === 'regresion' || metodo === 'auto') {
+                if (datos.toneladas_objetivo != null) {
+                    toneladasObjetivo = Number(datos.toneladas_objetivo);
+                    nombreMetodo = 'Regresión lineal';
+                }
+            }
+
+            if (
+                toneladasObjetivo == null &&
+                (metodo === 'historico' || metodo === 'auto')
+            ) {
+                if (datos.toneladas_objetivo_historico != null) {
+                    toneladasObjetivo =
+                        Number(datos.toneladas_objetivo_historico);
+                    nombreMetodo = 'Promedio histórico';
+                }
+            }
+
+            // La fecha parte de la última medición, no de la primera
+            const toneladasActuales =
+                datos.toneladas_ultima_medicion ??
+                datos.toneladas_actuales;
+
+            if (
+                !Number.isFinite(tonsDia) ||
+                tonsDia <= 0 ||
+                toneladasActuales == null ||
+                toneladasObjetivo == null
+            ) {
+                resultado.textContent =
+                    'Introduce las toneladas por día y verifica que exista una proyección válida.';
+
+                generarCalendario(null);
+                return;
+            }
+
+            const toneladasRestantes =
+                toneladasObjetivo - Number(toneladasActuales);
+
+            if (toneladasRestantes <= 0) {
+                resultado.textContent =
+                    'La proyección indica que ya se alcanzó o superó el tonelaje objetivo. Revisa el cambio del repuesto.';
+
+                generarCalendario(null);
+                return;
+            }
+
+            const diasRestantes = Math.ceil(toneladasRestantes / tonsDia);
+
+            const hoy = fechaLocal(new Date());
+            const fechaObjetivo = new Date(
+                hoy.getFullYear(),
+                hoy.getMonth(),
+                hoy.getDate() + diasRestantes
+            );
+
+            resultado.textContent =
+                `Cambio estimado: ${formatearFecha(fechaObjetivo)}. ` +
+                `${Math.ceil(toneladasRestantes).toLocaleString('es-PE')} toneladas restantes, ` +
+                `${diasRestantes} días estimados. Método: ${nombreMetodo}.`;
+
+            generarCalendario(fechaObjetivo);
+        }
+
+        selectorEquipo.addEventListener('change', actualizarCalendario);
+        inputTonsDia.addEventListener('input', actualizarCalendario);
+        selectorMetodo.addEventListener('change', actualizarCalendario);
+
+        // Mostrar los tres meses desde el inicio
+        generarCalendario(null);
+
+
     </script>
 
 

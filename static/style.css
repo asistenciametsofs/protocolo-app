@@ -1,3 +1,98 @@
+
+.proyeccion-calendario {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+}
+
+.calendario-controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 20px 0;
+}
+
+.calendario-controles > div {
+    flex: 1 1 200px;
+}
+
+.calendario-controles label {
+    display: block;
+    margin-bottom: 7px;
+}
+
+.calendario-controles input,
+.calendario-controles select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+#resultado-cambio {
+    margin: 20px 0;
+    font-weight: 600;
+}
+
+.calendarios-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.mes-calendario {
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.mes-calendario h3 {
+    text-align: center;
+}
+
+.dias-calendario {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    text-align: center;
+}
+
+.dia-semana,
+.dia {
+    padding: 8px 0;
+    font-size: 13px;
+}
+
+.dia-semana {
+    font-weight: bold;
+}
+
+.dia {
+    border-radius: 5px;
+}
+
+.dia.hoy {
+    outline: 2px solid #777;
+}
+
+.dia.fecha-cambio {
+    background: #c62828;
+    color: white;
+    font-weight: bold;
+}
+
+.dia.vacio {
+    visibility: hidden;
+}
+
+@media (max-width: 800px) {
+    .calendarios-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 .cardgrf {
     flex: 1 1 420px;
     background: white;
@@ -234,7 +329,7 @@ body {
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 16px;
 }

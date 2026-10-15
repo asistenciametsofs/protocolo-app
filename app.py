@@ -35,10 +35,6 @@ def home():
 def chinalco():
     return render_template('chinalco.html')
 
-# @app.route('/chinalco_graf')
-# def chinalco_graf():
-#     return render_template('chinalco_graf.html')
-
 @app.route('/chinalco_altura', methods=['GET', 'POST'])
 def chinalco_altura():
     import psycopg2
@@ -146,199 +142,6 @@ def chinalco_altura():
 
     return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp, data=data)
 
-
-
-# @app.route('/chinalco_graf_BR', methods=['GET'])
-# def chinalco_graf_br():
-#     import os
-#     import psycopg2
-
-#     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
-#     c = conn.cursor()
-
-#     ALTURA_MINIMA = 65.0
-
-#     try:
-#         # 1. Obtener el histórico de campañas
-#         c.execute("""
-#             SELECT equipo, id_camp, alt_ini, alt_fin,
-#                    actual, tons_prod, tons_acum, fecha_fin
-#             FROM chinalco_altura
-#             ORDER BY fecha_ini ASC
-#         """)
-#         campañas = c.fetchall()
-
-#         # 2. Obtener todos los equipos
-#         equipos = sorted(set(r[0] for r in campañas if r[0]))
-
-#         graficos = {}
-
-#         for equipo in equipos:
-
-#             # Mediciones de altura y tonelaje acumulado
-#             c.execute("""
-#                 SELECT alt, tons_acum, fecha
-#                 FROM chinalco_altura_med
-#                 WHERE equipo = %s
-#                   AND alt IS NOT NULL
-#                 ORDER BY fecha ASC
-#             """, (equipo,))
-
-#             mediciones = c.fetchall()
-
-#             # Formato de puntos: [toneladas acumuladas, altura]
-#             puntos = []
-
-#             for alt, tons, fecha in mediciones:
-#                 try:
-#                     x = float(tons)
-#                     y = float(alt)
-
-#                     if x >= 0 and y > 0:
-#                         puntos.append([x, y])
-#                 except (TypeError, ValueError):
-#                     continue
-
-#             # Ordenar por tonelaje
-#             puntos.sort(key=lambda p: p[0])
-
-#             # Campañas históricas finalizadas y válidas
-#             historico = []
-
-#             for r in campañas:
-#                 eq, id_camp, alt_ini, alt_fin, actual, tons_prod, tons_acum, fecha_fin = r
-
-#                 if eq != equipo or actual or fecha_fin is None:
-#                     continue
-
-#                 try:
-#                     ai = float(alt_ini)
-#                     af = float(alt_fin)
-#                     tp = float(tons_prod)
-
-#                     if tp > 0 and ai > af:
-#                         # Desgaste en mm por cada 1000 toneladas
-#                         tasa = (ai - af) / tp * 1000
-#                         historico.append(tasa)
-
-#                 except (TypeError, ValueError):
-#                     continue
-
-#             # Promedio histórico de desgaste
-#             tasa_historica = (
-#                 sum(historico) / len(historico)
-#                 if historico else None
-#             )
-
-#             pendiente = None
-#             toneladas_actuales = None
-#             altura_actual = None
-#             toneladas_objetivo = None
-#             linea_proyectada = []
-
-#             # 3. Con dos o más puntos, calcular regresión lineal
-#             if len(puntos) >= 2:
-#                 xs = [p[0] for p in puntos]
-#                 ys = [p[1] for p in puntos]
-
-#                 x_prom = sum(xs) / len(xs)
-#                 y_prom = sum(ys) / len(ys)
-
-#                 denominador = sum((x - x_prom) ** 2 for x in xs)
-
-#                 if denominador > 0:
-#                     m = sum(
-#                         (xs[i] - x_prom) * (ys[i] - y_prom)
-#                         for i in range(len(puntos))
-#                     ) / denominador
-
-#                     b = y_prom - m * x_prom
-
-#                     # Pendiente en mm por cada 1000 toneladas
-#                     pendiente = m * 1000
-
-#                     toneladas_actuales = xs[-1]
-#                     altura_actual = ys[-1]
-
-#                     # Proyectar si la pendiente indica desgaste
-#                     if m < 0:
-#                         x_objetivo = (ALTURA_MINIMA - b) / m
-
-#                         if x_objetivo >= toneladas_actuales:
-#                             toneladas_objetivo = x_objetivo
-
-#                             linea_proyectada = [
-#                                 [toneladas_actuales, m * toneladas_actuales + b],
-#                                 [toneladas_objetivo, ALTURA_MINIMA]
-#                             ]
-
-#             # 4. Si no hay una proyección por regresión,
-#             # utilizar el promedio histórico
-#             if toneladas_objetivo is None and tasa_historica and tasa_historica > 0:
-
-#                 if puntos:
-#                     toneladas_actuales, altura_actual = puntos[-1]
-
-#                 else:
-#                     # Sin mediciones: usar la campaña actual como referencia
-#                     actuales = [
-#                         r for r in campañas
-#                         if r[0] == equipo and r[4]
-#                     ]
-
-#                     if actuales:
-#                         actual = actuales[-1]
-
-#                         try:
-#                             altura_actual = float(actual[2])
-#                             toneladas_actuales = (
-#                                 float(actual[6])
-#                                 if actual[6] is not None else None
-#                             )
-#                         except (TypeError, ValueError):
-#                             pass
-
-#                 if (
-#                     toneladas_actuales is not None
-#                     and altura_actual is not None
-#                     and altura_actual > ALTURA_MINIMA
-#                 ):
-#                     # Convertir mm/1000 toneladas a mm/tonelada
-#                     m = -tasa_historica / 1000
-
-#                     pendiente = -tasa_historica
-
-#                     toneladas_objetivo = (
-#                         toneladas_actuales
-#                         + (ALTURA_MINIMA - altura_actual) / m
-#                     )
-
-#                     linea_proyectada = [
-#                         [toneladas_actuales, altura_actual],
-#                         [toneladas_objetivo, ALTURA_MINIMA]
-#                     ]
-
-#             graficos[equipo] = {
-#                 'puntos': puntos,
-#                 'pendiente': pendiente,
-#                 'tasa_historica': tasa_historica,
-#                 'toneladas_actuales': toneladas_actuales,
-#                 'altura_actual': altura_actual,
-#                 'toneladas_objetivo': toneladas_objetivo,
-#                 'altura_minima': ALTURA_MINIMA,
-#                 'linea_proyectada': linea_proyectada
-#             }
-
-#     finally:
-#         conn.close()
-
-#     return render_template(
-#         'chinalco_graf_BR.html',
-#         graficos=graficos
-#     )
-
-
-
 @app.route('/chinalco_graf_BR', methods=['GET'])
 def chinalco_graf_br():
     import os
@@ -442,6 +245,10 @@ def chinalco_graf_br():
             tasa_historica = (
                 sum(historico) / len(historico)
                 if historico else None
+            )
+
+            toneladas_ultima_medicion = (
+                puntos[-1][0] if puntos else 0
             )
 
             # Valores de salida
@@ -550,7 +357,8 @@ def chinalco_graf_br():
                 'linea_proyectada': linea_proyectada,
                 'linea_historica': linea_historica,
                 'toneladas_actual': toneladas_actual,
-                'altura_actual': altura_actual
+                'altura_actual': altura_actual,
+                'toneladas_ultima_medicion': toneladas_ultima_medicion
             }
 
     finally:
