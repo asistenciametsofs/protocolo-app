@@ -351,8 +351,7 @@ def chinalco_graf_br():
                 'toneladas_inicial': toneladas_inicial,
                 'altura_inicial': altura_inicial,
                 'toneladas_objetivo': toneladas_objetivo,
-                'toneladas_objetivo_historico':
-                    toneladas_objetivo_historico,
+                'toneladas_objetivo_historico': toneladas_objetivo_historico,
                 'altura_minima': ALTURA_MINIMA,
                 'linea_proyectada': linea_proyectada,
                 'linea_historica': linea_historica,
