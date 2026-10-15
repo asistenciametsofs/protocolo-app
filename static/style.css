@@ -4,6 +4,7 @@
     padding: 20px;
     border: 1px solid #ddd;
     border-radius: 12px;
+    background-color: white;
 }
 
 .calendario-controles {
@@ -45,6 +46,7 @@
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 8px;
+    background-color: #f0f4ff;
 }
 
 .mes-calendario h3 {
