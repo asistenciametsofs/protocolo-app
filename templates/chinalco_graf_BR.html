@@ -447,7 +447,7 @@
 
             if (toneladasRestantes <= 0) {
                 resultado.textContent =
-                    'La proyección indica que ya se alcanzó o superó el tonelaje objetivo. Revisa el cambio del repuesto.';
+                    'La proyección indica que ya se alcanzó o superó el tonelaje objetivo. Revisa el cambio del bowl.';
 
                 generarCalendario(null);
                 return;
@@ -476,6 +476,7 @@
 
         // Mostrar los tres meses desde el inicio
         generarCalendario(null);
+        actualizarCalendario();
 
 
     </script>
