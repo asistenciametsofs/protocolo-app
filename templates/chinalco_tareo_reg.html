@@ -30,118 +30,84 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+        <div class="card">
+            <h2>Registro de tareas realizadas</h2>
+            <table id="tablaReportes" class="display">
 
-        <h2>Registro de tareas realizadas</h2>
-        <table id="tareoTable" class="display">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Equipo</th>
-                    <th>Descripción</th>
-                    <th>Supervisor</th>
-                    <th>Ejecutores</th>
-                    <th>Tipo</th>
-                    <th>Estatus</th>
-                    <th>HH</th>
-                    <th>Condición Final</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in registros %}
-                <tr>
-                    <td>{{ r[0] }}</td>
-                    <td>{{ r[1] }}</td>
-                    <td>{{ r[2] }}</td>
-                    <td>{{ r[3] }}</td>
-                    <td>{{ r[4] }}</td>
-                    <td>{% if r[5] %} {{ r[5]|join(', ') }} {% endif %}</td>
-                    <td>{{ r[6] }}</td>
-                    <td>{{ r[7] }}</td>
-                    <td>{{ r[8] }}</td>
-                    <td>{{ r[9] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <thead>
 
-        <h2> class="title">otro</h2>
-        <table id="tablaReportes" class="display">
+                    <tr>
 
-            <thead>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Equipo</th>
+                        <th>Descripción</th>
+                        <th>Supervisor</th>
+                        <th>Ejecutores</th>
+                        <th>Tipo</th>
+                        <th>Estatus</th>
+                        <th>HH</th>
+                        <th>Condición Final</th>
 
-                <tr>
+                    </tr>
 
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Equipo</th>
-                    <th>Descripción</th>
-                    <th>Supervisor</th>
-                    <th>Ejecutores</th>
-                    <th>Tipo</th>
-                    <th>Estatus</th>
-                    <th>HH</th>
-                    <th>Condición Final</th>
+                    <!-- FILTROS -->
 
-                </tr>
+                    <tr>
 
-                <!-- FILTROS -->
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Equipo</th>
+                        <th>Descripción</th>
+                        <th>Supervisor</th>
+                        <th>Ejecutores</th>
+                        <th>Tipo</th>
+                        <th>Estatus</th>
+                        <th>HH</th>
+                        <th>Condición Final</th>
 
-                <tr>
+                    </tr>
 
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Equipo</th>
-                    <th>Descripción</th>
-                    <th>Supervisor</th>
-                    <th>Ejecutores</th>
-                    <th>Tipo</th>
-                    <th>Estatus</th>
-                    <th>HH</th>
-                    <th>Condición Final</th>
+                </thead>
 
-                </tr>
+                <tbody>
 
-            </thead>
+                    {% for r in registros %}
 
-            <tbody>
+                    <tr>
 
-                {% for r in registros %}
+                        <td>{{ r[0] }}</td>
 
-                <tr>
+                        <td>{{ r[1] }}</td>
 
-                    <td>{{ r[0] }}</td>
+                        <td>{{ r[2] }}</td>
 
-                    <td>{{ r[1] }}</td>
+                        <td>{{ r[3] }}</td>
 
-                    <td>{{ r[2] }}</td>
+                        <td>{{ r[4] }}</td>
 
-                    <td>{{ r[3] }}</td>
+                        <td>
+                            {% if r[5] %}
+                            {{ r[5]|join(', ') }}
+                            {% endif %}
+                        </td>
 
-                    <td>{{ r[4] }}</td>
+                        <td>{{ r[6] }}</td>
 
-                    <td>
-                        {% if r[5] %}
-                        {{ r[5]|join(', ') }}
-                        {% endif %}
-                    </td>
+                        <td>{{ r[7] }}</td>
 
-                    <td>{{ r[6] }}</td>
+                        <td>{{ r[8] }}</td>
 
-                    <td>{{ r[7] }}</td>
+                        <td>{{ r[9] }}</td>
 
-                    <td>{{ r[8] }}</td>
+                    </tr>
 
-                    <td>{{ r[9] }}</td>
+                    {% endfor %}
 
-                </tr>
+                </tbody>
 
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
+            </table>
+        </div>
     </div>
 
     <script>
