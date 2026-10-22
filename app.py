@@ -602,6 +602,39 @@ def chinalco_tareo_guardar():
 
     return redirect('/chinalco_tareo')
 
+@app.route('/chinalco_reporte/lista')
+def chinalco_reporte_lista():
+    import psycopg2
+    import os
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT
+            id,
+            fecha,
+            equipo,
+            descripcion_actividad,
+            supervisor,
+            ejecutores,
+            tipo_mantenimiento,
+            estatus,
+            horas_hombre,
+            condicion_final
+        FROM chinalco_tareo
+        ORDER BY fecha DESC;
+    """)
+
+    registros = c.fetchall()
+
+    conn.close()
+
+    return render_template(
+        'chinalco_tareo_reg.html',
+        registros=registros
+    )
+
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')
