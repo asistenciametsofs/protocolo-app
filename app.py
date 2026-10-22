@@ -602,8 +602,8 @@ def chinalco_tareo_guardar():
 
     return redirect('/chinalco_tareo')
 
-@app.route('/chinalco_reporte/lista')
-def chinalco_reporte_lista():
+@app.route('/chinalco_tareo_reg')
+def chinalco_tareo_reg():
     import psycopg2
     import os
 
