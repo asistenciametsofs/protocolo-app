@@ -92,13 +92,14 @@
                 <div class="grid2v2">
 
                     <label>Hora de inicio</label>
-                    <input type="time" name="hora_inicio">
+                    <input type="time" id="hora_inicio" name="hora_inicio">
 
                     <label>Hora de fin</label>
-                    <input type="time" name="hora_fin">
+                    <input type="time" id="hora_fin" name="hora_fin">
 
                     <label>Horas trabajadas</label>
-                    <input type="number" step="0.01" name="horas_trabajadas" readonly>
+                    <input type="number" step="0.01" min="0" id="horas_trabajadas" name="horas_trabajadas"
+                        placeholder="Horas">
 
                 </div>
 
@@ -128,14 +129,13 @@
                     </select>
 
                     <label>Hora inicio parada</label>
-                    <input type="time" name="inicio_parada">
+                    <input type="time" id="inicio_parada" name="inicio_parada">
 
                     <label>Hora fin parada</label>
-                    <input type="time" name="fin_parada">
+                    <input type="time" id="fin_parada" name="fin_parada">
 
                     <label>Horas totales de parada</label>
-                    <input type="number" step="0.01" name="horas_parada" readonly>
-
+                    <input type="number" step="0.01" id="horas_parada" name="horas_parada">
                 </div>
 
             </div>
@@ -153,10 +153,10 @@
                 <div class="grid2v2">
 
                     <label>Número de personas</label>
-                    <input type="number" min="1" name="numero_personas">
+                    <input type="number" min="1" id="numero_personas" name="numero_personas">
 
                     <label>Horas Hombre (HH)</label>
-                    <input type="number" step="0.01" name="horas_hombre" readonly>
+                    <input type="number" step="0.01" id="horas_hombre" name="horas_hombre" readonly>
 
                     <label>Supervisor encargado</label>
                     <select name="supervisor" placeholder="" required>
@@ -258,6 +258,114 @@
 
         </form>
     </div>
+
+    <script>
+
+        function calcularHoras(hi, hf) {
+
+            const inicio = hi.value;
+            const fin = hf.value;
+
+            if (!inicio || !fin) return;
+
+            let h1 = new Date("2000-01-01 " + inicio);
+            let h2 = new Date("2000-01-01 " + fin);
+
+            // Si cruza medianoche
+            if (h2 < h1) {
+                h2.setDate(h2.getDate() + 1);
+            }
+
+            let diferencia = (h2 - h1) / 3600000;
+
+            document.getElementById('horas_trabajadas').value =
+                diferencia.toFixed(2);
+        }
+
+        function calcularHoraFin(hi, ht, hf) {
+
+            const inicio = hi.value;
+            const horas = parseFloat(
+                ht.value
+            );
+
+            if (!inicio || isNaN(horas)) return;
+
+            let fecha = new Date("2000-01-01 " + inicio);
+
+            fecha.setMinutes(
+                fecha.getMinutes() + (horas * 60)
+            );
+
+            let hh = String(fecha.getHours()).padStart(2, "0");
+            let mm = String(fecha.getMinutes()).padStart(2, "0");
+
+            hf.value =
+                `${hh}:${mm}`;
+        }
+
+        function calcularHH() {
+
+            let personas =
+                parseFloat(document.getElementById('numero_personas').value);
+
+            let horas =
+                parseFloat(document.getElementById('horas_trabajadas').value);
+
+            if (isNaN(personas) || isNaN(horas))
+                return;
+
+            document.getElementById('horas_hombre').value =
+                (personas * horas).toFixed(2);
+        }
+
+
+        const hora_inicio = document.getElementById("hora_inicio");
+        const hora_fin = document.getElementById("hora_fin");
+        const horas_trabajadas = document.getElementById("horas_trabajadas");
+        const inicio_parada = document.getElementById("inicio_parada");
+        const fin_parada = document.getElementById("fin_parada");
+        const horas_parada = document.getElementById("horas_parada");
+
+        hora_inicio.addEventListener("change", function () {
+
+            if (hora_fin.value) {
+                calcularHoras(hora_inicio, hora_fin);
+            }
+
+        });
+
+        hora_fin.addEventListener("change", function () {
+            calcularHoras(hora_inicio, hora_fin);
+        });
+        horas_trabajadas.addEventListener("change", function () {
+            calcularHoraFin(hora_inicio, horas_trabajadas, hora_fin);
+        });
+
+        inicio_parada.addEventListener("change", function () {
+
+            if (fin_parada.value) {
+                calcularHoras(inicio_parada, fin_parada);
+            }
+
+        });
+
+        fin_parada.addEventListener("change", function () {
+            calcularHoras(inicio_parada, fin_parada);
+        });
+
+        horas_parada.addEventListener("change", function () {
+            calcularHoraFin(inicio_parada, horas_parada, fin_parada);
+        });
+
+        document.getElementById('numero_personas')
+            .addEventListener('input', calcularHH);
+
+        document.getElementById('horas_trabajadas')
+            .addEventListener('input', calcularHH);
+
+
+    </script>
 
 </body>
 

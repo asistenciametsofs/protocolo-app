@@ -450,7 +450,7 @@ def guardar_chinalco_faja():
     flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
 
-@app.route('/chinalco_tareo', methods=['GET', 'POST'])
+@app.route('/chinalco_tareo', methods=['GET'])
 def chinalco_tareo():
 
     import os
@@ -480,6 +480,127 @@ def chinalco_tareo():
 
     return render_template('chinalco_tareo.html', equipos=equipos, workers=workers)
 
+@app.route('/chinalco_tareo/guardar', methods=['POST'])
+def chinalco_tareo_guardar():
+
+    import os
+    import psycopg2
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    fecha = request.form.get('fecha')
+    equipo = request.form.get('equipo')
+
+    descripcion_actividad = request.form.get('descripcion_actividad')
+    procedimiento_detallado = request.form.get('procedimiento_detallado')
+    recursos_utilizados = request.form.get('recursos_utilizados')
+
+    hora_inicio = request.form.get('hora_inicio') or None
+    hora_fin = request.form.get('hora_fin') or None
+    horas_trabajadas = request.form.get('horas_trabajadas') or None
+
+    estado_equipo = request.form.get('estado_equipo')
+
+    inicio_parada = request.form.get('inicio_parada') or None
+    fin_parada = request.form.get('fin_parada') or None
+    horas_parada = request.form.get('horas_parada') or None
+
+    numero_personas = request.form.get('numero_personas') or None
+    horas_hombre = request.form.get('horas_hombre') or None
+
+    supervisor = request.form.get('supervisor')
+
+    # CHECKBOXES MULTIPLES
+    ejecutores = request.form.getlist('ejecutores')
+
+    tipo_mantenimiento = request.form.get('tipo_mantenimiento')
+    estatus = request.form.get('estatus')
+
+    avance = request.form.get('avance') or None
+
+    condicion_final = request.form.get('condicion_final')
+
+    c.execute("""
+        INSERT INTO chinalco_reporte_mantenimiento (
+
+            fecha,
+            equipo,
+
+            descripcion_actividad,
+            procedimiento_detallado,
+            recursos_utilizados,
+
+            hora_inicio,
+            hora_fin,
+            horas_trabajadas,
+
+            estado_equipo,
+
+            inicio_parada,
+            fin_parada,
+            horas_parada,
+
+            numero_personas,
+            horas_hombre,
+
+            supervisor,
+            ejecutores,
+
+            tipo_mantenimiento,
+            estatus,
+            avance,
+
+            condicion_final
+
+        )
+        VALUES (
+            %s,%s,
+            %s,%s,%s,
+            %s,%s,%s,
+            %s,
+            %s,%s,%s,
+            %s,%s,
+            %s,%s,
+            %s,%s,%s,
+            %s
+        )
+    """,
+    (
+        fecha,
+        equipo,
+
+        descripcion_actividad,
+        procedimiento_detallado,
+        recursos_utilizados,
+
+        hora_inicio,
+        hora_fin,
+        horas_trabajadas,
+
+        estado_equipo,
+
+        inicio_parada,
+        fin_parada,
+        horas_parada,
+
+        numero_personas,
+        horas_hombre,
+
+        supervisor,
+        ejecutores,
+
+        tipo_mantenimiento,
+        estatus,
+        avance,
+
+        condicion_final
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/chinalco_tareo')
 
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():
