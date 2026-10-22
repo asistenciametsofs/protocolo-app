@@ -42,7 +42,7 @@
 
                     <label>Equipo</label>
                     <select name="equipo" required>
-
+                        <option value="" disabled selected hidden>Seleccionar equipo</option>
                         {% for equipo in equipos %}
                         <option value="{{ equipo[0] }}">
                             {{ equipo[0] }} - {{ equipo[1] }}
@@ -211,7 +211,7 @@
                     <select name="estatus" required>
 
                         <option>Finalizado</option>
-                        <option>En proceso</option>
+                        <option selected>En proceso</option>
 
                     </select>
 
@@ -221,12 +221,12 @@
 
                     <label>Condición final</label>
 
-                    <select name="condicion_final">
+                    <select name="condicion_final" required>
 
                         <option>Equipo operativo</option>
                         <option>Equipo inoperativo</option>
                         <option>Actividad culminada</option>
-                        <option>Actividad incompleta</option>
+                        <option selected>Actividad incompleta</option>
 
                     </select>
 
@@ -261,7 +261,7 @@
 
     <script>
 
-        function calcularHoras(hi, hf) {
+        function calcularHoras(hi, hf, target) {
 
             const inicio = hi.value;
             const fin = hf.value;
@@ -278,11 +278,11 @@
 
             let diferencia = (h2 - h1) / 3600000;
 
-            document.getElementById('horas_trabajadas').value =
+            target.value =
                 diferencia.toFixed(2);
         }
 
-        function calcularHoraFin(hi, ht, hf) {
+        function calcularHoraFin(hi, ht, target) {
 
             const inicio = hi.value;
             const horas = parseFloat(
@@ -300,7 +300,7 @@
             let hh = String(fecha.getHours()).padStart(2, "0");
             let mm = String(fecha.getMinutes()).padStart(2, "0");
 
-            hf.value =
+            target.value =
                 `${hh}:${mm}`;
         }
 
@@ -330,13 +330,13 @@
         hora_inicio.addEventListener("change", function () {
 
             if (hora_fin.value) {
-                calcularHoras(hora_inicio, hora_fin);
+                calcularHoras(hora_inicio, hora_fin, horas_trabajadas);
             }
 
         });
 
         hora_fin.addEventListener("change", function () {
-            calcularHoras(hora_inicio, hora_fin);
+            calcularHoras(hora_inicio, hora_fin, horas_trabajadas);
         });
         horas_trabajadas.addEventListener("change", function () {
             calcularHoraFin(hora_inicio, horas_trabajadas, hora_fin);
@@ -345,13 +345,13 @@
         inicio_parada.addEventListener("change", function () {
 
             if (fin_parada.value) {
-                calcularHoras(inicio_parada, fin_parada);
+                calcularHoras(inicio_parada, fin_parada, horas_parada);
             }
 
         });
 
         fin_parada.addEventListener("change", function () {
-            calcularHoras(inicio_parada, fin_parada);
+            calcularHoras(inicio_parada, fin_parada, horas_parada);
         });
 
         horas_parada.addEventListener("change", function () {

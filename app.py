@@ -522,7 +522,7 @@ def chinalco_tareo_guardar():
     condicion_final = request.form.get('condicion_final')
 
     c.execute("""
-        INSERT INTO chinalco_reporte_mantenimiento (
+        INSERT INTO chinalco_tareo (
 
             fecha,
             equipo,
