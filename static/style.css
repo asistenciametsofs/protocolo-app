@@ -418,6 +418,12 @@ textarea:focus {
     gap: 10px;
 }
 
+.grid2v2 {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr;
+    gap: 10px;
+}
+
 .grid3 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;

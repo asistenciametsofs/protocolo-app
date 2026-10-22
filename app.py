@@ -369,8 +369,6 @@ def chinalco_graf_br():
         graficos=graficos
     )
 
-
-
 @app.route('/chinalco_graf', methods=['GET', 'POST'])
 def chinalco_graf():
     # with open('static/data/fajatest.json', 'r', encoding='utf-8') as archivo:
@@ -409,8 +407,6 @@ def chinalco_graf():
     }
 
     return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel, ttdt=ttdt, title=nombres_variables)
-
-
 
 @app.route('/chinalco_faja')
 def chinalco_faja():
@@ -453,6 +449,36 @@ def guardar_chinalco_faja():
     guardar_DB(datos, tabla)
     flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
+
+@app.route('/chinalco_tareo', methods=['GET', 'POST'])
+def chinalco_tareo():
+
+    import os
+    import psycopg2
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT codigo, descripcion
+        FROM chinalco_equipos
+        ORDER BY codigo;
+    """)
+
+    equipos = c.fetchall()
+
+    c.execute("""
+        SELECT dni, nombre, cargo
+        FROM chinalco_personal
+        WHERE tipo = 'Worker'
+        ORDER BY nombre;
+    """)
+
+    workers = c.fetchall()
+
+    conn.close()
+
+    return render_template('chinalco_tareo.html', equipos=equipos, workers=workers)
 
 
 @app.route('/chinalco_checklist')
