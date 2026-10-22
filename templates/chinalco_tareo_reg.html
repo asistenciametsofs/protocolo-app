@@ -111,6 +111,8 @@
     </div>
 
     <script>
+        const registros = {{ registros | tojson }};
+        window.registros = registros;
 
         $(document).ready(function () {
 
