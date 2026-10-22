@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>---</title>
+    <title>Graficos de Fajas</title>
     <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
 
 </head>
@@ -37,8 +37,6 @@
         </div>
     </div>
 
-
-
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
     <script>
 
@@ -53,41 +51,32 @@
             const fecha = registros.map(r =>
                 new Date(r[1]).toLocaleDateString('es-PE')
             );
-
             var valueok = 60
             var valuemid = 105
             const colorok = 'rgba(0, 255, 0, 0.2)'
             const colormid = 'rgba(255, 150, 0, 0.2)'
             const colorbad = 'rgba(255, 0, 0, 0.2)'
-
             if (i === 5 || i === 6 || i === 7  ) {
                 valueok = 2
                 valuemid = 3
                 console.log("ok")
             }
-            
-            
             const tempmr = registros.map(r => r[i + 4]);
-
             const option = {
                 xAxis: {
                     type: 'category',
                     data: fecha
                 },
-
                 yAxis: {
                     type: 'value'
                 },
-
                 series: [
                     {
                         data: tempmr,
                         type: 'line',
                         smooth: true,
-
                         markArea: {
                             silent: true,
-
                             data: [
                                 [
                                     {
@@ -124,12 +113,10 @@
                                 ]
                             ]
                         },
-
                         markLine: {
                             data: [
                                 {
                                     yAxis: valueok,
-                                    
                                 },
                                 {
                                     yAxis: valuemid,
@@ -138,7 +125,6 @@
                         }
                     }
                 ],
-
                 dataZoom: [
                     {
                         type: 'slider',
@@ -155,12 +141,10 @@
                         throttle: 120
                     }
                 ],
-
                 tooltip: {
                     trigger: 'axis'
                 }
             };
-
             const elemento = document.getElementById("C" + i);
 
             if (elemento) {
@@ -168,7 +152,9 @@
                 chart.setOption(option);
             }
         }
-
+        window.addEventListener('resize', () => {
+            instancias.forEach(chart => chart.resize());
+        });
     </script>
 
 </body>

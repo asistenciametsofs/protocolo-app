@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar tareas</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>---</h1>
+            <p id="folio-header">HB-...</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+    <div class="container" style="max-width: 1000px;">
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="flash">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form action="/chinalco_tareo/guardar" method="POST" enctype="multipart/form-data" id="form-tareo">
+            <!-- DATOS GENERALES -->
+
+            <div class="seccion">
+                <div class="seccion-titulo">DATOS GENERALES</div>
+
+                <div class="grid">
+
+                    <label>Fecha</label>
+                    <input type="date" name="fecha" required>
+
+                    <label>Equipo</label>
+                    <select name="equipo" required>
+                        <option value="" disabled selected hidden>Seleccionar equipo</option>
+                        {% for equipo in equipos %}
+                        <option value="{{ equipo[0] }}">
+                            {{ equipo[0] }} - {{ equipo[1] }}
+                        </option>
+                        {% endfor %}
+
+                        <option value="OTROS">OTROS</option>
+
+                    </select>
+
+                </div>
+            </div>
+
+            <br>
+
+            <!-- ACTIVIDAD -->
+
+            <div class="seccion">
+
+                <div class="seccion-titulo">
+                    INFORMACIÓN DE LA ACTIVIDAD
+                </div>
+
+                <div class="grid1">
+
+                    <label>Descripción breve de la actividad</label>
+                    <input type="text" name="descripcion_actividad" required>
+
+                    <label>Procedimiento detallado</label>
+                    <textarea name="procedimiento_detallado" rows="6" required></textarea>
+
+                    <label>Recursos utilizados</label>
+                    <textarea name="recursos_utilizados" rows="4" required></textarea>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <!-- TIEMPOS -->
+
+            <div class="seccion">
+
+                <div class="seccion-titulo">TIEMPOS</div>
+
+                <div class="grid2v2">
+
+                    <label>Hora de inicio</label>
+                    <input type="time" id="hora_inicio" name="hora_inicio">
+
+                    <label>Hora de fin</label>
+                    <input type="time" id="hora_fin" name="hora_fin">
+
+                    <label>Horas trabajadas</label>
+                    <input type="number" step="0.01" min="0" id="horas_trabajadas" name="horas_trabajadas"
+                        placeholder="Horas">
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <!-- ESTADO EQUIPO -->
+
+            <div class="seccion">
+
+                <div class="seccion-titulo">
+                    ESTADO DEL EQUIPO
+                </div>
+
+                <div class="grid2v2">
+
+                    <label>Estado del equipo</label>
+                    <select name="estado_equipo">
+
+                        <option>Parada de equipo</option>
+                        <option>Equipo operando</option>
+                        <option>Taller</option>
+                        <option>Equipo stand by</option>
+                        <option>Otros</option>
+
+                    </select>
+
+                    <label>Hora inicio parada</label>
+                    <input type="time" id="inicio_parada" name="inicio_parada">
+
+                    <label>Hora fin parada</label>
+                    <input type="time" id="fin_parada" name="fin_parada">
+
+                    <label>Horas totales de parada</label>
+                    <input type="number" step="0.01" id="horas_parada" name="horas_parada">
+                </div>
+
+            </div>
+
+            <br>
+
+            <!-- PERSONAL -->
+
+            <div class="seccion">
+
+                <div class="seccion-titulo">
+                    PERSONAL
+                </div>
+
+                <div class="grid2v2">
+
+                    <label>Número de personas</label>
+                    <input type="number" min="1" id="numero_personas" name="numero_personas">
+
+                    <label>Horas Hombre (HH)</label>
+                    <input type="number" step="0.01" id="horas_hombre" name="horas_hombre" readonly>
+
+                    <label>Supervisor encargado</label>
+                    <select name="supervisor" placeholder="" required>
+                        <option value="" disabled selected hidden>Seleccionar Supervisor</option>
+                        <option>Edwin Díaz</option>
+                        <option>Celso Burgos</option>
+                        <option>Alex Arroni</option>
+                    </select>
+                </div>
+
+                <br>
+
+                <label>Personas ejecutoras</label>
+
+                {% for worker in workers %}
+
+                <label>
+                    <input type="checkbox" name="ejecutores" value="{{ worker[0] }}">
+
+                    {{ worker[1] }}
+                    ({{ worker[2] }})
+                </label>
+
+                {% endfor %}
+
+            </div>
+
+            <br>
+
+            <!-- MANTENIMIENTO -->
+
+            <div class="seccion">
+
+                <div class="seccion-titulo">
+                    MANTENIMIENTO
+                </div>
+
+                <div class="grid2v2">
+
+                    <label>Tipo de mantenimiento</label>
+
+                    <select name="tipo_mantenimiento" required>
+
+                        <option>Preventivo</option>
+                        <option>Correctivo no programado</option>
+                        <option>Correctivo programado</option>
+
+                    </select>
+
+                    <label>Estatus</label>
+
+                    <select name="estatus" required>
+
+                        <option>Finalizado</option>
+                        <option selected>En proceso</option>
+
+                    </select>
+
+                    <label>Porcentaje de cumplimiento (%)</label>
+
+                    <input type="number" min="0" max="100" name="avance">
+
+                    <label>Condición final</label>
+
+                    <select name="condicion_final" required>
+
+                        <option>Equipo operativo</option>
+                        <option>Equipo inoperativo</option>
+                        <option>Actividad culminada</option>
+                        <option selected>Actividad incompleta</option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <!-- EVIDENCIAS -->
+
+            <div class="seccion">
+
+                <div class="seccion-titulo">
+                    EVIDENCIAS FOTOGRÁFICAS
+                </div>
+
+                <label>
+                    Adjuntar hasta 5 fotografías
+                </label>
+
+                <input type="file" name="fotos" accept="image/*" multiple>
+
+            </div>
+
+            <br>
+            <button type="submit" class="btn-submit">💾 Guardar checklist</button>
+
+
+        </form>
+    </div>
+
+    <script>
+
+        function calcularHoras(hi, hf, target) {
+
+            const inicio = hi.value;
+            const fin = hf.value;
+
+            if (!inicio || !fin) return;
+
+            let h1 = new Date("2000-01-01 " + inicio);
+            let h2 = new Date("2000-01-01 " + fin);
+
+            // Si cruza medianoche
+            if (h2 < h1) {
+                h2.setDate(h2.getDate() + 1);
+            }
+
+            let diferencia = (h2 - h1) / 3600000;
+
+            target.value =
+                diferencia.toFixed(2);
+        }
+
+        function calcularHoraFin(hi, ht, target) {
+
+            const inicio = hi.value;
+            const horas = parseFloat(
+                ht.value
+            );
+
+            if (!inicio || isNaN(horas)) return;
+
+            let fecha = new Date("2000-01-01 " + inicio);
+
+            fecha.setMinutes(
+                fecha.getMinutes() + (horas * 60)
+            );
+
+            let hh = String(fecha.getHours()).padStart(2, "0");
+            let mm = String(fecha.getMinutes()).padStart(2, "0");
+
+            target.value =
+                `${hh}:${mm}`;
+        }
+
+        function calcularHH() {
+
+            let personas =
+                parseFloat(document.getElementById('numero_personas').value);
+
+            let horas =
+                parseFloat(document.getElementById('horas_trabajadas').value);
+
+            if (isNaN(personas) || isNaN(horas))
+                return;
+
+            document.getElementById('horas_hombre').value =
+                (personas * horas).toFixed(2);
+        }
+
+
+        const hora_inicio = document.getElementById("hora_inicio");
+        const hora_fin = document.getElementById("hora_fin");
+        const horas_trabajadas = document.getElementById("horas_trabajadas");
+        const inicio_parada = document.getElementById("inicio_parada");
+        const fin_parada = document.getElementById("fin_parada");
+        const horas_parada = document.getElementById("horas_parada");
+
+        hora_inicio.addEventListener("change", function () {
+
+            if (hora_fin.value) {
+                calcularHoras(hora_inicio, hora_fin, horas_trabajadas);
+            }
+
+        });
+
+        hora_fin.addEventListener("change", function () {
+            calcularHoras(hora_inicio, hora_fin, horas_trabajadas);
+        });
+        horas_trabajadas.addEventListener("change", function () {
+            calcularHoraFin(hora_inicio, horas_trabajadas, hora_fin);
+        });
+
+        inicio_parada.addEventListener("change", function () {
+
+            if (fin_parada.value) {
+                calcularHoras(inicio_parada, fin_parada, horas_parada);
+            }
+
+        });
+
+        fin_parada.addEventListener("change", function () {
+            calcularHoras(inicio_parada, fin_parada, horas_parada);
+        });
+
+        horas_parada.addEventListener("change", function () {
+            calcularHoraFin(inicio_parada, horas_parada, fin_parada);
+        });
+
+        document.getElementById('numero_personas')
+            .addEventListener('input', calcularHH);
+
+        document.getElementById('horas_trabajadas')
+            .addEventListener('input', calcularHH);
+
+
+    </script>
+
+</body>
+
+</html>

@@ -1,3 +1,6 @@
+import datetime
+from time import time
+
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 from database import init_db, guardar_armado, guardar_cambio, obtener_registros, obtener_tendencias, guardar_DB
 from word_generator import generar_word_armado, generar_word_cambio
@@ -32,9 +35,339 @@ def home():
 def chinalco():
     return render_template('chinalco.html')
 
-# @app.route('/chinalco_graf')
-# def chinalco_graf():
-#     return render_template('chinalco_graf.html')
+@app.route('/chinalco_altura', methods=['GET', 'POST'])
+def chinalco_altura():
+    import psycopg2
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+    
+    sel = request.args.get('equipo', request.form.get('equipo', 'BR-01'))
+
+    c.execute('SELECT * FROM chinalco_altura WHERE equipo = %s ORDER BY fecha_ini ASC;', (sel,))
+    registros = c.fetchall()    
+    temp = 0
+    for i in registros:
+        if i[8] is not None:
+            temp += i[8]
+
+    promedio = round(temp / len(registros), 10) if len(registros) > 0 else None
+
+    if registros[len(registros)-1][10]:
+        camp = registros[len(registros)-1][1] 
+    else:
+        camp = 1
+
+    c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s ORDER BY tons_acum DESC LIMIT 1;', (sel, camp))
+    data = c.fetchone()
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha')
+        equipo = request.form.get('equipo')
+        altura_actual = request.form.get('alt')
+        toneladas_acumuladas = request.form.get('tons_acum')
+
+        c.execute('INSERT INTO chinalco_altura_med ( id_camp, fecha, equipo, alt, tons_acum) VALUES (%s, %s, %s, %s, %s);', (camp, fecha, equipo, altura_actual, toneladas_acumuladas))
+        conn.commit()
+        flash('✅ Registro guardado!')
+
+        if request.form.get('newCycle'):
+            c.execute('UPDATE chinalco_altura SET fecha_fin = %s, actual = FALSE, alt_fin = %s WHERE equipo = %s AND id_camp = %s;', (fecha, altura_actual, equipo, camp))
+            conn.commit()
+            flash('✅ Campaña finalizada!')
+
+            newalt = request.form.get('newAlt')
+
+            # Calcular avg_tons
+
+            # c.execute('SELECT tons_acum, alt FROM chinalco_altura_med WHERE equipo = %s AND id_camp = %s;', (sel, camp))
+            # datos_med = c.fetchall()
+    
+            # c.execute('SELECT AVG(tons_acum) FROM chinalco_altura WHERE equipo = %s;', (sel,))
+            # his_avg_tons = c.fetchone()[0]
+
+            c.execute("""
+                SELECT tons_acum, alt
+                FROM chinalco_altura_med
+                WHERE equipo = %s AND id_camp = %s;
+            """, (sel, camp))
+
+            datos_med = c.fetchall()
+
+            if len(datos_med) >= 2:
+                # Separar los valores X e Y
+                xs = [float(row[0]) for row in datos_med]
+                ys = [float(row[1]) for row in datos_med]
+
+                n = len(datos_med)
+
+                # Aplicar la fórmula de regresión lineal
+                numerador = (
+                    n * sum(x * y for x, y in zip(xs, ys))
+                    - sum(xs) * sum(ys)
+                )
+
+                denominador = (
+                    n * sum(x ** 2 for x in xs)
+                    - sum(xs) ** 2
+                )
+
+                if denominador != 0:
+                    pendiente = numerador / denominador
+                else:
+                    pendiente = 0  # Todos los valores X son iguales
+
+            else:
+                # Menos de 2 mediciones: obtener el promedio histórico
+                c.execute("""
+                    SELECT AVG(tons_acum)
+                    FROM chinalco_altura
+                    WHERE equipo = %s;
+                """, (sel,))
+
+                pendiente = c.fetchone()[0]
+
+
+            c.execute('INSERT INTO chinalco_altura (id_camp, equipo, fecha_ini, actual, alt_ini, avg_tons) VALUES (%s, %s, %s, TRUE, %s, %s);', (camp+1, equipo, fecha, newalt, pendiente))
+            conn.commit()
+
+            c.execute('INSERT INTO chinalco_altura_med ( id_camp, fecha, equipo, alt, tons_acum) VALUES (%s, %s, %s, %s, %s);', (camp+1, fecha, equipo, newalt, toneladas_acumuladas))
+            conn.commit()
+
+            flash('✅ Nueva campaña iniciada!')
+
+        conn.close()
+        return redirect(url_for('chinalco'))
+
+    conn.close()
+
+    return render_template('chinalco_altura.html', registros=registros, promedio=promedio, sel=sel, camp=camp, data=data)
+
+@app.route('/chinalco_graf_BR', methods=['GET'])
+def chinalco_graf_br():
+    import os
+    import psycopg2
+
+    ALTURA_MINIMA = 65.0
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    try:
+        # 1. Obtener campañas
+        c.execute("""
+            SELECT equipo, id_camp, alt_ini, alt_fin,
+                   actual, tons_prod, tons_acum, fecha_fin
+            FROM chinalco_altura
+            ORDER BY fecha_ini ASC
+        """)
+        campañas = c.fetchall()
+
+        equipos = sorted(set(r[0] for r in campañas if r[0]))
+        graficos = {}
+
+        for equipo in equipos:
+
+            # 2. Encontrar la campaña actual del equipo
+            campañas_actuales = [
+                r for r in campañas
+                if r[0] == equipo and r[4] is True
+            ]
+
+            campaña_actual = (
+                campañas_actuales[-1]
+                if campañas_actuales else None
+            )
+
+            if campaña_actual is None:
+                graficos[equipo] = {
+                    'puntos': [],
+                    'pendiente': None,
+                    'tasa_historica': None,
+                    'toneladas_actuales': None,
+                    'altura_actual': None,
+                    'toneladas_objetivo': None,
+                    'toneladas_objetivo_historico': None,
+                    'altura_minima': ALTURA_MINIMA,
+                    'linea_proyectada': [],
+                    'linea_historica': []
+                }
+                continue
+
+            id_camp_actual = campaña_actual[1]
+
+            # 3. Obtener SOLO las mediciones de la campaña actual
+            c.execute("""
+                SELECT alt, tons_acum, fecha
+                FROM chinalco_altura_med
+                WHERE equipo = %s
+                  AND id_camp = %s
+                  AND alt IS NOT NULL
+                  AND tons_acum IS NOT NULL
+                ORDER BY tons_acum ASC, fecha ASC
+            """, (equipo, id_camp_actual))
+
+            mediciones = c.fetchall()
+            puntos = []
+
+            for alt, tons, fecha in mediciones:
+                try:
+                    x = float(tons)
+                    y = float(alt)
+
+                    if x >= 0 and y > 0:
+                        puntos.append([x, y])
+                except (TypeError, ValueError):
+                    continue
+
+            puntos.sort(key=lambda p: p[0])
+
+            # 4. Calcular desgaste promedio de campañas históricas
+            historico = []
+
+            for r in campañas:
+                eq, id_camp, alt_ini, alt_fin, actual, tons_prod, tons_acum, fecha_fin = r
+
+                if eq != equipo or actual or fecha_fin is None:
+                    continue
+
+                try:
+                    ai = float(alt_ini)
+                    af = float(alt_fin)
+                    tp = float(tons_prod)
+
+                    if tp > 0 and ai > af:
+                        tasa = (ai - af) / tp * 1000
+                        historico.append(tasa)
+
+                except (TypeError, ValueError):
+                    continue
+
+            tasa_historica = (
+                sum(historico) / len(historico)
+                if historico else None
+            )
+
+            toneladas_ultima_medicion = (
+                puntos[-1][0] if puntos else 0
+            )
+
+            # Valores de salida
+            pendiente = None
+            toneladas_inicial = None
+            altura_inicial = None
+            toneladas_objetivo = None
+            toneladas_objetivo_historico = None
+
+            linea_proyectada = []
+            linea_historica = []
+
+            # 5. Punto de referencia: última medición actual
+            if puntos:
+                toneladas_inicial, altura_inicial = puntos[0]
+                toneladas_actual, altura_actual = puntos[-1]
+                  
+            else:
+                # Si aún no hay mediciones, usar el inicio
+                # de la campaña actual como referencia
+                try:
+                    altura_inicial = float(campaña_actual[2])
+                    toneladas_inicial = (
+                        float(campaña_actual[6])
+                        if campaña_actual[6] is not None
+                        else None
+                    )
+                except (TypeError, ValueError):
+                    altura_inicial = None
+                    toneladas_inicial = None
+
+            # 6. Proyección por regresión lineal
+            # Utiliza exclusivamente los puntos de la campaña actual
+            if len(puntos) >= 2:
+                xs = [p[0] for p in puntos]
+                ys = [p[1] for p in puntos]
+
+                x_prom = sum(xs) / len(xs)
+                y_prom = sum(ys) / len(ys)
+
+                denominador = sum(
+                    (x - x_prom) ** 2 for x in xs
+                )
+
+                if denominador > 0:
+                    m = sum(
+                        (xs[i] - x_prom) * (ys[i] - y_prom)
+                        for i in range(len(puntos))
+                    ) / denominador
+
+                    b = y_prom - m * x_prom
+
+                    # Desgaste en mm por cada 1000 toneladas
+                    pendiente = m * 1000
+
+                    # Proyectar solo si existe desgaste
+                    if (
+                        m < 0
+                        and altura_inicial is not None
+                        and toneladas_inicial is not None
+                        and altura_inicial > ALTURA_MINIMA
+                    ):
+                        x_objetivo = (
+                            ALTURA_MINIMA - b
+                        ) / m
+
+                        if x_objetivo >= toneladas_inicial:
+                            toneladas_objetivo = x_objetivo
+
+                            linea_proyectada = [
+                                [toneladas_inicial, altura_inicial],
+                                [toneladas_objetivo, ALTURA_MINIMA]
+                            ]
+
+            # 7. Proyección independiente por promedio histórico
+            # Se calcula aunque también exista la regresión
+            if (
+                tasa_historica is not None
+                # and tasa_historica > 0
+                and toneladas_inicial is not None
+                and altura_inicial is not None
+                and altura_inicial > ALTURA_MINIMA
+            ):
+                toneladas_objetivo_historico = (
+                    toneladas_inicial
+                    + (altura_inicial - ALTURA_MINIMA)
+                    / tasa_historica * 1000
+                )
+
+                linea_historica = [
+                    [toneladas_inicial, altura_inicial],
+                    [toneladas_objetivo_historico, ALTURA_MINIMA]
+                ]
+
+            # 8. Guardar datos para la plantilla
+            graficos[equipo] = {
+                'puntos': puntos,
+                'pendiente': pendiente,
+                'tasa_historica': tasa_historica,
+                'toneladas_inicial': toneladas_inicial,
+                'altura_inicial': altura_inicial,
+                'toneladas_objetivo': toneladas_objetivo,
+                'toneladas_objetivo_historico': toneladas_objetivo_historico,
+                'altura_minima': ALTURA_MINIMA,
+                'linea_proyectada': linea_proyectada,
+                'linea_historica': linea_historica,
+                'toneladas_actual': toneladas_actual,
+                'altura_actual': altura_actual,
+                'toneladas_ultima_medicion': toneladas_ultima_medicion
+            }
+
+    finally:
+        c.close()
+        conn.close()
+
+    return render_template(
+        'chinalco_graf_BR.html',
+        graficos=graficos
+    )
 
 @app.route('/chinalco_graf', methods=['GET', 'POST'])
 def chinalco_graf():
@@ -74,8 +407,6 @@ def chinalco_graf():
     }
 
     return render_template('chinalco_graf.html', registros=registros, equipos=equipos, sel=sel, ttdt=ttdt, title=nombres_variables)
-
-
 
 @app.route('/chinalco_faja')
 def chinalco_faja():
@@ -119,6 +450,190 @@ def guardar_chinalco_faja():
     flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
 
+@app.route('/chinalco_tareo', methods=['GET'])
+def chinalco_tareo():
+
+    import os
+    import psycopg2
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT codigo, descripcion
+        FROM chinalco_equipos
+        ORDER BY codigo;
+    """)
+
+    equipos = c.fetchall()
+
+    c.execute("""
+        SELECT dni, nombre, cargo
+        FROM chinalco_personal
+        WHERE tipo = 'Worker'
+        ORDER BY nombre;
+    """)
+
+    workers = c.fetchall()
+
+    conn.close()
+
+    return render_template('chinalco_tareo.html', equipos=equipos, workers=workers)
+
+@app.route('/chinalco_tareo/guardar', methods=['POST'])
+def chinalco_tareo_guardar():
+
+    import os
+    import psycopg2
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    fecha = request.form.get('fecha')
+    equipo = request.form.get('equipo')
+
+    descripcion_actividad = request.form.get('descripcion_actividad')
+    procedimiento_detallado = request.form.get('procedimiento_detallado')
+    recursos_utilizados = request.form.get('recursos_utilizados')
+
+    hora_inicio = request.form.get('hora_inicio') or None
+    hora_fin = request.form.get('hora_fin') or None
+    horas_trabajadas = request.form.get('horas_trabajadas') or None
+
+    estado_equipo = request.form.get('estado_equipo')
+
+    inicio_parada = request.form.get('inicio_parada') or None
+    fin_parada = request.form.get('fin_parada') or None
+    horas_parada = request.form.get('horas_parada') or None
+
+    numero_personas = request.form.get('numero_personas') or None
+    horas_hombre = request.form.get('horas_hombre') or None
+
+    supervisor = request.form.get('supervisor')
+
+    # CHECKBOXES MULTIPLES
+    ejecutores = request.form.getlist('ejecutores')
+
+    tipo_mantenimiento = request.form.get('tipo_mantenimiento')
+    estatus = request.form.get('estatus')
+
+    avance = request.form.get('avance') or None
+
+    condicion_final = request.form.get('condicion_final')
+
+    c.execute("""
+        INSERT INTO chinalco_tareo (
+
+            fecha,
+            equipo,
+
+            descripcion_actividad,
+            procedimiento_detallado,
+            recursos_utilizados,
+
+            hora_inicio,
+            hora_fin,
+            horas_trabajadas,
+
+            estado_equipo,
+
+            inicio_parada,
+            fin_parada,
+            horas_parada,
+
+            numero_personas,
+            horas_hombre,
+
+            supervisor,
+            ejecutores,
+
+            tipo_mantenimiento,
+            estatus,
+            avance,
+
+            condicion_final
+
+        )
+        VALUES (
+            %s,%s,
+            %s,%s,%s,
+            %s,%s,%s,
+            %s,
+            %s,%s,%s,
+            %s,%s,
+            %s,%s,
+            %s,%s,%s,
+            %s
+        )
+    """,
+    (
+        fecha,
+        equipo,
+
+        descripcion_actividad,
+        procedimiento_detallado,
+        recursos_utilizados,
+
+        hora_inicio,
+        hora_fin,
+        horas_trabajadas,
+
+        estado_equipo,
+
+        inicio_parada,
+        fin_parada,
+        horas_parada,
+
+        numero_personas,
+        horas_hombre,
+
+        supervisor,
+        ejecutores,
+
+        tipo_mantenimiento,
+        estatus,
+        avance,
+
+        condicion_final
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/chinalco_tareo')
+
+@app.route('/chinalco_tareo_reg')
+def chinalco_tareo_reg():
+    import psycopg2
+    import os
+
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT
+            id,
+            fecha,
+            equipo,
+            descripcion_actividad,
+            supervisor,
+            ejecutores,
+            tipo_mantenimiento,
+            estatus,
+            horas_hombre,
+            condicion_final
+        FROM chinalco_tareo
+        ORDER BY fecha DESC;
+    """)
+
+    registros = c.fetchall()
+
+    conn.close()
+
+    return render_template(
+        'chinalco_tareo_reg.html',
+        registros=registros
+    )
 
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():

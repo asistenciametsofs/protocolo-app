@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graficos de Chancadoras</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>---</h1>
+            <p id="folio-header">HB-...</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+    <div class="container">
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        {% for equipo, datos in graficos.items() %}
+        <div id="graficos-container" class="containergrf" style="flex-basis: 100%;">
+
+            <div class="cardgrf">
+                <div id="grafico-{{ loop.index0 }}" class="chart"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="kpi-grid" id="kpi-grid">
+                <div class="kpi">
+                    <div class="kpi-label">Última altura</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> {{ datos.altura_actual }} mm</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Toneladas restantes</div>
+                    <div class="kpi-valor" {% if datos.toneladas_objetivo is not none %} style="color:#1a3a5c">
+                        {{ (datos.toneladas_objetivo - datos.toneladas_actual) | round(2) }}
+                        {% else %}
+                        style="color:#555; font-size:16px">
+                        Sin proyección (se deben tener al menos 2 mediciones para proyectar)
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Fecha estimada cambio</div>
+                    <div class="kpi-valor" style="color:#1a3a5c"> </div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Desgaste por día</div>
+                    <div class="kpi-valor" style="color:#555; font-size:16px">
+                        {% if datos.pendiente is not none %}
+                        {{ datos.pendiente | round(2) }} mm/1000 tons
+                        {% else %}
+                        Sin proyección (se deben tener al menos 2 mediciones para proyectar)
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p style="border-style: none none outset none; border-width: 2px;"> </p>
+        {% endfor %}
+
+        <section class="proyeccion-calendario">
+            <h2>Calendario estimado de cambio de repuesto</h2>
+
+            <div class="calendario-controles">
+                <div>
+                    <label for="equipo-cal">Equipo</label>
+                    <select id="equipo-cal">
+                        {% for equipo in graficos %}
+                        <option value="{{ equipo }}">{{ equipo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="tons-dia">Toneladas procesadas por día</label>
+                    <input type="number" id="tons-dia" min="1" step="1" placeholder="Ej. 1500" value="1500">
+                </div>
+
+                <div>
+                    <label for="tipo-proyeccion">Método de proyección</label>
+                    <select id="tipo-proyeccion">
+                        <option value="auto">Automático</option>
+                        <option value="regresion">Regresión lineal</option>
+                        <option value="historico">Promedio histórico</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="resultado-cambio"></div>
+
+            <div id="calendarios" class="calendarios-grid"></div>
+        </section>
+
+
+
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
+    <script>
+        // Graficos
+        const graficos = {{ graficos | tojson }};
+        const instancias = [];
+
+        window.graficos = graficos;
+
+        Object.entries(graficos).forEach(([equipo, datos], i) => {
+            const elemento = document.getElementById(`grafico-${i}`);
+            console.log(1, elemento)
+
+            console.log(datos.toneladas_objetivo_historico - ((datos.toneladas_objetivo_historico - datos.toneladas_inicial) * 1.05));
+
+            if (!elemento) return;
+            console.log(`Renderizando gráfico para ${equipo} en el elemento:`, elemento);
+
+            const chart = echarts.init(elemento);
+            instancias.push(chart);
+
+            const puntos = datos.puntos || [];
+            const proyeccion = datos.linea_proyectada || [];
+            const alturaMinima = datos.altura_minima ?? 65;
+
+            const series = [
+                {
+                    name: 'Mediciones actuales',
+                    type: 'line',
+                    data: datos.puntos,
+                    showSymbol: true,
+                    smooth: false
+                },
+                {
+                    name: 'Proyección por regresión',
+                    type: 'line',
+                    data: datos.linea_proyectada,
+                    showSymbol: false,
+                    connectNulls: true,
+                    lineStyle: {
+                        type: 'dashed',
+                        width: 2
+                    }
+                },
+                {
+                    name: 'Proyección por promedio histórico',
+                    type: 'line',
+                    data: datos.linea_historica,
+                    showSymbol: false,
+                    connectNulls: true,
+                    lineStyle: {
+                        type: 'dotted',
+                        width: 3
+                    },
+                    markArea: {
+                        silent: true,
+
+                        data: [
+                            [
+                                {
+                                    yAxis: 0,
+                                    itemStyle: {
+                                        color: 'rgba(255, 0, 0, 0.2)'
+                                    }
+                                },
+                                {
+                                    yAxis: alturaMinima
+                                },
+                            ],
+                        ]
+                    },
+                    smooth: false,
+                    showSymbol: true,
+                    symbolSize: 7,
+                    lineStyle: {
+                        width: 2
+                    },
+                    markLine: {
+                        silent: true,
+                        symbol: 'none',
+                        data: [
+                            {
+                                name: 'Altura mínima',
+                                yAxis: alturaMinima,
+                                lineStyle: {
+                                    color: '#e74c3c',
+                                    type: 'dashed',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: `Mínimo: ${alturaMinima} mm`
+                                }
+                            }
+                        ]
+                    }
+
+                }
+            ];
+
+            if (proyeccion.length === 2) {
+                series.push({
+                    name: 'Proyección',
+                    type: 'line',
+                    data: proyeccion,
+                    showSymbol: true,
+                    symbolSize: 7,
+                    lineStyle: {
+                        color: '#16FF29',
+                        type: 'dashed',
+                        width: 1
+                    }
+                });
+            }
+
+            const option = {
+                title: {
+                    text: equipo,
+                    subtext: datos.toneladas_objetivo != null
+                        ? `Cambio estimado: ${Number(datos.toneladas_objetivo).toLocaleString('es-PE', { maximumFractionDigits: 0 })} toneladas`
+                        : 'Sin proyección disponible',
+                    left: 'center'
+                },
+
+                tooltip: {
+                    trigger: 'axis',
+                    valueFormatter: value =>
+                        value == null ? '-' : `${Number(value).toFixed(2)} mm`
+                },
+
+                legend: {
+                    bottom: 0,
+                    data: ['Altura medida', 'Proyección']
+                },
+
+                grid: {
+                    left: 60,
+                    right: 70,
+                    top: 85,
+                    bottom: 85
+                },
+
+                xAxis: {
+                    type: 'value',
+                    name: 'Toneladas acumuladas',
+                    nameLocation: 'middle',
+                    nameGap: 45,
+                    axisLabel: {
+                        formatter: value =>
+                            Number(value).toLocaleString('es-PE')
+                    },
+                    min: datos.toneladas_objetivo_historico - ((datos.toneladas_objetivo_historico - datos.toneladas_inicial) * 1.05),
+                },
+
+                yAxis: {
+                    type: 'value',
+                    name: 'Altura (mm)',
+                    min: 0,
+                    axisLabel: {
+                        formatter: '{value} mm'
+                    }
+                },
+
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: 0
+                    },
+                    {
+                        type: 'slider',
+                        xAxisIndex: 0,
+                        bottom: 35
+                    }
+                ],
+
+
+
+                series
+            };
+
+            chart.setOption(option);
+        });
+
+        window.addEventListener('resize', () => {
+            instancias.forEach(chart => chart.resize());
+        });
+
+
+
+        //Calendario de proyeccion
+        const selectorEquipo = document.getElementById('equipo-cal');
+        const inputTonsDia = document.getElementById('tons-dia');
+        const selectorMetodo = document.getElementById('tipo-proyeccion');
+        const resultado = document.getElementById('resultado-cambio');
+        const contenedor = document.getElementById('calendarios');
+
+        function fechaLocal(fecha) {
+            return new Date(
+                fecha.getFullYear(),
+                fecha.getMonth(),
+                fecha.getDate()
+            );
+        }
+
+        function formatearFecha(fecha) {
+            return fecha.toLocaleDateString('es-PE', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function generarCalendario(fechaObjetivo) {
+            contenedor.innerHTML = '';
+
+            const hoy = fechaLocal(new Date());
+            const nombresMeses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril',
+                'Mayo', 'Junio', 'Julio', 'Agosto',
+                'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+
+            const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+            for (let i = 0; i < 3; i++) {
+                const inicioMes = new Date(
+                    hoy.getFullYear(),
+                    hoy.getMonth() + i,
+                    1
+                );
+
+                const diasMes = new Date(
+                    inicioMes.getFullYear(),
+                    inicioMes.getMonth() + 1,
+                    0
+                ).getDate();
+
+                // Ajustar para que la semana comience el lunes
+                const desplazamiento = (inicioMes.getDay() + 6) % 7;
+
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'mes-calendario';
+
+                const titulo = document.createElement('h3');
+                titulo.textContent =
+                    `${nombresMeses[inicioMes.getMonth()]} ${inicioMes.getFullYear()}`;
+
+                tarjeta.appendChild(titulo);
+
+                const p = document.createElement('p');
+                titulo.appendChild(p);
+
+                const cuadrilla = document.createElement('div');
+                cuadrilla.className = 'dias-calendario';
+
+                diasSemana.forEach(dia => {
+                    const celda = document.createElement('div');
+                    celda.className = 'dia-semana';
+                    celda.textContent = dia;
+                    cuadrilla.appendChild(celda);
+                });
+
+                for (let j = 0; j < desplazamiento; j++) {
+                    const vacio = document.createElement('div');
+                    vacio.className = 'dia vacio';
+                    cuadrilla.appendChild(vacio);
+                }
+
+                for (let dia = 1; dia <= diasMes; dia++) {
+                    const fecha = new Date(
+                        inicioMes.getFullYear(),
+                        inicioMes.getMonth(),
+                        dia
+                    );
+
+                    const celda = document.createElement('div');
+                    celda.className = 'dia';
+                    celda.textContent = dia;
+
+                    if (fecha.getTime() === hoy.getTime()) {
+                        celda.classList.add('hoy');
+                        celda.title = 'Hoy';
+                    }
+
+                    if (
+                        fechaObjetivo &&
+                        fecha.getTime() === fechaObjetivo.getTime()
+                    ) {
+                        celda.classList.add('fecha-cambio');
+                        celda.title = 'Fecha estimada de cambio';
+                    }
+
+                    cuadrilla.appendChild(celda);
+                }
+
+                tarjeta.appendChild(cuadrilla);
+                contenedor.appendChild(tarjeta);
+            }
+        }
+
+        function actualizarCalendario() {
+            const equipo = selectorEquipo.value;
+            const datos = graficos[equipo];
+            const tonsDia = Number(inputTonsDia.value);
+            const metodo = selectorMetodo.value;
+
+            let toneladasObjetivo = null;
+            let nombreMetodo = '';
+
+            if (metodo === 'regresion' || metodo === 'auto') {
+                if (datos.toneladas_objetivo != null) {
+                    toneladasObjetivo = Number(datos.toneladas_objetivo);
+                    nombreMetodo = 'Regresión lineal';
+                }
+            }
+
+            if (
+                toneladasObjetivo == null &&
+                (metodo === 'historico' || metodo === 'auto')
+            ) {
+                if (datos.toneladas_objetivo_historico != null) {
+                    toneladasObjetivo =
+                        Number(datos.toneladas_objetivo_historico);
+                    nombreMetodo = 'Promedio histórico';
+                }
+            }
+
+            // La fecha parte de la última medición, no de la primera
+            const toneladasActuales =
+                datos.toneladas_ultima_medicion ??
+                datos.toneladas_actuales;
+
+            if (
+                !Number.isFinite(tonsDia) ||
+                tonsDia <= 0 ||
+                toneladasActuales == null ||
+                toneladasObjetivo == null
+            ) {
+                resultado.textContent =
+                    'Introduce las toneladas por día y verifica que exista una proyección válida.';
+
+                generarCalendario(null);
+                return;
+            }
+
+            const toneladasRestantes =
+                toneladasObjetivo - Number(toneladasActuales);
+
+            if (toneladasRestantes <= 0) {
+                resultado.textContent =
+                    'La proyección indica que ya se alcanzó o superó el tonelaje objetivo. Revisa el cambio del bowl.';
+
+                generarCalendario(null);
+                return;
+            }
+
+            const diasRestantes = Math.ceil(toneladasRestantes / tonsDia);
+
+            const hoy = fechaLocal(new Date());
+            const fechaObjetivo = new Date(
+                hoy.getFullYear(),
+                hoy.getMonth(),
+                hoy.getDate() + diasRestantes
+            );
+
+            resultado.textContent =
+                `Cambio estimado: ${formatearFecha(fechaObjetivo)}. ` +
+                `${Math.ceil(toneladasRestantes).toLocaleString('es-PE')} toneladas restantes, ` +
+                `${diasRestantes} días estimados. Método: ${nombreMetodo}.`;
+
+            generarCalendario(fechaObjetivo);
+        }
+
+        selectorEquipo.addEventListener('change', actualizarCalendario);
+        inputTonsDia.addEventListener('input', actualizarCalendario);
+        selectorMetodo.addEventListener('change', actualizarCalendario);
+
+        // Mostrar los tres meses desde el inicio
+        generarCalendario(null);
+        actualizarCalendario();
+
+
+    </script>
+
+
+</body>
+
+</html>

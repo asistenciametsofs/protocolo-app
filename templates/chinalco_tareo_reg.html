@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de tareas</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>---</h1>
+            <p id="folio-header">HB-...</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+    <div class="container" style="max-width: 1000px;">
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="flash">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="card">
+            <h2>Registro de tareas realizadas</h2>
+            <table id="tablaReportes" class="display">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Equipo</th>
+                        <th>Descripción</th>
+                        <th>Supervisor</th>
+                        <th>Ejecutores</th>
+                        <th>Tipo</th>
+                        <th>Estatus</th>
+                        <th>HH</th>
+                        <th>Condición Final</th>
+
+                    </tr>
+
+                    <!-- FILTROS -->
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Equipo</th>
+                        <th>Descripción</th>
+                        <th>Supervisor</th>
+                        <th>Ejecutores</th>
+                        <th>Tipo</th>
+                        <th>Estatus</th>
+                        <th>HH</th>
+                        <th>Condición Final</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for r in registros %}
+
+                    <tr>
+
+                        <td>{{ r[0] }}</td>
+
+                        <td>{{ r[1] }}</td>
+
+                        <td>{{ r[2] }}</td>
+
+                        <td>{{ r[3] }}</td>
+
+                        <td>{{ r[4] }}</td>
+
+                        <td>
+                            {% if r[5] %}
+                            {{ r[5]|join(', ') }}
+                            {% endif %}
+                        </td>
+
+                        <td>{{ r[6] }}</td>
+
+                        <td>{{ r[7] }}</td>
+
+                        <td>{{ r[8] }}</td>
+
+                        <td>{{ r[9] }}</td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const registros = {{ registros | tojson }};
+        window.registros = registros;
+
+        $(document).ready(function () {
+
+            $('#tablaReportes thead tr:eq(1) th').each(function () {
+
+                var title = $(this).text();
+
+                $(this).html(
+                    '<input type="text" placeholder="Filtrar" style="width:100%">'
+                );
+
+            });
+
+            var table = $('#tablaReportes').DataTable({
+
+                pageLength: 25,
+                order: [[1, 'desc']],
+
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json'
+                }
+
+            });
+
+            table.columns().every(function (index) {
+
+                $('input', table.column(index).header().parentNode.nextElementSibling.children[index])
+
+                    .on('keyup change clear', () => {
+
+                        if (table.column(index).search() !== this.value) {
+
+                            table.column(index)
+                                .search(this.value)
+                                .draw();
+                        }
+
+                    });
+
+            });
+
+        });
+
+    </script>
+</body>
+
+</html>
