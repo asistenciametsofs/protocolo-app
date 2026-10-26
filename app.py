@@ -635,7 +635,7 @@ def chinalco_tareo_reg():
         registros=registros
     )
 
-@app.route('/chinalco_reporte/<int:id>')
+@app.route('/chinalco_reporte/<int:id>', methods=['GET'])
 def chinalco_reporte(id):
     import psycopg2
     import os
@@ -654,8 +654,7 @@ def chinalco_reporte(id):
     conn.close()
 
     return render_template(
-        'chinalco_reporte.html',
-        registro=registro
+        'chinalco_reporte.html'
     )
 
 @app.route('/chinalco_checklist')
