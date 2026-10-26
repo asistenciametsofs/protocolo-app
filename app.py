@@ -635,6 +635,29 @@ def chinalco_tareo_reg():
         registros=registros
     )
 
+@app.route('/chinalco_reporte/<int:id>')
+def chinalco_reporte_detalle(id):
+    import psycopg2
+    import os
+    
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT *
+        FROM chinalco_reporte_mantenimiento
+        WHERE id = %s
+    """, (id,))
+
+    registro = c.fetchone()
+
+    conn.close()
+
+    return render_template(
+        'chinalco_reporte.html',
+        registro=registro
+    )
+
 @app.route('/chinalco_checklist')
 def Chinalco_checklist():
     return render_template('chinalco_checklist.html')

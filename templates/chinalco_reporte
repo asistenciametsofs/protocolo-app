@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro {{ registro[0] }}</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>---</h1>
+            <p id="folio-header">Registro {{ registro[0] }}</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+    <div class="container">
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="flash">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="card">
+            <h2>Reporte #{{ registro[0] }}</h2>
+
+            <hr>
+
+            <p><b>Fecha:</b> {{ registro[1] }}</p>
+
+            <p><b>Equipo:</b> {{ registro[2] }}</p>
+
+            <p><b>Descripción:</b></p>
+            <p>{{ registro[3] }}</p>
+
+            <p><b>Procedimiento detallado:</b></p>
+            <p>{{ registro[4] }}</p>
+
+            <p><b>Recursos utilizados:</b></p>
+            <p>{{ registro[5] }}</p>
+
+            <hr>
+
+            <p><b>Hora inicio:</b> {{ registro[6] }}</p>
+
+            <p><b>Hora fin:</b> {{ registro[7] }}</p>
+
+            <p><b>Horas trabajadas:</b> {{ registro[8] }}</p>
+
+            <hr>
+
+            <p><b>Estado del equipo:</b> {{ registro[9] }}</p>
+
+            <p><b>Inicio parada:</b> {{ registro[10] }}</p>
+
+            <p><b>Fin parada:</b> {{ registro[11] }}</p>
+
+            <p><b>Horas parada:</b> {{ registro[12] }}</p>
+
+            <hr>
+
+            <p><b>N° Personas:</b> {{ registro[13] }}</p>
+
+            <p><b>HH:</b> {{ registro[14] }}</p>
+
+            <p><b>Supervisor:</b> {{ registro[15] }}</p>
+
+            <hr>
+
+            <p><b>Personal ejecutor:</b></p>
+
+            <ul>
+
+                {% for persona in registro[16] %}
+
+                <li>{{ persona }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+            <hr>
+
+            <p><b>Tipo de mantenimiento:</b> {{ registro[17] }}</p>
+
+            <p><b>Estatus:</b> {{ registro[18] }}</p>
+
+            <p><b>Avance:</b> {{ registro[19] }} %</p>
+
+            <p><b>Condición final:</b> {{ registro[20] }}</p>
+
+            <hr>
+
+            <p><b>Fecha registro:</b> {{ registro[21] }}</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -20,7 +20,7 @@
         </div>
         <div class="metso-logo">Metso</div>
     </div>
-    <div class="container" style="max-width: 1000px;">
+    <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
         {% with messages = get_flashed_messages() %}
@@ -35,9 +35,7 @@
             <table id="tablaReportes" class="display">
 
                 <thead>
-
                     <tr>
-
                         <th>ID</th>
                         <th>Fecha</th>
                         <th>Equipo</th>
@@ -48,13 +46,10 @@
                         <th>Estatus</th>
                         <th>HH</th>
                         <th>Condición Final</th>
-
+                        <th>Acciones</th>
                     </tr>
-
                     <!-- FILTROS -->
-
                     <tr>
-
                         <th>ID</th>
                         <th>Fecha</th>
                         <th>Equipo</th>
@@ -65,45 +60,31 @@
                         <th>Estatus</th>
                         <th>HH</th>
                         <th>Condición Final</th>
-
                     </tr>
-
                 </thead>
 
                 <tbody>
-
                     {% for r in registros %}
-
                     <tr>
-
                         <td>{{ r[0] }}</td>
-
                         <td>{{ r[1] }}</td>
-
                         <td>{{ r[2] }}</td>
-
                         <td>{{ r[3] }}</td>
-
                         <td>{{ r[4] }}</td>
-
                         <td>
                             {% if r[5] %}
                             {{ r[5]|join(', ') }}
                             {% endif %}
                         </td>
-
                         <td>{{ r[6] }}</td>
-
                         <td>{{ r[7] }}</td>
-
                         <td>{{ r[8] }}</td>
-
                         <td>{{ r[9] }}</td>
-
+                        <td>
+                            <a href="/chinalco_reporte/{{ r[0] }}" class="btn btn-primary">ver</a>
+                        </td>
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
 
             </table>
