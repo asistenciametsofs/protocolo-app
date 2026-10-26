@@ -643,18 +643,19 @@ def chinalco_reporte(id):
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
 
-    # c.execute("""
-    #     SELECT *
-    #     FROM chinalco_tareo
-    #     WHERE id = %s
-    # """, (id,))
+    c.execute("""
+        SELECT *
+        FROM chinalco_tareo
+        WHERE id = %s
+    """, (id,))
 
-    # registro = c.fetchone()
+    registro = c.fetchone()
 
-    # conn.close()
+    conn.close()
 
     return render_template(
-        'chinalco_reporte.html'
+        'chinalco_reporte.html',
+        registro=registro
     )
 
 @app.route('/chinalco_checklist')
