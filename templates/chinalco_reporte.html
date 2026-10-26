@@ -30,77 +30,153 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <div class="card">
-            <h2>Reporte #{{ registro[0] }}</h2>
+        <div class="ficha-reporte">
 
-            <hr>
+            <div class="ficha-header">
 
-            <p><b>Fecha:</b> {{ registro[1] }}</p>
+                <h1>Reporte Diario de Mantenimiento</h1>
 
-            <p><b>Equipo:</b> {{ registro[2] }}</p>
+                <p>
+                    ID #{{ registro[0] }}
+                </p>
 
-            <p><b>Descripción:</b></p>
-            <p>{{ registro[3] }}</p>
+            </div>
 
-            <p><b>Procedimiento detallado:</b></p>
-            <p>{{ registro[4] }}</p>
+            <div class="ficha-kpis">
 
-            <p><b>Recursos utilizados:</b></p>
-            <p>{{ registro[5] }}</p>
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">Equipo</div>
+                    <div class="ficha-kpi-value">{{ registro[2] }}</div>
+                </div>
 
-            <hr>
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">HH</div>
+                    <div class="ficha-kpi-value">{{ registro[14] }}</div>
+                </div>
 
-            <p><b>Hora inicio:</b> {{ registro[6] }}</p>
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">Horas Trabajo</div>
+                    <div class="ficha-kpi-value">{{ registro[8] }}</div>
+                </div>
 
-            <p><b>Hora fin:</b> {{ registro[7] }}</p>
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">Avance</div>
+                    <div class="ficha-kpi-value">
+                        {{ registro[19] }}%
+                    </div>
+                </div>
 
-            <p><b>Horas trabajadas:</b> {{ registro[8] }}</p>
+            </div>
 
-            <hr>
+            <div class="ficha-grid">
 
-            <p><b>Estado del equipo:</b> {{ registro[9] }}</p>
+                <div class="ficha-campo">
+                    <div class="ficha-label">Fecha</div>
+                    <div class="ficha-valor">{{ registro[1] }}</div>
+                </div>
 
-            <p><b>Inicio parada:</b> {{ registro[10] }}</p>
+                <div class="ficha-campo">
+                    <div class="ficha-label">Supervisor</div>
+                    <div class="ficha-valor">{{ registro[15] }}</div>
+                </div>
 
-            <p><b>Fin parada:</b> {{ registro[11] }}</p>
+                <div class="ficha-campo">
+                    <div class="ficha-label">Inicio</div>
+                    <div class="ficha-valor">{{ registro[6] }}</div>
+                </div>
 
-            <p><b>Horas parada:</b> {{ registro[12] }}</p>
+                <div class="ficha-campo">
+                    <div class="ficha-label">Fin</div>
+                    <div class="ficha-valor">{{ registro[7] }}</div>
+                </div>
 
-            <hr>
+            </div>
 
-            <p><b>N° Personas:</b> {{ registro[13] }}</p>
+            <div class="ficha-bloque">
 
-            <p><b>HH:</b> {{ registro[14] }}</p>
+                <h3>Descripción de la actividad</h3>
 
-            <p><b>Supervisor:</b> {{ registro[15] }}</p>
+                <div class="ficha-texto">
+                    {{ registro[3] }}
+                </div>
 
-            <hr>
+            </div>
 
-            <p><b>Personal ejecutor:</b></p>
+            <div class="ficha-bloque">
 
-            <ul>
+                <h3>Procedimiento detallado</h3>
 
-                {% for persona in registro[16] %}
+                <div class="ficha-texto">
+                    {{ registro[4] }}
+                </div>
 
-                <li>{{ persona }}</li>
+            </div>
 
-                {% endfor %}
+            <div class="ficha-bloque">
 
-            </ul>
+                <h3>Recursos utilizados</h3>
 
-            <hr>
+                <div class="ficha-texto">
+                    {{ registro[5] }}
+                </div>
 
-            <p><b>Tipo de mantenimiento:</b> {{ registro[17] }}</p>
+            </div>
 
-            <p><b>Estatus:</b> {{ registro[18] }}</p>
+            <div class="ficha-bloque">
 
-            <p><b>Avance:</b> {{ registro[19] }} %</p>
+                <h3>Personal ejecutor</h3>
 
-            <p><b>Condición final:</b> {{ registro[20] }}</p>
+                <div class="personal-grid">
 
-            <hr>
+                    {% for persona in registro[16] %}
 
-            <p><b>Fecha registro:</b> {{ registro[21] }}</p>
+                    <div class="persona-card">
+                        {{ persona }}
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Estado del trabajo</h3>
+
+                <p>
+                    <strong>Estatus:</strong>
+
+                    {% if registro[18] == 'Finalizado' %}
+                    <span class="estado-badge estado-finalizado">
+                        {{ registro[18] }}
+                    </span>
+                    {% else %}
+                    <span class="estado-badge estado-proceso">
+                        {{ registro[18] }}
+                    </span>
+                    {% endif %}
+
+                </p>
+
+                <br>
+
+                <p>
+                    <strong>Condición final:</strong>
+
+                    <span class="estado-badge
+            {% if 'operativo' in registro[20]|lower %}
+                condicion-ok
+            {% else %}
+                condicion-no
+            {% endif %}
+            ">
+                        {{ registro[20] }}
+                    </span>
+                </p>
+
+            </div>
+
         </div>
     </div>
 
