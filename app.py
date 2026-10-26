@@ -636,7 +636,7 @@ def chinalco_tareo_reg():
     )
 
 @app.route('/chinalco_reporte/<int:id>')
-def chinalco_reporte_detalle(id):
+def chinalco_reporte(id):
     import psycopg2
     import os
     
@@ -645,7 +645,7 @@ def chinalco_reporte_detalle(id):
 
     c.execute("""
         SELECT *
-        FROM chinalco_reporte_mantenimiento
+        FROM chinalco_tareo
         WHERE id = %s
     """, (id,))
 
