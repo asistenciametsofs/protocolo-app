@@ -606,10 +606,13 @@ def chinalco_tareo_guardar():
 def chinalco_tareo_reg():
     import psycopg2
     import os
+    import json
+    from datetime import date, timedelta
 
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
 
+    # Registros para tabla
     c.execute("""
         SELECT
             id,
@@ -628,11 +631,71 @@ def chinalco_tareo_reg():
 
     registros = c.fetchall()
 
+    # Para Graf #1
+    c.execute("""
+        SELECT
+            TO_CHAR(fecha, 'YYYY-MM') as mes,
+            COUNT(*) as total
+        FROM chinalco_reporte_mantenimiento
+        GROUP BY 1
+        ORDER BY 1
+    """)
+
+    ots_mes = c.fetchall()
+
+    meses = [r[0] for r in ots_mes]
+    totales_mes = [r[1] for r in ots_mes]
+
+    # Para Graf #2 
+    c.execute("""
+        SELECT
+            fecha,
+            COUNT(*) as total
+        FROM chinalco_reporte_mantenimiento
+        WHERE fecha >= CURRENT_DATE - INTERVAL '30 days'
+        GROUP BY fecha
+        ORDER BY fecha
+    """)
+
+    ots_dia = c.fetchall()
+
+    #Calc
+    inicio = date.today() - timedelta(days=30)
+    fin = date.today()
+
+    dic_ots = {
+        r[0]: r[1]
+        for r in ots_dia
+    }
+
+    dias = []
+    totales_dia = []
+
+    actual = inicio
+
+    while actual <= fin:
+
+        dias.append(actual.strftime('%d-%m'))
+
+        totales_dia.append(
+            dic_ots.get(actual, 0)
+        )
+
+        actual += timedelta(days=1)
+
     conn.close()
 
     return render_template(
         'chinalco_tareo_reg.html',
-        registros=registros
+        registros=registros,
+
+        meses=json.dumps(meses),
+        totales_mes=json.dumps(totales_mes),
+
+        dias=json.dumps(dias),
+        totales_dia=json.dumps(totales_dia),
+
+        hoy=date.today().strftime('%d-%m')
     )
 
 @app.route('/chinalco_reporte/<int:id>', methods=['GET'])
@@ -699,7 +762,6 @@ def guardar_chinalco_checklist():
     guardar_DB(datos, tabla)
     flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
-
 
 @app.route('/chinalco_head_assembly')
 def chinalco_head_assembly():
