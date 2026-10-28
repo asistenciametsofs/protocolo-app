@@ -15,7 +15,7 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <a href="/chinalco_tareo_reg" class="btn-back">← Volver al inicio</a>
+            <a href="/chinalco_tareo_reg" class="btn-white">← Volver al inicio</a>
             <p id="folio-header">Registro {{ registro[0] }}</p>
         </div>
         <div class="metso-logo">Metso</div>
@@ -34,11 +34,11 @@
         <div class="ficha-reporte">
             <div class="grid2">
                 <a href="{% if registro[0] > 1 %}/chinalco_reporte/{{ registro[0] - 1 }}{% else %}#{% endif %}"
-                    class="card btn-white {% if registro[0] == 1 %}disabled{% endif %}">
+                    class="card btn-black {% if registro[0] == 1 %}disabled{% endif %}">
                     ← Anterior
                 </a>
 
-                <a href="/chinalco_reporte/{{ registro[0] + 1 }}" class="card btn-white">
+                <a href="/chinalco_reporte/{{ registro[0] + 1 }}" class="card btn-black">
                     Siguiente →
                 </a>
             </div>
