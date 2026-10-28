@@ -38,7 +38,7 @@
             </div>
 
         </div>
-        
+
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -157,7 +157,7 @@
 
     </script>
     <script>
-        window.data = {{ totales_mes| safe }};
+        window.data = {{ totales_mes | safe }};
         var chartMes = echarts.init(
             document.getElementById('graficoMes')
         );
@@ -172,16 +172,16 @@
                 data: {{ meses| safe }}
             },
 
-            yAxis: {
-                type: 'value'
-            },
+        yAxis: {
+            type: 'value'
+        },
 
-            series: [{
-                type: 'bar',
-                data: {{ totales_mes| safe }},
-                itemStyle: {
-                color: '#1a3a5c'
-            }
+        series: [{
+            type: 'bar',
+            data: {{ totales_mes| safe }},
+            itemStyle: {
+            color: '#1a3a5c'
+        }
             }]
         };
 
@@ -194,7 +194,7 @@
         const valores = {{ totales_dia| safe }};
         const hoy = "{{ hoy }}";
 
-        window.dias = dias; 
+        window.dias = dias;
 
         const datos = dias.map((dia, i) => {
 
@@ -241,9 +241,38 @@
 
                 type: 'bar',
 
-                data: datos
+                data: datos,
+                markLine = {
+                    silent: true,
+                    symbol: ["none", "none"],
+                    lineStyle: {
+                        color: "#e67e22",
+                        width: 2,
+                        type: "dashed"
+                    },
+                    label: {
+                        show: true,
+                        formatter: "Hoy",
+                        position: "insideEndTop"
+                    },
+                    data: [{ xAxis: hoy }]
+                }
 
-            }]
+            }],
+            dataZoom: [
+                {
+                    type: "inside",
+                    xAxisIndex: 0,
+                    filterMode: "filter"
+                },
+                {
+                    type: "slider",
+                    xAxisIndex: 0,
+                    filterMode: "filter",
+                    bottom: 35,
+                    height: 20
+                }
+            ],
         };
 
         chartDia.setOption(optionDia);
