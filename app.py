@@ -636,7 +636,7 @@ def chinalco_tareo_reg():
         SELECT
             TO_CHAR(fecha, 'YYYY-MM') as mes,
             COUNT(*) as total
-        FROM chinalco_reporte_mantenimiento
+        FROM chinalco_tareo
         GROUP BY 1
         ORDER BY 1
     """)
@@ -651,7 +651,7 @@ def chinalco_tareo_reg():
         SELECT
             fecha,
             COUNT(*) as total
-        FROM chinalco_reporte_mantenimiento
+        FROM chinalco_tareo
         WHERE fecha >= CURRENT_DATE - INTERVAL '30 days'
         GROUP BY fecha
         ORDER BY fecha
