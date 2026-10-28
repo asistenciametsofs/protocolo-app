@@ -20,21 +20,23 @@
         </div>
         <div class="metso-logo">Metso</div>
     </div>
-    <div class="containergrf">
 
-        <div class="cardgrf">
-            <h3>OTs por mes</h3>
-            <div id="graficoMes" class="chart"></div>
-        </div>
-
-        <div class="cardgrf">
-            <h3>OTs últimos 30 días</h3>
-            <div id="graficoDia" class="chart"></div>
-        </div>
-
-    </div>
 
     <div class="container">
+
+        <div class="containergrf">
+
+            <div class="cardgrf">
+                <h3>OTs por mes</h3>
+                <div id="graficoMes" class="chart"></div>
+            </div>
+
+            <div class="cardgrf">
+                <h3>OTs últimos 30 días</h3>
+                <div id="graficoDia" class="chart"></div>
+            </div>
+
+        </div>
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
 
         {% with messages = get_flashed_messages() %}
@@ -153,93 +155,96 @@
 
     </script>
     <script>
-    var chartMes = echarts.init(
-        document.getElementById('graficoMes')
-    );
-    var optionMes = {
+        window.data = {{ totales_mes| safe }};
+        var chartMes = echarts.init(
+            document.getElementById('graficoMes')
+        );
+        var optionMes = {
 
-        tooltip: {
-            trigger: 'axis'
-        },
+            tooltip: {
+                trigger: 'axis'
+            },
 
-        xAxis: {
-            type: 'category',
-            data: {{ meses|safe }}
-        },
+            xAxis: {
+                type: 'category',
+                data: {{ meses| safe }}
+            },
 
-        yAxis: {
-            type: 'value'
-        },
+            yAxis: {
+                type: 'value'
+            },
 
-        series: [{
-            type: 'bar',
-            data: {{ totales_mes|safe }},
-            itemStyle: {
+            series: [{
+                type: 'bar',
+                data: {{ totales_mes| safe }},
+                itemStyle: {
                 color: '#1a3a5c'
             }
-        }]
-    };
+            }]
+        };
 
-    chartMes.setOption(optionMes);
+        chartMes.setOption(optionMes);
 
     </script>
     <script>
 
-    const dias = {{ dias|safe }};
-    const valores = {{ totales_dia|safe }};
-    const hoy = "{{ hoy }}";
+        const dias = {{ dias| safe }};
+        const valores = {{ totales_dia| safe }};
+        const hoy = "{{ hoy }}";
 
-    const datos = dias.map((dia, i) => {
+        window.dias = dias; 
 
-        return {
+        const datos = dias.map((dia, i) => {
 
-            value: valores[i],
+            return {
 
-            itemStyle: {
-                color: dia === hoy
-                    ? '#dc3545'
-                    : '#1a3a5c'
-            }
+                value: valores[i],
 
+                itemStyle: {
+                    color: dia === hoy
+                        ? '#dc3545'
+                        : '#1a3a5c'
+                }
+
+            };
+
+        });
+
+        var chartDia = echarts.init(
+            document.getElementById('graficoDia')
+        );
+
+        var optionDia = {
+
+            tooltip: {
+                trigger: 'axis'
+            },
+
+            xAxis: {
+
+                type: 'category',
+
+                data: dias,
+
+                axisLabel: {
+                    rotate: 45
+                }
+            },
+
+            yAxis: {
+                type: 'value'
+            },
+
+            series: [{
+
+                type: 'bar',
+
+                data: datos
+
+            }]
         };
 
-    });
-
-    var chartDia = echarts.init(
-        document.getElementById('graficoDia')
-    );
-
-    var optionDia = {
-
-        tooltip: {
-            trigger: 'axis'
-        },
-
-        xAxis: {
-
-            type: 'category',
-
-            data: dias,
-
-            axisLabel: {
-                rotate: 45
-            }
-        },
-
-        yAxis: {
-            type: 'value'
-        },
-
-        series: [{
-
-            type: 'bar',
-
-            data: datos
-
-        }]
-    };
-
-    chartDia.setOption(optionDia);
+        chartDia.setOption(optionDia);
 
     </script>
 
