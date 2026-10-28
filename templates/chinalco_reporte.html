@@ -15,13 +15,13 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <h1>---</h1>
+            <a href="/chinalco_tareo_reg" class="btn-back">← Volver al inicio</a>
             <p id="folio-header">Registro {{ registro[0] }}</p>
         </div>
         <div class="metso-logo">Metso</div>
     </div>
     <div class="container">
-        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -30,7 +30,18 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+
         <div class="ficha-reporte">
+            <div class="grid2">
+                <a href="{% if registro[0] > 1 %}/chinalco_reporte/{{ registro[0] - 1 }}{% else %}#{% endif %}"
+                    class="card btn-white {% if registro[0] == 1 %}disabled{% endif %}">
+                    ← Anterior
+                </a>
+
+                <a href="/chinalco_reporte/{{ registro[0] + 1 }}" class="card btn-white">
+                    Siguiente →
+                </a>
+            </div>
 
             <div class="ficha-header">
 

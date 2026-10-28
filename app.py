@@ -623,7 +623,7 @@ def chinalco_tareo_reg():
             horas_hombre,
             condicion_final
         FROM chinalco_tareo
-        ORDER BY fecha DESC;
+        ORDER BY id DESC;
     """)
 
     registros = c.fetchall()
