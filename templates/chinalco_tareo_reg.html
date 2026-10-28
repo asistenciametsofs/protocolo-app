@@ -193,6 +193,7 @@
         const dias = {{ dias| safe }};
         const valores = {{ totales_dia| safe }};
         const hoy = "{{ hoy }}";
+        console.log(hoy);
 
         window.dias = dias;
 
@@ -223,11 +224,8 @@
             },
 
             xAxis: {
-
                 type: 'category',
-
                 data: dias,
-
                 axisLabel: {
                     rotate: 45
                 }
@@ -238,43 +236,39 @@
             },
 
             series: [{
-
                 type: 'bar',
-
                 data: datos,
-                markLine = {
+
+                markLine: {
                     silent: true,
-                    symbol: ["none", "none"],
+                    symbol: ['none', 'none'],
                     lineStyle: {
-                        color: "#e67e22",
+                        color: '#e67e22',
                         width: 2,
-                        type: "dashed"
+                        type: 'dashed'
                     },
                     label: {
                         show: true,
-                        formatter: "Hoy",
-                        position: "insideEndTop"
+                        formatter: 'Hoy'
                     },
-                    data: [{ xAxis: hoy }]
+                    data: [
+                        { xAxis: hoy }
+                    ]
                 }
-
             }],
+
             dataZoom: [
                 {
-                    type: "inside",
-                    xAxisIndex: 0,
-                    filterMode: "filter"
+                    type: 'inside'
                 },
                 {
-                    type: "slider",
-                    xAxisIndex: 0,
-                    filterMode: "filter",
+                    type: 'slider',
                     bottom: 35,
                     height: 20
                 }
-            ],
-        };
+            ]
 
+        };
         chartDia.setOption(optionDia);
 
     </script>
