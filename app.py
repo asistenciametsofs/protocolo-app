@@ -452,7 +452,6 @@ def guardar_chinalco_faja():
 
 @app.route('/chinalco_tareo', methods=['GET'])
 def chinalco_tareo():
-
     import os
     import psycopg2
 
@@ -624,7 +623,8 @@ def chinalco_tareo_reg():
             tipo_mantenimiento,
             estatus,
             horas_hombre,
-            condicion_final
+            condicion_final,
+            cmms
         FROM chinalco_tareo
         ORDER BY id DESC;
     """)
@@ -697,6 +697,25 @@ def chinalco_tareo_reg():
 
         hoy=date.today().strftime('%d-%m')
     )
+
+@app.route('/chinalco_reporte/cerrar/<int:id>', methods=['POST'])
+def chinalco_reporte_cerrar(id):
+    import psycopg2
+    import os
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        UPDATE chinalco_tareo
+        SET cmms = TRUE
+        WHERE id = %s
+          AND cmms = FALSE
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/chinalco_reporte/lista')
 
 @app.route('/chinalco_reporte/<int:id>', methods=['GET'])
 def chinalco_reporte(id):

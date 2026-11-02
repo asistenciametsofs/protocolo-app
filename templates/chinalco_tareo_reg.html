@@ -64,6 +64,7 @@
                         <th>HH</th>
                         <th>Condición Final</th>
                         <th>Acciones</th>
+                        <th>CMMS?</th>
                     </tr>
                     <!-- FILTROS -->
                     <tr>
@@ -99,6 +100,16 @@
                         <td>{{ r[9] }}</td>
                         <td>
                             <a href="/chinalco_reporte/{{ r[0] }}" class="btn btn-primary">ver</a>
+                        </td>
+                        <td>
+                            {% if r[10] %}                            
+                            <input type="checkbox" disabled="" true="" checked="">
+                            {% else %}
+                            <form method="POST" action="/chinalco_reporte/cerrar/{{ r[0] }}"
+                                onsubmit="return confirm('Una vez cerrado no podrá reabrirse. ¿Continuar?');">
+                                <input type="checkbox" onchange="this.form.submit()">
+                            </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -193,8 +204,8 @@
         const dias = {{ dias| safe }};
         const valores = {{ totales_dia| safe }};
         const hoy = "{{ hoy }}";
-        console.log(hoy);
 
+        window.valores = valores;
         window.dias = dias;
 
         const datos = dias.map((dia, i) => {
