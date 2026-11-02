@@ -715,7 +715,7 @@ def chinalco_reporte_cerrar(id):
     conn.commit()
     conn.close()
 
-    return redirect('/chinalco_reporte/lista')
+    return redirect('/chinalco_tareo_reg')
 
 @app.route('/chinalco_reporte/<int:id>', methods=['GET'])
 def chinalco_reporte(id):
