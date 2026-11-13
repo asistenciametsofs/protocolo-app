@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desgaste de Chancadora</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .grid3 {
+            border-bottom: 2px solid #fae8fe;
+            padding: 10px 0;
+        }
+
+        .page-title {
+            margin-bottom: 16px;
+        }
+
+        .form-etapa {
+            margin-bottom: 28px;
+        }
+
+        .etapa-cabecera {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .etapa-numero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1a3a5c;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .ayuda {
+            display: block;
+            margin-top: 6px;
+            color: #666;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .alerta-tecnica {
+            margin: 10px 0;
+            padding: 10px 12px;
+            border-left: 4px solid #fd7e14;
+            background: #fff3e8;
+            border-radius: 0 7px 7px 0;
+            font-size: 13px;
+        }
+
+        .imagen-referencia {
+            width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            background: #f5f7fa;
+            border: 1px dashed #9aa8b7;
+            border-radius: 8px;
+            margin: 8px 0 12px;
+            cursor: zoom-in;
+        }
+
+        .componente {
+            background: #f0f2f5;
+            border: 1px solid #e3e7ec;
+            border-radius: 10px;
+            padding: 14px;
+            min-width: 0;
+        }
+
+        .componente h3 {
+            color: #1a3a5c;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .tabla-scroll {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .tabla-mediciones {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .tabla-mediciones th {
+            background: #1a3a5c;
+            color: white;
+            padding: 8px;
+            border: 1px solid #d6dce2;
+            text-align: center;
+        }
+
+        .tabla-mediciones td {
+            padding: 5px;
+            border: 1px solid #d6dce2;
+            text-align: center;
+        }
+
+        .tabla-mediciones input {
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .selector-etapa {
+            background: #e8f0fe;
+            border: 1px solid #bfd0e8;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+
+        .selector-etapa label {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0;
+            color: #1a3a5c;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .selector-etapa input {
+            width: 20px;
+            height: 20px;
+        }
+
+        .seccion-opcional {
+            display: none;
+        }
+
+        .seccion-opcional.activo {
+            display: block;
+        }
+
+        .acciones-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .acciones-form .btn-submit {
+            flex: 1 1 240px;
+        }
+
+        .btn-limpiar {
+            flex: 0 1 180px;
+            padding: 16px;
+            border: 0;
+            border-radius: 10px;
+            background: #e8f0fe;
+            color: #1a3a5c;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .modal-imagen {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            inset: 0;
+            background: rgba(0, 0, 0, .86);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-imagen.activo {
+            display: flex;
+        }
+
+        .imagen-grande {
+            max-width: 95%;
+            max-height: 92%;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .cerrar-modal {
+            position: absolute;
+            top: 12px;
+            right: 22px;
+            color: #fff;
+            border: 0;
+            background: transparent;
+            font-size: 40px;
+            cursor: pointer;
+        }
+
+        .estado-visual {
+            margin-top: 7px;
+            min-height: 18px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .fuera-limite {
+            color: #c62828;
+        }
+
+        .dentro-limite {
+            color: #1b7f37;
+        }
+
+        @media (max-width:800px) {
+
+            .grid2,
+            .grid3,
+            .grid4 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>Desgaste de Chancadora</h1>
+            <p id="folio-header">HB-...</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+    {% if mensajes %}
+
+    {% for categoria, mensaje in mensajes %}
+
+    <div class="
+                {% if categoria == 'success' %}
+                    banner-verde
+                {% else %}
+                    banner-amarillo
+                {% endif %}
+            ">
+        {{ mensaje }}
+    </div>
+
+    {% endfor %}
+
+    {% endif %}
+
+    {% endwith %}
+
+
+    <div class="container">
+        <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        <div class="seccion page-title">
+            <div class="seccion-titulo">Registro por etapas de desarme</div>
+            <p class="paso-desc">Cada bloque es un formulario independiente y se guarda en una tabla diferente. Completa
+                únicamente la etapa inspeccionada.</p>
+        </div>
+
+        <!-- FORMULARIO 1: OPERACION Y MONITOREO -->
+        <form class="form-etapa" action="chinalco_chancadora/1/guardar" method="POST" id="form-operacion">
+            <section class="seccion">
+                <div class="etapa-cabecera">
+                    <div class="seccion-titulo"><span class="etapa-numero">1</span> Medición de Altura</div>
+                    <span class="btn-chancadora activo">Tabla: chinalco_hp_operacion</span>
+                </div>
+
+                <div class="grid3">
+                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Equipo</label><select name="equipo" required>
+                            <option value="">Seleccione</option>
+                            <option value="BR-01">BR-01</option>
+                            <option value="BR-02">BR-02</option>
+                        </select></div>
+                    <div><label>Supervisor encargado</label>
+                        <select name="supervisor" placeholder="" required>
+                            <option value="" disabled selected hidden>Seleccionar Supervisor</option>
+                            <option>Edwin Díaz</option>
+                            <option>Celso Burgos</option>
+                            <option>Alex Arroni</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid2">
+                    <div>
+                        <label>Altura Bowl (mm)</label>
+                        <input type="number" step="0.001" min="0" name="altura_bowl">
+                        <label class="checkbox-group"><span><input type="checkbox" id="hubo-cambio-liners"
+                                    name="hubo_cambio_liners" value="true"> Hubo nuevo cambio de Head y
+                                Bowl</span></label>
+                        <div id="bloque-altura-nueva" class="condicional">
+                            <label>Nueva altura Bowl después del cambio (mm)</label>
+                            <input type="number" step="0.001" min="0" name="altura_bowl_nueva">
+                        </div>
+                    </div>
+                    <div><label>Total de toneladas acumuladas (tn)</label><input type="number" step="0.01" min="0"
+                            name="total_toneladas"></div>
+                </div>
+
+                <div class="acciones-form"><button class="btn-submit" type="submit">Guardar
+                        operación</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
+            </section>
+        </form>
+
+        <form class="form-etapa" action="chinalco_chancadora/2/guardar" method="POST" id="form-monitoreo">
+            <section class="seccion">
+                <div class="etapa-cabecera">
+                    <div class="seccion-titulo"><span class="etapa-numero">2</span> Operación y monitoreo</div>
+                    <span class="btn-chancadora activo">Tabla: chinalco_hp_operacion</span>
+                </div>
+
+
+                <div class="grid3">
+                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Equipo</label><select name="equipo" required>
+                            <option value="">Seleccione</option>
+                            <option value="BR-01">BR-01</option>
+                            <option value="BR-02">BR-02</option>
+                        </select></div>
+                    <div><label>Supervisor encargado</label>
+                        <select name="supervisor" placeholder="" required>
+                            <option value="" disabled selected hidden>Seleccionar Supervisor</option>
+                            <option>Edwin Díaz</option>
+                            <option>Celso Burgos</option>
+                            <option>Alex Arroni</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid2">
+                    <div><label style="margin-top: 40px;">Setting actual (mm)</label><input type="number" step="0.001"
+                            min="0" name="setting_actual">
+                        <label>Nivel de aceite de lubricación (%)</label><input type="number" step="0.1" min="0"
+                            max="100" name="nivel_aceite">
+                        <label>Temperatura de aceite de lubricación (°C)</label><input type="number" step="0.1"
+                            name="temperatura_aceite">
+                        <label>Presión de aceite de lubricación (bar)</label><input type="number" step="0.01" min="0"
+                            name="presion_aceite">
+                        <label>Corriente del motor (A)</label><input type="number" step="0.1" min="0"
+                            name="corriente_motor">
+                        <label>Potencia del motor (kW)</label><input type="number" step="0.1" min="0"
+                            name="potencia_motor">
+                    </div>
+
+
+                    <div class="componente" style="margin-top: 10px;">
+                        <h3>Alimentación</h3><img src="static/fotos_chinalco/BR_chancadora.png"
+                            alt="Referencia de distribución de alimentación en la chancadora"
+                            class="imagen-referencia ampliable" style="min-height: 150px;">
+                        <label>Alimentación</label><select name="alimentacion">
+                            <option value="" hidden selected>Seleccione</option>
+                            <option>Correcta</option>
+                            <option>Incorrecta</option>
+                        </select>
+                    </div>
+
+                    <div><label>Vibración NDE del motor (mm/s)</label><input type="number" step="0.01" min="0"
+                            name="vibracion_nde"></div>
+                    <div><label>Vibración DE del motor (mm/s)</label><input type="number" step="0.01" min="0"
+                            name="vibracion_de"></div>
+                </div>
+                <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+                <div class="acciones-form"><button class="btn-submit" type="submit">Guardar operación</button><button
+                        class="btn-limpiar" type="reset">Limpiar</button></div>
+            </section>
+        </form>
+
+        <!-- FORMULARIO 3: HEAD, BOWL Y BUJES -->
+        <form class="form-etapa" action="chinalco_chancadora/3/guardar" method="POST" id="form-head">
+            <section class="seccion">
+                <div class="etapa-cabecera">
+                    <div class="seccion-titulo"><span class="etapa-numero">3</span> Head, Bowl y bujes</div>
+                    <span class="btn-chancadora activo">Tabla: chinalco_hp_head</span>
+                </div>
+                <div class="grid3">
+                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Equipo</label><select name="equipo" required>
+                            <option value="">Seleccione</option>
+                            <option value="BR-01">BR-01</option>
+                            <option value="BR-02">BR-02</option>
+                        </select></div>
+                    <div><label>Supervisor encargado</label>
+                        <select name="supervisor" placeholder="" required>
+                            <option value="" disabled selected hidden>Seleccionar Supervisor</option>
+                            <option>Edwin Díaz</option>
+                            <option>Celso Burgos</option>
+                            <option>Alex Arroni</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid3">
+                    <div class="componente">
+                        <h3>Hilos del anillo de ajuste</h3><img src="static/fotos_chinalco/Hilos_anillo.png"
+                            alt="Anillo de ajuste" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="anillo_ajuste_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Main Frame Pin (pasador)</h3><img src="/static/fotos_chinalco/fulcrum_pas.png"
+                            alt="Main Frame Pin" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="main_frame_pin_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Fulcrum Bar</h3><img src="/static/fotos_chinalco/fulcrum_pas.png" alt="Fulcrum Liner"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="fulcrum_liner_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Seat Liner</h3><img src="/static/fotos_chinalco/seat_liner.png" alt="Seat Liner"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="seat_liner_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Bowl</h3><img src="/static/fotos_chinalco/bowl.png" alt="Bowl"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="bowl_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Manto Bowl</h3><img src="/static/fotos_chinalco/manto_bowl.png" alt="Manto Bowl"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="manto_bowl_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Head</h3><img src="/static/fotos_chinalco/head.png" alt="Head"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="head_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Manto Head</h3><img src="/static/fotos_chinalco/mantohead.png" alt="Manto Head"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="manto_head_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Feed Plate</h3><img src="/static/fotos_chinalco/feedplate.png" alt="Feed Plate"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="feed_plate_estado"
+                            class="estado-select"></select>
+                    </div>
+                </div>
+
+                <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+                <div class="acciones-form"><button class="btn-submit" type="submit">Guardar inspección
+                        Head</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
+            </section>
+        </form>
+
+        <!-- FORMULARIO 4: SOCKET, MAIN FRAME Y PROTECCIONES -->
+        <form class="form-etapa" action="chinalco_chancadora/4/guardar" method="POST" id="form-socket">
+            <section class="seccion">
+                <div class="etapa-cabecera">
+                    <div class="seccion-titulo"><span class="etapa-numero">4</span> Socket, Main Frame y protecciones
+                    </div>
+                    <span class="btn-chancadora activo">Tabla: chinalco_hp_socket</span>
+                </div>
+                <div class="grid3">
+                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Equipo</label><select name="equipo" required>
+                            <option value="">Seleccione</option>
+                            <option value="BR-01">BR-01</option>
+                            <option value="BR-02">BR-02</option>
+                        </select></div>
+                    <div><label>Supervisor encargado</label>
+                        <select name="supervisor" placeholder="" required>
+                            <option value="" disabled selected hidden>Seleccionar Supervisor</option>
+                            <option>Edwin Díaz</option>
+                            <option>Celso Burgos</option>
+                            <option>Alex Arroni</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid3">
+                    <div class="componente">
+                        <h3>Socket</h3><img src="/static/fotos_chinalco/socket.png" alt="Socket"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="socket_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Socket Liner</h3><img src="/static/fotos_chinalco/socketliner.png" alt="Socket Liner"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="socket_liner_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Guarda dinámica</h3><img src="/static/fotos_chinalco/guarda_contra.png"
+                            alt="Guarda dinámica" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="guarda_dinamica_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Main Frame Liners</h3><img src="/static/fotos_chinalco/main_frame.png"
+                            alt="Main Frame Liners" class="imagen-referencia ampliable"><label>Estado
+                            general</label><select name="main_frame_liners_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Excéntrica</h3><img src="/static/fotos_chinalco/excentrica.png" alt="Excéntrica"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="excentrica_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Monturas</h3><img src="/static/fotos_chinalco/montura.png" alt="Monturas"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="monturas_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Sello U</h3><img src="/static/fotos_chinalco/Sello_u.jpg" alt="Sello U"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="sello_u_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Sello T</h3><img src="/static/fotos_chinalco/Sello_t.jpg" alt="Sello T"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="sello_t_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Contrapeso</h3><img src="/static/fotos_chinalco/contrapeso.png" alt="Contrapeso"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="contrapeso_estado"
+                            class="estado-select"></select>
+                    </div>
+                </div>
+
+                <div class="selector-etapa"><label><input type="checkbox" id="medir-upper" name="registrar_upper"
+                            value="true"> Registrar tabla dimensional
+                        Upper Bushing</label></div>
+                <div id="seccion-upper" class="seccion-opcional">
+                    <div class="seccion-subtitulo">Upper Bushing, 3 puntos</div>
+                    <img src="/static/fotos_chinalco/chinalco_headassembly.png" alt="Referencia Upper Bushing"
+                        class="imagen-referencia ampliable">
+                    <div class="tabla-scroll">
+                        <table class="tabla-mediciones">
+                            <thead>
+                                <tr>
+                                    <th>Punto</th>
+                                    <th>A (mm)</th>
+                                    <th>B (mm)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="upper-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="selector-etapa"><label><input type="checkbox" id="medir-lower" name="registrar_lower"
+                            value="true"> Registrar tabla dimensional
+                        Lower Bushing</label></div>
+                <div id="seccion-lower" class="seccion-opcional">
+                    <div class="seccion-subtitulo">Lower Bushing, 8 puntos</div>
+                    <img src="/static/fotos_chinalco/chinalco_headassembly.png" alt="Referencia Lower Bushing"
+                        class="imagen-referencia ampliable">
+                    <div class="tabla-scroll">
+                        <table class="tabla-mediciones">
+                            <thead>
+                                <tr>
+                                    <th>Punto</th>
+                                    <th>A (mm)</th>
+                                    <th>B (mm)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lower-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="selector-etapa"><label><input type="checkbox" id="medir-ranuras" name="registrar_ranuras"
+                            value="true"> Registrar profundidad de
+                        ranuras del Socket Liner</label></div>
+                <div id="seccion-ranuras" class="seccion-opcional">
+                    <div class="alerta-tecnica">Profundidad mínima de referencia: <strong>2.5 mm</strong>. Los valores
+                        menores se resaltan automáticamente.</div>
+                    <img style="max-height: 460px;" src="/static/fotos_chinalco/prof.png"
+                        alt="Puntos de profundidad del Socket Liner" class="imagen-referencia ampliable">
+                    <div class="tabla-scroll">
+                        <table class="tabla-mediciones">
+                            <thead>
+                                <tr>
+                                    <th>Punto</th>
+                                    <th>A (mm)</th>
+                                    <th>B (mm)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranuras-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+                <div class="selector-etapa"><label><input type="checkbox" id="medir-asentamiento"
+                            name="registrar_asentamiento" value="true"> Registrar
+                        asentamiento del Socket</label></div>
+
+
+                <div id="seccion-asentamiento" class="seccion-opcional">
+
+                    <div class="alerta-tecnica">Referencia: 0° es el punto de medición paralelo al contraeje</div>
+                    <img style="max-height: 460px;" src="/static/fotos_chinalco/socket_asent.png"
+                        alt="Puntos de profundidad del Socket Liner" class="imagen-referencia ampliable">
+
+                    <div class="seccion-subtitulo">Diámetro interior</div>
+                    <div class="tabla-scroll">
+                        <table class="tabla-mediciones">
+                            <thead>
+                                <tr>
+                                    <th>0°</th>
+                                    <th>90°</th>
+                                    <th>180°</th>
+                                    <th>270°</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="number" step="0.001" name="asent_int_0"></td>
+                                    <td><input type="number" step="0.001" name="asent_int_90"></td>
+                                    <td><input type="number" step="0.001" name="asent_int_180"></td>
+                                    <td><input type="number" step="0.001" name="asent_int_270"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="seccion-subtitulo">Diámetro exterior</div>
+                    <div class="tabla-scroll">
+                        <table class="tabla-mediciones">
+                            <thead>
+                                <tr>
+                                    <th>0°</th>
+                                    <th>90°</th>
+                                    <th>180°</th>
+                                    <th>270°</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="number" step="0.001" name="asent_ext_0"></td>
+                                    <td><input type="number" step="0.001" name="asent_ext_90"></td>
+                                    <td><input type="number" step="0.001" name="asent_ext_180"></td>
+                                    <td><input type="number" step="0.001" name="asent_ext_270"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="selector-etapa"><label><input type="checkbox" id="medir-mainframe"
+                            name="registrar_mainframe" value="true"> Registrar desgaste de
+                        Main Frame Liners</label></div>
+                <div id="seccion-mainframe" class="seccion-opcional">
+                    <div class="alerta-tecnica">Desgaste máximo de referencia: <strong>3.0 mm</strong>.</div>
+                    <img style="max-height: 460px;" src="/static/fotos_chinalco/main_detalle.png"
+                        alt="Puntos de profundidad del Socket Liner" class="imagen-referencia ampliable">
+                    <div class="tabla-scroll">
+                        <table class="tabla-mediciones">
+                            <thead>
+                                <tr>
+                                    <th>A1</th>
+                                    <th>A2</th>
+                                    <th>B1</th>
+                                    <th>B2</th>
+                                    <th>C1</th>
+                                    <th>C2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input class="maximo-3" type="number" step="0.001" min="0" name="mainframe_a1"
+                                            placeholder="A1">
+                                        <div class="estado-visual"></div>
+                                    </td>
+                                    <td><input class="maximo-3" type="number" step="0.001" min="0" name="mainframe_a2"
+                                            placeholder="A2">
+                                        <div class="estado-visual"></div>
+                                    </td>
+                                    <td><input class="maximo-3" type="number" step="0.001" min="0" name="mainframe_b1"
+                                            placeholder="B1">
+                                        <div class="estado-visual"></div>
+                                    </td>
+                                    <td><input class="maximo-3" type="number" step="0.001" min="0" name="mainframe_b2"
+                                            placeholder="B2">
+                                        <div class="estado-visual"></div>
+                                    </td>
+                                    <td><input class="maximo-3" type="number" step="0.001" min="0" name="mainframe_c1"
+                                            placeholder="C1">
+                                        <div class="estado-visual"></div>
+                                    </td>
+                                    <td><input class="maximo-3" type="number" step="0.001" min="0" name="mainframe_c2"
+                                            placeholder="C2">
+                                        <div class="estado-visual"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+                <div class="acciones-form"><button class="btn-submit" type="submit">Guardar inspección
+                        Socket</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
+            </section>
+        </form>
+
+        <!-- FORMULARIO 5: EXCENTRICA Y TRANSMISION -->
+        <form class="form-etapa" action="chinalco_chancadora/5/guardar" method="POST" id="form-excentrica">
+            <section class="seccion">
+                <div class="etapa-cabecera">
+                    <div class="seccion-titulo"><span class="etapa-numero">5</span> Excéntrica y transmisión</div>
+                    <span class="btn-chancadora activo">Tabla: chinalco_hp_excentrica</span>
+                </div>
+                <div class="grid3">
+                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Equipo</label><select name="equipo" required>
+                            <option value="">Seleccione</option>
+                            <option value="BR-01">BR-01</option>
+                            <option value="BR-02">BR-02</option>
+                        </select></div>
+                    <div><label>Supervisor encargado</label>
+                        <select name="supervisor" placeholder="" required>
+                            <option value="" disabled selected hidden>Seleccionar Supervisor</option>
+                            <option>Edwin Díaz</option>
+                            <option>Celso Burgos</option>
+                            <option>Alex Arroni</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid3">
+                    <div class="componente">
+                        <h3>Eje central</h3><img src="/static/fotos_chinalco/eje.png" alt="Eje central"
+                            class="imagen-referencia ampliable"><label>Estado</label><select name="eje_central_estado"
+                            class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Eccentric Bushing</h3><img src="/static/fotos_chinalco/buje_excentrico.png"
+                            alt="Eccentric Bushing" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="eccentric_bushing_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Engranaje de corona</h3><img src="/static/fotos_chinalco/corona.png"
+                            alt="Engranaje de corona" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="engranaje_corona_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Piñón de contraeje</h3><img src="/static/fotos_chinalco/pinon.png" alt="Piñón de contraeje"
+                            class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="pinon_contraeje_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Lower Thrust Bearing</h3><img src="/static/fotos_chinalco/lowerbearing.png"
+                            alt="Lower Thrust Bearing" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="lower_thrust_bearing_estado" class="estado-select"></select>
+                    </div>
+                    <div class="componente">
+                        <h3>Upper Thrust Bearing</h3><img src="/static/fotos_chinalco/upper_thrust.png"
+                            alt="Upper Thrust Bearing" class="imagen-referencia ampliable"><label>Estado</label><select
+                            name="upper_thrust_bearing_estado" class="estado-select"></select>
+                    </div>
+                </div>
+                <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+                <div class="acciones-form"><button class="btn-submit" type="submit">Guardar inspección
+                        Excéntrica</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
+            </section>
+        </form>
+
+
+        <div id="modal-imagen" class="modal-imagen" role="dialog" aria-modal="true"
+            aria-label="Vista ampliada de imagen">
+            <button type="button" class="cerrar-modal" aria-label="Cerrar">&times;</button>
+            <img id="imagen-grande" class="imagen-grande" alt="Imagen ampliada">
+        </div>
+
+        <script>
+            (() => {
+                'use strict';
+
+                const estados = ['', 'Buen estado', 'Algo desgastado', 'Bastante desgastado', 'Deplorable'];
+
+                document.querySelectorAll('.estado-select').forEach(select => {
+                    estados.forEach(texto => {
+                        const option = document.createElement('option');
+                        option.value = texto;
+                        option.textContent = texto || 'Seleccione';
+
+                        select.appendChild(option);
+                    });
+                    select.addEventListener('change', () => {
+                        select.classList.remove('estado-bueno', 'estado-malo');
+                        if (select.value === 'Buen estado') select.classList.add('estado-bueno');
+                        if (select.value === 'Bastante desgastado' || select.value === 'Deplorable') select.classList.add('estado-malo');
+                    });
+                });
+
+                function enlazarCheckbox(checkId, sectionId) {
+                    const check = document.getElementById(checkId);
+                    const section = document.getElementById(sectionId);
+                    if (!check || !section) return;
+                    const actualizar = () => {
+                        section.classList.toggle('activo', check.checked);
+                        section.querySelectorAll('input, select, textarea').forEach(control => {
+                            control.disabled = !check.checked;
+                        });
+                    };
+                    check.addEventListener('change', actualizar);
+                    actualizar();
+                }
+
+                enlazarCheckbox('hubo-cambio-liners', 'bloque-altura-nueva');
+                enlazarCheckbox('medir-upper', 'seccion-upper');
+                enlazarCheckbox('medir-lower', 'seccion-lower');
+                enlazarCheckbox('medir-ranuras', 'seccion-ranuras');
+                enlazarCheckbox('medir-mainframe', 'seccion-mainframe');
+                enlazarCheckbox('medir-asentamiento', 'seccion-asentamiento');
+
+                function crearFilasBuje(tbodyId, prefijo, cantidad) {
+                    const tbody = document.getElementById(tbodyId);
+                    for (let i = 1; i <= cantidad; i++) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                <td>${i}</td>
+                <td><input type="number" min="0" step="0.001" placeholder="A${i}" name="${prefijo}_a_${i}"></td>
+                <td><input type="number" min="0" step="0.001" placeholder="B${i}" name="${prefijo}_b_${i}"></td>
+                `;
+                        tbody.appendChild(tr);
+                    }
+                }
+                crearFilasBuje('upper-body', 'upper', 3);
+                crearFilasBuje('lower-body', 'lower', 8);
+
+                const ranurasBody = document.getElementById('ranuras-body');
+                for (let i = 1; i <= 8; i++) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+            <td>${i}</td>
+            <td><input class="minimo-25" type="number" min="0" step="0.001" placeholder="A${i}" name="ranura_a_${i}"></td>
+            <td><input class="minimo-25" type="number" min="0" step="0.001" placeholder="B${i}" name="ranura_b_${i}"></td>
+            `;
+                    ranurasBody.appendChild(tr);
+                }
+
+                document.addEventListener('input', event => {
+                    const input = event.target;
+                    if (input.classList.contains('minimo-25')) {
+                        const fila = input.closest('tr');
+                        const valores = [...fila.querySelectorAll('.minimo-25')]
+                            .map(el => Number.parseFloat(el.value))
+                            .filter(Number.isFinite);
+                        // const celda = fila.querySelector('.evaluacion-ranura');
+                        // if (!valores.length) { celda.textContent = ''; celda.className = 'evaluacion-ranura'; return; }
+                        // const fuera = valores.some(v => v < 2.5);
+                        // celda.textContent = fuera ? 'Bajo mínimo' : 'Conforme';
+                        // celda.className = `evaluacion-ranura ${fuera ? 'fuera-limite' : 'dentro-limite'}`;
+                    }
+                    // if (input.classList.contains('maximo-3')) {
+                    //     const salida = input.parentElement.querySelector('.estado-visual');
+                    //     const valor = Number.parseFloat(input.value);
+                    //     if (!Number.isFinite(valor)) { salida.textContent = ''; salida.className = 'estado-visual'; return; }
+                    //     const fuera = valor > 3;
+                    //     salida.textContent = fuera ? 'Supera 3 mm' : 'Dentro del límite';
+                    //     salida.className = `estado-visual ${fuera ? 'fuera-limite' : 'dentro-limite'}`;
+                    // }
+                });
+
+                const modal = document.getElementById('modal-imagen');
+                const imagenGrande = document.getElementById('imagen-grande');
+                document.querySelectorAll('.ampliable').forEach(img => {
+                    img.addEventListener('click', () => {
+                        imagenGrande.src = img.src;
+                        imagenGrande.alt = img.alt;
+                        modal.classList.add('activo');
+                    });
+                    img.addEventListener('error', () => {
+                        img.alt = `Agrega la imagen: ${img.getAttribute('src')}`;
+                        img.style.minHeight = '150px';
+                    }, { once: true });
+                });
+                function cerrarModal() { modal.classList.remove('activo'); imagenGrande.removeAttribute('src'); }
+                modal.querySelector('.cerrar-modal').addEventListener('click', cerrarModal);
+                modal.addEventListener('click', event => { if (event.target === modal) cerrarModal(); });
+                document.addEventListener('keydown', event => { if (event.key === 'Escape') cerrarModal(); });
+
+                document.querySelectorAll('form').forEach(form => {
+                    form.addEventListener('reset', () => {
+                        window.setTimeout(() => {
+                            form.querySelectorAll('.seccion-opcional, .condicional').forEach(el => el.classList.remove('activo'));
+                            form.querySelectorAll('.estado-visual, .evaluacion-ranura').forEach(el => { el.textContent = ''; el.className = el.classList.contains('evaluacion-ranura') ? 'evaluacion-ranura' : 'estado-visual'; });
+                        }, 0);
+                    });
+                });
+            })();
+        </script>
+
+</body>
+
+</html>
