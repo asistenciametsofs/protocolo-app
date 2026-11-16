@@ -280,7 +280,7 @@
                 </div>
 
                 <div class="grid3">
-                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Fecha</label><input type="date" id="datePicker" name="fecha" required></div>
                     <div><label>Equipo</label><select name="equipo" required>
                             <option value="">Seleccione</option>
                             <option value="BR-01">BR-01</option>
@@ -298,18 +298,18 @@
 
                 <div class="grid2">
                     <div>
-                        <label>Altura Bowl (mm)</label>
-                        <input type="number" step="0.001" min="0" name="altura_bowl">
+                        <label>Medición de altura (mm)</label>
+                        <input type="number" step="0.001" min="0" name="alt">
                         <label class="checkbox-group"><span><input type="checkbox" id="hubo-cambio-liners"
-                                    name="hubo_cambio_liners" value="true"> Hubo nuevo cambio de Head y
+                                    name="newCycle"> Hubo nuevo cambio de Head y
                                 Bowl</span></label>
                         <div id="bloque-altura-nueva" class="condicional">
                             <label>Nueva altura Bowl después del cambio (mm)</label>
-                            <input type="number" step="0.001" min="0" name="altura_bowl_nueva">
+                            <input type="number" step="0.001" min="0" name="newAlt">
                         </div>
                     </div>
                     <div><label>Total de toneladas acumuladas (tn)</label><input type="number" step="0.01" min="0"
-                            name="total_toneladas"></div>
+                            name="tons_acum"></div>
                 </div>
 
                 <div class="acciones-form"><button class="btn-submit" type="submit">Guardar
@@ -326,7 +326,7 @@
 
 
                 <div class="grid3">
-                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Fecha</label><input type="date" id="datePicker" name="fecha" required></div>
                     <div><label>Equipo</label><select name="equipo" required>
                             <option value="">Seleccione</option>
                             <option value="BR-01">BR-01</option>
@@ -388,7 +388,7 @@
                     <span class="btn-chancadora activo">Tabla: chinalco_hp_head</span>
                 </div>
                 <div class="grid3">
-                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Fecha</label><input type="date" id="datePicker" name="fecha" required></div>
                     <div><label>Equipo</label><select name="equipo" required>
                             <option value="">Seleccione</option>
                             <option value="BR-01">BR-01</option>
@@ -467,7 +467,7 @@
                     <span class="btn-chancadora activo">Tabla: chinalco_hp_socket</span>
                 </div>
                 <div class="grid3">
-                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Fecha</label><input type="date" id="datePicker" name="fecha" required></div>
                     <div><label>Equipo</label><select name="equipo" required>
                             <option value="">Seleccione</option>
                             <option value="BR-01">BR-01</option>
@@ -717,7 +717,7 @@
                     <span class="btn-chancadora activo">Tabla: chinalco_hp_excentrica</span>
                 </div>
                 <div class="grid3">
-                    <div><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div><label>Fecha</label><input type="date" id="datePicker" name="fecha" required></div>
                     <div><label>Equipo</label><select name="equipo" required>
                             <option value="">Seleccione</option>
                             <option value="BR-01">BR-01</option>
@@ -780,6 +780,14 @@
         <script>
             (() => {
                 'use strict';
+
+                const datePicker = document.getElementById('datePicker');
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+
+                datePicker.value = `${yyyy}-${mm}-${dd}`;
 
                 const estados = ['', 'Buen estado', 'Algo desgastado', 'Bastante desgastado', 'Deplorable'];
 

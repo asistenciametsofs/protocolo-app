@@ -872,6 +872,9 @@ def chinalco_altura():
             flash('✅ Nueva campaña iniciada!')
 
         conn.close()
+
+        
+
         return redirect(url_for('chinalco'))
 
     conn.close()
