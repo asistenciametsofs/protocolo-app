@@ -800,7 +800,7 @@
                         select.appendChild(option);
                     });
                     select.addEventListener('change', () => {
-                        select.classList.remove('estado-bueno', 'estado-malo');
+                        select.classList.remove('estado-bueno', 'estado-malo', 'estado-medio', 'estado-deplorable');
                         if (select.value === 'Buen estado') select.classList.add('estado-bueno');
                         if (select.value === 'Algo desgastado') select.classList.add('estado-medio');
                         if (select.value === 'Bastante desgastado') select.classList.add('estado-malo');
