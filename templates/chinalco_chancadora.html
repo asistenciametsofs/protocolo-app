@@ -802,7 +802,9 @@
                     select.addEventListener('change', () => {
                         select.classList.remove('estado-bueno', 'estado-malo');
                         if (select.value === 'Buen estado') select.classList.add('estado-bueno');
-                        if (select.value === 'Bastante desgastado' || select.value === 'Deplorable') select.classList.add('estado-malo');
+                        if (select.value === 'Algo desgastado') select.classList.add('estado-medio');
+                        if (select.value === 'Bastante desgastado') select.classList.add('estado-malo');
+                        if (select.value === 'Deplorable') select.classList.add('estado-deplorable');
                     });
                 });
 

@@ -778,9 +778,19 @@ textarea:focus {
     background: #f0fff4;
 }
 
+.estado-medio {
+    border-color: #ffc107;
+    background: #fff8e1;
+}
+
 .estado-malo {
     border-color: #dc3545;
     background: #fff5f5;
+}
+
+.estado-deplorable {
+    border-color: #ff0000;
+    background: #ff000046;
 }
 
 .btn-foto {
