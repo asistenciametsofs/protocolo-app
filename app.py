@@ -291,6 +291,9 @@ def guardar_chinalco_hp_monitoreo():
     conn = None
     cursor = None
 
+    assets_subidos = []
+    archivos = obtener_archivos_validos()
+
     try:
         fecha = texto_o_none("fecha")
         equipo = texto_o_none("equipo")
@@ -379,6 +382,14 @@ def guardar_chinalco_hp_monitoreo():
 
         registro_id = cursor.fetchone()[0]
 
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=2,
+            registro_id=registro_id,
+            equipo=equipo
+        )
+
         conn.commit()
 
         flash(
@@ -390,6 +401,7 @@ def guardar_chinalco_hp_monitoreo():
 
         if conn:
             conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
 
         app.logger.exception(
             "Error al guardar monitoreo de chancadora"
@@ -411,7 +423,6 @@ def guardar_chinalco_hp_monitoreo():
     return redirect(
         url_for("chinalco_chancadora") + "#form-monitoreo"
     )
-
 
 @app.route("/chinalco_chancadora/3/guardar", methods=["POST"])
 def guardar_chinalco_hp_manto():
@@ -475,6 +486,14 @@ def guardar_chinalco_hp_manto():
 
         registro_id = cursor.fetchone()[0]
 
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=3,
+            registro_id=registro_id,
+            equipo=equipo
+        )
+
         conn.commit()
 
         flash(
@@ -487,6 +506,7 @@ def guardar_chinalco_hp_manto():
 
         if conn:
             conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
 
         app.logger.exception(
             "Error al guardar inspección de Head y Bowl"
@@ -885,6 +905,14 @@ def guardar_chinalco_hp_excentrica():
 
         registro_id = cursor.fetchone()[0]
 
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=5,
+            registro_id=registro_id,
+            equipo=equipo
+        )
+
         conn.commit()
 
         flash(
@@ -897,6 +925,7 @@ def guardar_chinalco_hp_excentrica():
 
         if conn:
             conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
 
         app.logger.exception(
             "Error al guardar inspección de excéntrica"

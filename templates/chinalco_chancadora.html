@@ -317,7 +317,7 @@
             </section>
         </form>
 
-        <form class="form-etapa" action="chinalco_chancadora/2/guardar" method="POST" id="form-monitoreo">
+        <form class="form-etapa" action="chinalco_chancadora/2/guardar" method="POST" enctype="multipart/form-data" id="form-monitoreo">
             <section class="seccion">
                 <div class="etapa-cabecera">
                     <div class="seccion-titulo"><span class="etapa-numero">2</span> Operación y monitoreo</div>
@@ -375,13 +375,34 @@
                             name="vibracion_de"></div>
                 </div>
                 <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+
+                <div class="evidencias-carga">
+
+                    <label for="archivos-etapa-2">
+                        Fotos y videos de la inspección
+                    </label>
+
+                    <input type="file" id="archivos-etapa-4" name="archivos"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                        class="input-evidencias" multiple>
+
+                    <small class="ayuda">
+                        Puedes seleccionar varias fotos o videos.
+                        Formatos permitidos: JPG, PNG, WEBP, MP4, MOV y WEBM.
+                        Máximo recomendado: 10 archivos por registro.
+                    </small>
+
+                    <div class="preview-evidencias"></div>
+
+                </div>
+
                 <div class="acciones-form"><button class="btn-submit" type="submit">Guardar operación</button><button
                         class="btn-limpiar" type="reset">Limpiar</button></div>
             </section>
         </form>
 
         <!-- FORMULARIO 3: HEAD, BOWL Y BUJES -->
-        <form class="form-etapa" action="chinalco_chancadora/3/guardar" method="POST" id="form-head">
+        <form class="form-etapa" action="chinalco_chancadora/3/guardar" method="POST" enctype="multipart/form-data" id="form-head">
             <section class="seccion">
                 <div class="etapa-cabecera">
                     <div class="seccion-titulo"><span class="etapa-numero">3</span> Head, Bowl y bujes</div>
@@ -453,6 +474,27 @@
                 </div>
 
                 <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+
+                <div class="evidencias-carga">
+
+                    <label for="archivos-etapa-2">
+                        Fotos y videos de la inspección
+                    </label>
+
+                    <input type="file" id="archivos-etapa-4" name="archivos"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                        class="input-evidencias" multiple>
+
+                    <small class="ayuda">
+                        Puedes seleccionar varias fotos o videos.
+                        Formatos permitidos: JPG, PNG, WEBP, MP4, MOV y WEBM.
+                        Máximo recomendado: 10 archivos por registro.
+                    </small>
+
+                    <div class="preview-evidencias"></div>
+
+                </div>
+
                 <div class="acciones-form"><button class="btn-submit" type="submit">Guardar inspección
                         Head</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
             </section>
@@ -713,8 +755,8 @@
                     </label>
 
                     <input type="file" id="archivos-etapa-4" name="archivos"
-                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple
-                        class="input-evidencias">
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                        class="input-evidencias" multiple>
 
                     <small class="ayuda">
                         Puedes seleccionar varias fotos o videos.
@@ -732,7 +774,7 @@
         </form>
 
         <!-- FORMULARIO 5: EXCENTRICA Y TRANSMISION -->
-        <form class="form-etapa" action="chinalco_chancadora/5/guardar" method="POST" id="form-excentrica">
+        <form class="form-etapa" action="chinalco_chancadora/5/guardar" method="POST" enctype="multipart/form-data" id="form-excentrica">
             <section class="seccion">
                 <div class="etapa-cabecera">
                     <div class="seccion-titulo"><span class="etapa-numero">5</span> Excéntrica y transmisión</div>
@@ -787,6 +829,27 @@
                     </div>
                 </div>
                 <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+
+                <div class="evidencias-carga">
+
+                    <label for="archivos-etapa-2">
+                        Fotos y videos de la inspección
+                    </label>
+
+                    <input type="file" id="archivos-etapa-4" name="archivos"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                        class="input-evidencias" multiple>
+
+                    <small class="ayuda">
+                        Puedes seleccionar varias fotos o videos.
+                        Formatos permitidos: JPG, PNG, WEBP, MP4, MOV y WEBM.
+                        Máximo recomendado: 10 archivos por registro.
+                    </small>
+
+                    <div class="preview-evidencias"></div>
+
+                </div>
+
                 <div class="acciones-form"><button class="btn-submit" type="submit">Guardar inspección
                         Excéntrica</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
             </section>
