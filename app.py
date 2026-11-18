@@ -13,16 +13,200 @@ import psycopg2
 from decimal import Decimal, InvalidOperation
 import cloudinary
 import cloudinary.uploader
+from cloudinary.exceptions import Error as CloudinaryError
+from werkzeug.utils import secure_filename
 from reportlab.graphics.widgets.markers import makeMarker
 
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-)
+# cloudinary.config(
+#     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+#     api_key=os.environ.get('CLOUDINARY_API_KEY'),
+#     api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+# )
 
 app = Flask(__name__)
 app.secret_key = 'metso1250secretkey'
+
+EXTENSIONES_PERMITIDAS = {
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "mp4",
+    "mov",
+    "webm"
+}
+
+MAXIMO_ARCHIVOS = 10
+MAXIMO_BYTES_POR_ARCHIVO = 50 * 1024 * 1024
+
+
+def extension_archivo(nombre):
+    if "." not in nombre:
+        return ""
+
+    return nombre.rsplit(".", 1)[1].lower()
+
+def obtener_archivos_validos():
+    """
+    Recoge todos los archivos enviados como 'archivos'
+    y valida cantidad, extensión y tamaño.
+    """
+
+    archivos = [
+        archivo
+        for archivo in request.files.getlist("archivos")
+        if archivo and archivo.filename
+    ]
+
+    if len(archivos) > MAXIMO_ARCHIVOS:
+        raise ValueError(
+            f"Solo se permiten {MAXIMO_ARCHIVOS} archivos por registro."
+        )
+
+    for archivo in archivos:
+
+        extension = extension_archivo(archivo.filename)
+
+        if extension not in EXTENSIONES_PERMITIDAS:
+            raise ValueError(
+                f"El archivo '{archivo.filename}' "
+                "no tiene un formato permitido."
+            )
+
+        # Determinar tamaño sin consumir permanentemente el stream.
+        posicion_actual = archivo.stream.tell()
+
+        archivo.stream.seek(0, 2)
+        tamano = archivo.stream.tell()
+        archivo.stream.seek(posicion_actual)
+
+        if tamano > MAXIMO_BYTES_POR_ARCHIVO:
+            raise ValueError(
+                f"El archivo '{archivo.filename}' supera 50 MB."
+            )
+
+    return archivos
+
+def subir_archivos_cloudinary(
+    cursor,
+    archivos,
+    etapa,
+    registro_id,
+    equipo
+):
+    """
+    Sube fotos y videos a Cloudinary y registra sus datos
+    en chinalco_hp_archivos.
+
+    Devuelve la lista de assets subidos para poder borrarlos
+    si posteriormente falla la transacción.
+    """
+
+    assets_subidos = []
+
+    for archivo in archivos:
+
+        nombre_seguro = secure_filename(archivo.filename)
+
+        identificador = uuid.uuid4().hex
+
+        # No incluir extensión en public_id.
+        public_id = (
+            f"etapa_{etapa}/"
+            f"{equipo}/"
+            f"registro_{registro_id}/"
+            f"{identificador}"
+        )
+
+        resultado = cloudinary.uploader.upload(
+            archivo,
+            resource_type="auto",
+            folder="chinalco/hp400",
+            public_id=public_id,
+            overwrite=False,
+            unique_filename=False,
+            use_filename=False,
+            tags=[
+                "chinalco",
+                "hp400",
+                f"etapa_{etapa}",
+                equipo,
+                f"registro_{registro_id}"
+            ]
+        )
+
+        asset = {
+            "asset_id": resultado.get("asset_id"),
+            "public_id": resultado["public_id"],
+            "secure_url": resultado["secure_url"],
+            "resource_type": resultado["resource_type"],
+            "format": resultado.get("format"),
+            "bytes": resultado.get("bytes"),
+            "width": resultado.get("width"),
+            "height": resultado.get("height"),
+            "duration": resultado.get("duration"),
+            "nombre_original": nombre_seguro
+        }
+
+        assets_subidos.append(asset)
+
+        cursor.execute("""
+            INSERT INTO chinalco_hp_archivos (
+                etapa,
+                registro_id,
+                asset_id,
+                public_id,
+                secure_url,
+                resource_type,
+                formato,
+                nombre_original,
+                bytes,
+                ancho,
+                alto,
+                duracion
+            )
+            VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s
+            );
+        """, (
+            etapa,
+            registro_id,
+            asset["asset_id"],
+            asset["public_id"],
+            asset["secure_url"],
+            asset["resource_type"],
+            asset["format"],
+            asset["nombre_original"],
+            asset["bytes"],
+            asset["width"],
+            asset["height"],
+            asset["duration"]
+        ))
+
+    return assets_subidos
+
+def eliminar_assets_cloudinary(assets):
+    """
+    Compensación: elimina de Cloudinary los assets que se
+    subieron si luego falla PostgreSQL.
+    """
+
+    for asset in reversed(assets):
+
+        try:
+            cloudinary.uploader.destroy(
+                asset["public_id"],
+                resource_type=asset["resource_type"],
+                invalidate=True
+            )
+
+        except Exception:
+            app.logger.exception(
+                "No se pudo eliminar de Cloudinary el asset %s",
+                asset.get("public_id")
+            )
+
 
 def get_db_connection():
     return psycopg2.connect(
@@ -86,7 +270,6 @@ with app.app_context():
     init_db()
 
 
-
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -101,53 +284,6 @@ def chinalco():
 def chinalco_chancadora():
     return render_template('chinalco_chancadora.html')
 
-# @app.route('/chinalco_chancadora/2/guardar', methods=['POST'])
-# def guardar_monitoreo():
-#     import psycopg2
-#     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
-
-#     try:
-#         c = conn.cursor()
-
-#         c.execute("""
-#             INSERT INTO chinalco_hp_monitoreo (
-#                 fecha, equipo, supervisor,
-#                 setting_actual, alimentacion,
-#                 nivel_aceite, temperatura_aceite,
-#                 presion_aceite, corriente_motor,
-#                 potencia_motor, vibracion_nde,
-#                 vibracion_de, observaciones
-#             )
-#             VALUES (
-#                 %s, %s, %s, %s, %s, %s, %s,
-#                 %s, %s, %s, %s, %s, %s
-#             )
-#         """, (
-#             request.form.get('fecha'),
-#             request.form.get('equipo'),
-#             request.form.get('supervisor'),
-#             obtener_numero('setting_actual'),
-#             request.form.get('alimentacion') or None,
-#             obtener_numero('nivel_aceite'),
-#             obtener_numero('temperatura_aceite'),
-#             obtener_numero('presion_aceite'),
-#             obtener_numero('corriente_motor'),
-#             obtener_numero('potencia_motor'),
-#             obtener_numero('vibracion_nde'),
-#             obtener_numero('vibracion_de'),
-#             request.form.get('observaciones') or None
-#         ))
-
-#         conn.commit()
-
-#     except Exception:
-#         conn.rollback()
-#         raise
-
-#     finally:
-#         conn.close()
-
-#     return redirect(request.referrer or '/chinalco')
 
 @app.route("/chinalco_chancadora/2/guardar", methods=["POST"])
 def guardar_chinalco_hp_monitoreo():
@@ -378,6 +514,9 @@ def guardar_chinalco_hp_head():
 
     conn = None
     cursor = None
+
+    assets_subidos = []
+    archivos = obtener_archivos_validos()
 
     try:
         fecha = texto_o_none("fecha")
@@ -646,6 +785,15 @@ def guardar_chinalco_hp_head():
                     medida_b
                 ))
 
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=4,
+            registro_id=head_id,
+            equipo=equipo
+        )
+
+                
         conn.commit()
 
         flash(
@@ -658,6 +806,7 @@ def guardar_chinalco_hp_head():
 
         if conn:
             conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
 
         app.logger.exception(
             "Error al guardar inspección de Socket y Main Frame"
@@ -873,7 +1022,7 @@ def chinalco_altura():
 
         conn.close()
 
-        
+
 
         return redirect(url_for('chinalco'))
 

@@ -459,7 +459,8 @@
         </form>
 
         <!-- FORMULARIO 4: SOCKET, MAIN FRAME Y PROTECCIONES -->
-        <form class="form-etapa" action="chinalco_chancadora/4/guardar" method="POST" id="form-socket">
+        <form class="form-etapa" action="chinalco_chancadora/4/guardar" method="POST" enctype="multipart/form-data"
+            id="form-socket">
             <section class="seccion">
                 <div class="etapa-cabecera">
                     <div class="seccion-titulo"><span class="etapa-numero">4</span> Socket, Main Frame y protecciones
@@ -704,6 +705,27 @@
                 </div>
 
                 <label>Observaciones</label><textarea class="obs-grande" name="observaciones" rows="4"></textarea>
+
+                <div class="evidencias-carga">
+
+                    <label for="archivos-etapa-2">
+                        Fotos y videos de la inspección
+                    </label>
+
+                    <input type="file" id="archivos-etapa-4" name="archivos"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple
+                        class="input-evidencias">
+
+                    <small class="ayuda">
+                        Puedes seleccionar varias fotos o videos.
+                        Formatos permitidos: JPG, PNG, WEBP, MP4, MOV y WEBM.
+                        Máximo recomendado: 10 archivos por registro.
+                    </small>
+
+                    <div class="preview-evidencias"></div>
+
+                </div>
+
                 <div class="acciones-form"><button class="btn-submit" type="submit">Guardar inspección
                         Socket</button><button class="btn-limpiar" type="reset">Limpiar</button></div>
             </section>
@@ -779,6 +801,113 @@
 
         <script>
             (() => {
+
+                const LIMITE_ARCHIVOS = 10;
+                const LIMITE_MB_POR_ARCHIVO = 50;
+                const LIMITE_BYTES = LIMITE_MB_POR_ARCHIVO * 1024 * 1024;
+
+                const tiposPermitidos = new Set([
+                    'image/jpeg',
+                    'image/png',
+                    'image/webp',
+                    'video/mp4',
+                    'video/quicktime',
+                    'video/webm'
+                ]);
+
+                document.querySelectorAll('.input-evidencias').forEach(input => {
+
+                    input.addEventListener('change', function () {
+
+                        const contenedor = this
+                            .closest('.evidencias-carga')
+                            .querySelector('.preview-evidencias');
+
+                        contenedor.innerHTML = '';
+
+                        const archivos = Array.from(this.files);
+
+                        if (archivos.length > LIMITE_ARCHIVOS) {
+
+                            contenedor.innerHTML = `
+                <div class="preview-error">
+                    Solo puedes seleccionar hasta
+                    ${LIMITE_ARCHIVOS} archivos.
+                </div>
+            `;
+
+                            this.value = '';
+                            return;
+                        }
+
+                        const archivoInvalido = archivos.find(archivo =>
+                            !tiposPermitidos.has(archivo.type)
+                            || archivo.size > LIMITE_BYTES
+                        );
+
+                        if (archivoInvalido) {
+
+                            contenedor.innerHTML = `
+                <div class="preview-error">
+                    El archivo "${archivoInvalido.name}"
+                    no tiene un formato permitido o supera
+                    ${LIMITE_MB_POR_ARCHIVO} MB.
+                </div>
+            `;
+
+                            this.value = '';
+                            return;
+                        }
+
+                        archivos.forEach(archivo => {
+
+                            const tarjeta = document.createElement('div');
+                            tarjeta.className = 'preview-archivo';
+
+                            const urlTemporal = URL.createObjectURL(archivo);
+
+                            let elementoMedia;
+
+                            if (archivo.type.startsWith('image/')) {
+
+                                elementoMedia = document.createElement('img');
+                                elementoMedia.src = urlTemporal;
+                                elementoMedia.alt = archivo.name;
+
+                            } else {
+
+                                elementoMedia = document.createElement('video');
+                                elementoMedia.src = urlTemporal;
+                                elementoMedia.controls = true;
+                                elementoMedia.preload = 'metadata';
+
+                            }
+
+                            elementoMedia.addEventListener(
+                                'loadeddata',
+                                () => URL.revokeObjectURL(urlTemporal),
+                                { once: true }
+                            );
+
+                            const nombre = document.createElement('span');
+                            nombre.className = 'preview-nombre';
+                            nombre.textContent = archivo.name;
+
+                            const tamano = document.createElement('span');
+                            tamano.className = 'preview-tamano';
+                            tamano.textContent =
+                                `${(archivo.size / 1024 / 1024).toFixed(2)} MB`;
+
+                            tarjeta.appendChild(elementoMedia);
+                            tarjeta.appendChild(nombre);
+                            tarjeta.appendChild(tamano);
+
+                            contenedor.appendChild(tarjeta);
+                        });
+                    });
+                });
+
+
                 'use strict';
 
                 const datePicker = document.querySelectorAll('#datePicker');
@@ -787,7 +916,7 @@
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
 
-                datePicker.forEach(input => {input.value = `${yyyy}-${mm}-${dd}`;});
+                datePicker.forEach(input => { input.value = `${yyyy}-${mm}-${dd}`; });
 
                 const estados = ['', 'Buen estado', 'Algo desgastado', 'Bastante desgastado', 'Deplorable'];
 
