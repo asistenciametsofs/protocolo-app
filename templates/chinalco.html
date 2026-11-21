@@ -3,9 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Protocolos Chinalco</title>
     <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+
     <style>
         * {
             margin: 0;
@@ -161,24 +163,141 @@
 
         <h2 class="title">Protocolos</h2>
 
-        <div class="card">
-            <h2>📏 Chancadoras</h2>
-            <a href="/chinalco_altura" class="btn btn-primary">Una lista desplegable</a>
-        </div>
+        <div class="card card-chancadoras">
 
-        <div class="card">
-            <h2>📏 Chancadoras</h2>
-            <a href="/chinalco_chancadora" class="btn btn-primary">Una lista desplegable</a>
-        </div>
+            <div class="card-chancadoras-header">
 
-        <div class="card">
-            <h2>📋 Checklist Diario</h2>
-            <a href="/chinalco_checklist" class="btn btn-primary">Checklist CHANCADORA CÓNICA HP400</a>
-        </div>
+                <div class="card-chancadoras-icono">
+                    ⚙️
+                </div>
 
-        <div class="card">
-            <h2>📋 Protocolo head assembly</h2>
-            <a href="/chinalco_head_assembly" class="btn btn-primary">Protocolo Dimensional HEAD ASSEMBLY</a>
+                <div>
+                    <h2>Chancadoras HP400</h2>
+
+                    <p>
+                        Selecciona el formato que deseas completar.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="card-dropdown">
+
+                <button type="button" class="navbar-dropdown-boton" aria-expanded="false"
+                    aria-controls="menu-chancadoras">
+                    <span>Seleccionar formato</span>
+
+                    <span class="navbar-flecha">
+                        ▾
+                    </span>
+                </button>
+
+                <div id="menu-chancadoras" class="navbar-dropdown-menu">
+
+                    <a href="/chinalco_altura">
+
+                        <span class="navbar-opcion-icono">
+                            📏
+                        </span>
+
+                        <span class="navbar-opcion-texto">
+
+                            <strong>
+                                Medición de altura Bowl
+                            </strong>
+
+                            <small>
+                                Altura, toneladas y cambio de revestimientos
+                            </small>
+
+                        </span>
+
+                    </a>
+
+                    <a href="/chinalco_chancadora">
+
+                        <span class="navbar-opcion-icono">
+                            ⚙️
+                        </span>
+
+                        <span class="navbar-opcion-texto">
+
+                            <strong>
+                                Desgaste de chancadora
+                            </strong>
+
+                            <small>
+                                Inspección por etapas de desarme
+                            </small>
+
+                        </span>
+
+                    </a>
+
+                    <a href="/chinalco_checklist">
+
+                        <span class="navbar-opcion-icono">
+                            📋
+                        </span>
+
+                        <span class="navbar-opcion-texto">
+
+                            <strong>
+                                Checklist diario HP400
+                            </strong>
+
+                            <small>
+                                Inspección diaria de operación
+                            </small>
+
+                        </span>
+
+                    </a>
+
+                    <a href="/chinalco_head_assembly">
+
+                        <span class="navbar-opcion-icono">
+                            🔩
+                        </span>
+
+                        <span class="navbar-opcion-texto">
+
+                            <strong>
+                                Protocolo Head Assembly
+                            </strong>
+
+                            <small>
+                                Control dimensional de bujes
+                            </small>
+
+                        </span>
+
+                    </a>
+
+                    <a href="/manual_html_guia_rapida_hp400">
+
+                        <span class="navbar-opcion-icono">
+                            🔩
+                        </span>
+
+                        <span class="navbar-opcion-texto">
+
+                            <strong>
+                                Guía Rápida HP400
+                            </strong>
+
+                            <small>
+                                Operación y mantenimiento
+                            </small>
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
 
         <div class="card">
@@ -210,6 +329,65 @@
             <a href="/chinalco_graf_BR" class="btn btn-green">Proyección de Alturas</a>
         </div>
     </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const dropdown =
+                document.querySelector('.card-dropdown');
+
+            const boton =
+                dropdown.querySelector(
+                    '.navbar-dropdown-boton'
+                );
+
+            function cerrarMenu() {
+
+                dropdown.classList.remove('activo');
+
+                boton.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+
+            }
+
+            boton.addEventListener('click', function (evento) {
+
+                evento.stopPropagation();
+
+                const abierto =
+                    dropdown.classList.toggle('activo');
+
+                boton.setAttribute(
+                    'aria-expanded',
+                    String(abierto)
+                );
+
+            });
+
+
+            document.addEventListener('click', function (evento) {
+
+                if (!dropdown.contains(evento.target)) {
+                    cerrarMenu();
+                }
+
+            });
+
+
+            document.addEventListener('keydown', function (evento) {
+
+                if (evento.key === 'Escape') {
+                    cerrarMenu();
+                    boton.focus();
+                }
+
+            });
+
+        });
+    </script>
 </body>
 
 </html>

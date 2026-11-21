@@ -284,6 +284,9 @@ def chinalco():
 def chinalco_chancadora():
     return render_template('chinalco_chancadora.html')
 
+@app.route('/manual_html_guia_rapida_hp400.html')
+def manual_html_guia_rapida_hp400():
+    return render_template('manual_html_guia_rapida_hp400.html')
 
 @app.route("/chinalco_chancadora/2/guardar", methods=["POST"])
 def guardar_chinalco_hp_monitoreo():

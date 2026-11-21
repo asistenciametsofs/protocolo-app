@@ -1,3 +1,296 @@
+/* =========================================
+   CARD DESPLEGABLE DE CHANCADORAS
+========================================= */
+
+.card-chancadoras {
+    position: relative;
+    overflow: visible;
+
+    max-width: 560px;
+    margin: 0 auto 16px;
+
+    padding: 22px;
+
+    text-align: left;
+
+    border-top: 5px solid #1a3a5c;
+}
+
+
+/* Encabezado */
+
+.card-chancadoras-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    margin-bottom: 18px;
+}
+
+.card-chancadoras-header h2 {
+    margin: 0 0 4px;
+
+    color: #1a3a5c;
+    font-size: 18px;
+}
+
+.card-chancadoras-header p {
+    margin: 0;
+
+    color: #667380;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+
+/* Icono principal */
+
+.card-chancadoras-icono {
+    flex: 0 0 48px;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8f0fe;
+    border-radius: 11px;
+
+    font-size: 24px;
+}
+
+
+/* Contenedor desplegable */
+
+.card-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+
+/* Botón del menú */
+
+.card-chancadoras .navbar-dropdown-boton {
+    width: 100%;
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 11px 15px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: #1a3a5c;
+    color: white;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.card-chancadoras .navbar-dropdown-boton:hover {
+    background: #254f78;
+}
+
+.card-chancadoras .navbar-dropdown-boton:focus-visible {
+    outline: 3px solid rgba(26, 58, 92, 0.25);
+    outline-offset: 3px;
+}
+
+
+/* Flecha */
+
+.navbar-flecha {
+    font-size: 15px;
+
+    transition: transform 0.2s ease;
+}
+
+.card-dropdown.activo .navbar-flecha {
+    transform: rotate(180deg);
+}
+
+
+/* Menú dentro del card */
+
+.card-chancadoras .navbar-dropdown-menu {
+    position: absolute;
+
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+
+    z-index: 200;
+
+    width: 100%;
+
+    padding: 8px;
+
+    background: white;
+    border: 1px solid #dce3ea;
+    border-radius: 11px;
+
+    box-shadow:
+        0 12px 28px
+        rgba(0, 0, 0, 0.16);
+
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+}
+
+.card-dropdown.activo .navbar-dropdown-menu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+
+    pointer-events: auto;
+}
+
+
+/* Opciones */
+
+.card-chancadoras .navbar-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    padding: 11px;
+
+    color: #263442;
+    text-align: left;
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    transition:
+        background-color 0.16s ease,
+        color 0.16s ease;
+}
+
+.card-chancadoras .navbar-dropdown-menu a:hover,
+.card-chancadoras .navbar-dropdown-menu a:focus-visible {
+    background: #e8f0fe;
+    color: #1a3a5c;
+    outline: none;
+}
+
+.card-chancadoras .navbar-dropdown-menu a + a {
+    border-top: 1px solid #edf0f3;
+}
+
+
+/* Iconos de las opciones */
+
+.navbar-opcion-icono {
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f0f4ff;
+    border-radius: 8px;
+
+    font-size: 19px;
+}
+
+
+/* Texto */
+
+.navbar-opcion-texto {
+    min-width: 0;
+}
+
+.navbar-opcion-texto strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #1a3a5c;
+    font-size: 13px;
+}
+
+.navbar-opcion-texto small {
+    display: block;
+
+    color: #687582;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+
+/* Adaptación móvil */
+
+@media (max-width: 600px) {
+
+    .card-chancadoras {
+        max-width: none;
+        padding: 16px;
+    }
+
+    .card-chancadoras-header {
+        align-items: flex-start;
+    }
+
+    .card-chancadoras-icono {
+        flex-basis: 42px;
+
+        width: 42px;
+        height: 42px;
+
+        font-size: 21px;
+    }
+
+    .card-chancadoras-header h2 {
+        font-size: 16px;
+    }
+
+    .card-chancadoras .navbar-dropdown-menu {
+        position: static;
+
+        display: none;
+
+        margin-top: 8px;
+
+        transform: none;
+        box-shadow: none;
+    }
+
+    .card-dropdown.activo .navbar-dropdown-menu {
+        display: block;
+    }
+
+}
+
+
+
+
+
+
 /* =========================
    CHANCADORA
 ========================= */
