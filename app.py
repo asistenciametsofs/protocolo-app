@@ -9,21 +9,266 @@ import os
 import json
 import uuid
 import threading
+import psycopg2
+from decimal import Decimal, InvalidOperation
 import cloudinary
 import cloudinary.uploader
+from cloudinary.exceptions import Error as CloudinaryError
+from werkzeug.utils import secure_filename
 from reportlab.graphics.widgets.markers import makeMarker
 
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-)
+# cloudinary.config(
+#     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+#     api_key=os.environ.get('CLOUDINARY_API_KEY'),
+#     api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+# )
 
 app = Flask(__name__)
 app.secret_key = 'metso1250secretkey'
 
+EXTENSIONES_PERMITIDAS = {
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "mp4",
+    "mov",
+    "webm"
+}
+
+MAXIMO_ARCHIVOS = 10
+MAXIMO_BYTES_POR_ARCHIVO = 50 * 1024 * 1024
+
+
+def extension_archivo(nombre):
+    if "." not in nombre:
+        return ""
+
+    return nombre.rsplit(".", 1)[1].lower()
+
+def obtener_archivos_validos():
+    """
+    Recoge todos los archivos enviados como 'archivos'
+    y valida cantidad, extensión y tamaño.
+    """
+
+    archivos = [
+        archivo
+        for archivo in request.files.getlist("archivos")
+        if archivo and archivo.filename
+    ]
+
+    if len(archivos) > MAXIMO_ARCHIVOS:
+        raise ValueError(
+            f"Solo se permiten {MAXIMO_ARCHIVOS} archivos por registro."
+        )
+
+    for archivo in archivos:
+
+        extension = extension_archivo(archivo.filename)
+
+        if extension not in EXTENSIONES_PERMITIDAS:
+            raise ValueError(
+                f"El archivo '{archivo.filename}' "
+                "no tiene un formato permitido."
+            )
+
+        # Determinar tamaño sin consumir permanentemente el stream.
+        posicion_actual = archivo.stream.tell()
+
+        archivo.stream.seek(0, 2)
+        tamano = archivo.stream.tell()
+        archivo.stream.seek(posicion_actual)
+
+        if tamano > MAXIMO_BYTES_POR_ARCHIVO:
+            raise ValueError(
+                f"El archivo '{archivo.filename}' supera 50 MB."
+            )
+
+    return archivos
+
+def subir_archivos_cloudinary(
+    cursor,
+    archivos,
+    etapa,
+    registro_id,
+    equipo
+):
+    """
+    Sube fotos y videos a Cloudinary y registra sus datos
+    en chinalco_hp_archivos.
+
+    Devuelve la lista de assets subidos para poder borrarlos
+    si posteriormente falla la transacción.
+    """
+
+    assets_subidos = []
+
+    for archivo in archivos:
+
+        nombre_seguro = secure_filename(archivo.filename)
+
+        identificador = uuid.uuid4().hex
+
+        # No incluir extensión en public_id.
+        public_id = (
+            f"etapa_{etapa}/"
+            f"{equipo}/"
+            f"registro_{registro_id}/"
+            f"{identificador}"
+        )
+
+        resultado = cloudinary.uploader.upload(
+            archivo,
+            resource_type="auto",
+            folder="chinalco/hp400",
+            public_id=public_id,
+            overwrite=False,
+            unique_filename=False,
+            use_filename=False,
+            tags=[
+                "chinalco",
+                "hp400",
+                f"etapa_{etapa}",
+                equipo,
+                f"registro_{registro_id}"
+            ]
+        )
+
+        asset = {
+            "asset_id": resultado.get("asset_id"),
+            "public_id": resultado["public_id"],
+            "secure_url": resultado["secure_url"],
+            "resource_type": resultado["resource_type"],
+            "format": resultado.get("format"),
+            "bytes": resultado.get("bytes"),
+            "width": resultado.get("width"),
+            "height": resultado.get("height"),
+            "duration": resultado.get("duration"),
+            "nombre_original": nombre_seguro
+        }
+
+        assets_subidos.append(asset)
+
+        cursor.execute("""
+            INSERT INTO chinalco_hp_archivos (
+                etapa,
+                registro_id,
+                asset_id,
+                public_id,
+                secure_url,
+                resource_type,
+                formato,
+                nombre_original,
+                bytes,
+                ancho,
+                alto,
+                duracion
+            )
+            VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s
+            );
+        """, (
+            etapa,
+            registro_id,
+            asset["asset_id"],
+            asset["public_id"],
+            asset["secure_url"],
+            asset["resource_type"],
+            asset["format"],
+            asset["nombre_original"],
+            asset["bytes"],
+            asset["width"],
+            asset["height"],
+            asset["duration"]
+        ))
+
+    return assets_subidos
+
+def eliminar_assets_cloudinary(assets):
+    """
+    Compensación: elimina de Cloudinary los assets que se
+    subieron si luego falla PostgreSQL.
+    """
+
+    for asset in reversed(assets):
+
+        try:
+            cloudinary.uploader.destroy(
+                asset["public_id"],
+                resource_type=asset["resource_type"],
+                invalidate=True
+            )
+
+        except Exception:
+            app.logger.exception(
+                "No se pudo eliminar de Cloudinary el asset %s",
+                asset.get("public_id")
+            )
+
+
+def get_db_connection():
+    return psycopg2.connect(
+        os.environ.get("DATABASE_URL"),
+        connect_timeout=10
+    )
+
+
+def texto_o_none(nombre):
+    """
+    Devuelve None si el campo está vacío.
+    En caso contrario devuelve el texto sin espacios extremos.
+    """
+    valor = request.form.get(nombre, "").strip()
+    return valor if valor else None
+
+
+def decimal_o_none(nombre):
+    """
+    Convierte un campo del formulario a Decimal.
+    Devuelve None si está vacío.
+    """
+    valor = request.form.get(nombre, "").strip()
+
+    if not valor:
+        return None
+
+    try:
+        return Decimal(valor.replace(",", "."))
+    except InvalidOperation:
+        raise ValueError(
+            f"El valor ingresado en '{nombre}' no es un número válido."
+        )
+
+
+def checkbox_marcado(nombre):
+    """
+    Detecta checkboxes cuyos valores pueden ser:
+    true, on, 1, yes o si.
+    """
+    valor = request.form.get(nombre)
+
+    return valor is not None and valor.lower() in {
+        "true",
+        "on",
+        "1",
+        "yes",
+        "si",
+        "sí"
+    }
+
+def obtener_numero(campo):
+    valor = request.form.get(campo, '').strip()
+
+    if valor == '':
+        return None
+
+    return float(valor)
+
 with app.app_context():
     init_db()
+
 
 @app.route('/')
 def home():
@@ -34,6 +279,678 @@ def home():
 @app.route('/chinalco')
 def chinalco():
     return render_template('chinalco.html')
+
+@app.route('/chinalco_chancadora')
+def chinalco_chancadora():
+    return render_template('chinalco_chancadora.html')
+
+@app.route('/manual_html_guia_rapida_hp400')
+def manual_html_guia_rapida_hp400():
+    return render_template('manual_html_guia_rapida_hp400.html')
+
+@app.route("/chinalco_chancadora/2/guardar", methods=["POST"])
+def guardar_chinalco_hp_monitoreo():
+
+    conn = None
+    cursor = None
+
+    assets_subidos = []
+    archivos = obtener_archivos_validos()
+
+    try:
+        fecha = texto_o_none("fecha")
+        equipo = texto_o_none("equipo")
+        supervisor = texto_o_none("supervisor")
+
+        if not fecha:
+            raise ValueError("La fecha es obligatoria.")
+
+        if equipo not in ("BR-01", "BR-02"):
+            raise ValueError("El equipo seleccionado no es válido.")
+
+        if not supervisor:
+            raise ValueError("El supervisor es obligatorio.")
+
+        setting_actual = decimal_o_none("setting_actual")
+        alimentacion = texto_o_none("alimentacion")
+        nivel_aceite = decimal_o_none("nivel_aceite")
+        temperatura_aceite = decimal_o_none("temperatura_aceite")
+        presion_aceite = decimal_o_none("presion_aceite")
+        corriente_motor = decimal_o_none("corriente_motor")
+        potencia_motor = decimal_o_none("potencia_motor")
+        vibracion_nde = decimal_o_none("vibracion_nde")
+        vibracion_de = decimal_o_none("vibracion_de")
+        observaciones = texto_o_none("observaciones")
+
+        if nivel_aceite is not None and not (
+            Decimal("0") <= nivel_aceite <= Decimal("100")
+        ):
+            raise ValueError(
+                "El nivel de aceite debe estar entre 0 y 100 %."
+            )
+
+        # Usa estos valores si conservaste Correcta/Incorrecta en PostgreSQL.
+        alimentaciones_validas = {
+            "Correcta",
+            "Incorrecta"
+        }
+
+        if (
+            alimentacion is not None
+            and alimentacion not in alimentaciones_validas
+        ):
+            raise ValueError(
+                "La alimentación debe ser Correcta o Incorrecta."
+            )
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO chinalco_hp_monitoreo (
+                fecha,
+                equipo,
+                supervisor,
+                setting_actual,
+                alimentacion,
+                nivel_aceite,
+                temperatura_aceite,
+                presion_aceite,
+                corriente_motor,
+                potencia_motor,
+                vibracion_nde,
+                vibracion_de,
+                observaciones
+            )
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s
+            )
+            RETURNING id;
+        """, (
+            fecha,
+            equipo,
+            supervisor,
+            setting_actual,
+            alimentacion,
+            nivel_aceite,
+            temperatura_aceite,
+            presion_aceite,
+            corriente_motor,
+            potencia_motor,
+            vibracion_nde,
+            vibracion_de,
+            observaciones
+        ))
+
+        registro_id = cursor.fetchone()[0]
+
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=2,
+            registro_id=registro_id,
+            equipo=equipo
+        )
+
+        conn.commit()
+
+        flash(
+            f"Monitoreo #{registro_id} guardado correctamente.",
+            "success"
+        )
+
+    except (ValueError, psycopg2.Error) as error:
+
+        if conn:
+            conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
+
+        app.logger.exception(
+            "Error al guardar monitoreo de chancadora"
+        )
+
+        flash(
+            f"No se pudo guardar el monitoreo: {error}",
+            "error"
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+    return redirect(
+        url_for("chinalco_chancadora") + "#form-monitoreo"
+    )
+
+@app.route("/chinalco_chancadora/3/guardar", methods=["POST"])
+def guardar_chinalco_hp_manto():
+
+    conn = None
+    cursor = None
+
+    try:
+        fecha = texto_o_none("fecha")
+        equipo = texto_o_none("equipo")
+        supervisor = texto_o_none("supervisor")
+
+        if not fecha:
+            raise ValueError("La fecha es obligatoria.")
+
+        if equipo not in ("BR-01", "BR-02"):
+            raise ValueError("El equipo seleccionado no es válido.")
+
+        if not supervisor:
+            raise ValueError("El supervisor es obligatorio.")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO chinalco_hp_manto (
+                fecha,
+                equipo,
+                supervisor,
+                anillo_ajuste_estado,
+                main_frame_pin_estado,
+                fulcrum_liner_estado,
+                seat_liner_estado,
+                bowl_estado,
+                manto_bowl_estado,
+                head_estado,
+                manto_head_estado,
+                feed_plate_estado,
+                observaciones
+            )
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s
+            )
+            RETURNING id;
+        """, (
+            fecha,
+            equipo,
+            supervisor,
+            texto_o_none("anillo_ajuste_estado"),
+            texto_o_none("main_frame_pin_estado"),
+            texto_o_none("fulcrum_liner_estado"),
+            texto_o_none("seat_liner_estado"),
+            texto_o_none("bowl_estado"),
+            texto_o_none("manto_bowl_estado"),
+            texto_o_none("head_estado"),
+            texto_o_none("manto_head_estado"),
+            texto_o_none("feed_plate_estado"),
+            texto_o_none("observaciones")
+        ))
+
+        registro_id = cursor.fetchone()[0]
+
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=3,
+            registro_id=registro_id,
+            equipo=equipo
+        )
+
+        conn.commit()
+
+        flash(
+            f"Inspección de Head y Bowl #{registro_id} "
+            "guardada correctamente.",
+            "success"
+        )
+
+    except (ValueError, psycopg2.Error) as error:
+
+        if conn:
+            conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
+
+        app.logger.exception(
+            "Error al guardar inspección de Head y Bowl"
+        )
+
+        flash(
+            f"No se pudo guardar la inspección: {error}",
+            "error"
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+    return redirect(
+        url_for("chinalco_chancadora") + "#form-head"
+    )
+
+@app.route("/chinalco_chancadora/4/guardar", methods=["POST"])
+def guardar_chinalco_hp_head():
+
+    conn = None
+    cursor = None
+
+    assets_subidos = []
+    archivos = obtener_archivos_validos()
+
+    try:
+        fecha = texto_o_none("fecha")
+        equipo = texto_o_none("equipo")
+        supervisor = texto_o_none("supervisor")
+
+        if not fecha:
+            raise ValueError("La fecha es obligatoria.")
+
+        if equipo not in ("BR-01", "BR-02"):
+            raise ValueError("El equipo seleccionado no es válido.")
+
+        if not supervisor:
+            raise ValueError("El supervisor es obligatorio.")
+
+        # Un checkbox desmarcado no llega en request.form.
+        upper_registrado = checkbox_marcado("registrar_upper")
+        lower_registrado = checkbox_marcado("registrar_lower")
+        ranuras_registradas = checkbox_marcado("registrar_ranuras")
+        asentamiento_registrado = checkbox_marcado(
+            "registrar_asentamiento"
+        )
+        mainframe_registrado = checkbox_marcado(
+            "registrar_mainframe"
+        )
+
+        # Compatibilidad con el HTML actual, cuyos checkboxes
+        # todavía no tienen name. Se detecta si al menos una medida llegó.
+        if not upper_registrado:
+            upper_registrado = any(
+                texto_o_none(f"upper_a_{i}") is not None
+                or texto_o_none(f"upper_b_{i}") is not None
+                for i in range(1, 4)
+            )
+
+        if not lower_registrado:
+            lower_registrado = any(
+                texto_o_none(f"lower_a_{i}") is not None
+                or texto_o_none(f"lower_b_{i}") is not None
+                for i in range(1, 9)
+            )
+
+        if not ranuras_registradas:
+            ranuras_registradas = any(
+                texto_o_none(f"ranura_a_{i}") is not None
+                or texto_o_none(f"ranura_b_{i}") is not None
+                for i in range(1, 9)
+            )
+
+        if not asentamiento_registrado:
+            asentamiento_registrado = any(
+                texto_o_none(nombre) is not None
+                for nombre in (
+                    "asent_int_0",
+                    "asent_int_90",
+                    "asent_int_180",
+                    "asent_int_270",
+                    "asent_ext_0",
+                    "asent_ext_90",
+                    "asent_ext_180",
+                    "asent_ext_270"
+                )
+            )
+
+        if not mainframe_registrado:
+            mainframe_registrado = any(
+                texto_o_none(nombre) is not None
+                for nombre in (
+                    "mainframe_a1",
+                    "mainframe_a2",
+                    "mainframe_b1",
+                    "mainframe_b2",
+                    "mainframe_c1",
+                    "mainframe_c2"
+                )
+            )
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # ------------------------------------------------------
+        # REGISTRO PRINCIPAL
+        # ------------------------------------------------------
+
+        cursor.execute("""
+            INSERT INTO chinalco_hp_head (
+                fecha,
+                equipo,
+                supervisor,
+
+                socket_estado,
+                socket_liner_estado,
+                guarda_dinamica_estado,
+                main_frame_liners_estado,
+                excentrica_estado,
+                monturas_estado,
+                sello_u_estado,
+                sello_t_estado,
+                contrapeso_estado,
+
+                upper_bushing_registrado,
+                lower_bushing_registrado,
+                ranuras_registradas,
+                asentamiento_registrado,
+                mainframe_mediciones_registradas,
+
+                asent_int_0,
+                asent_int_90,
+                asent_int_180,
+                asent_int_270,
+
+                asent_ext_0,
+                asent_ext_90,
+                asent_ext_180,
+                asent_ext_270,
+
+                mainframe_a1,
+                mainframe_a2,
+                mainframe_b1,
+                mainframe_b2,
+                mainframe_c1,
+                mainframe_c2,
+
+                observaciones
+            )
+            VALUES (
+                %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s
+            )
+            RETURNING id;
+        """, (
+            fecha,
+            equipo,
+            supervisor,
+
+            texto_o_none("socket_estado"),
+            texto_o_none("socket_liner_estado"),
+            texto_o_none("guarda_dinamica_estado"),
+            texto_o_none("main_frame_liners_estado"),
+            texto_o_none("excentrica_estado"),
+            texto_o_none("monturas_estado"),
+            texto_o_none("sello_u_estado"),
+            texto_o_none("sello_t_estado"),
+            texto_o_none("contrapeso_estado"),
+
+            upper_registrado,
+            lower_registrado,
+            ranuras_registradas,
+            asentamiento_registrado,
+            mainframe_registrado,
+
+            decimal_o_none("asent_int_0"),
+            decimal_o_none("asent_int_90"),
+            decimal_o_none("asent_int_180"),
+            decimal_o_none("asent_int_270"),
+
+            decimal_o_none("asent_ext_0"),
+            decimal_o_none("asent_ext_90"),
+            decimal_o_none("asent_ext_180"),
+            decimal_o_none("asent_ext_270"),
+
+            decimal_o_none("mainframe_a1"),
+            decimal_o_none("mainframe_a2"),
+            decimal_o_none("mainframe_b1"),
+            decimal_o_none("mainframe_b2"),
+            decimal_o_none("mainframe_c1"),
+            decimal_o_none("mainframe_c2"),
+
+            texto_o_none("observaciones")
+        ))
+
+        head_id = cursor.fetchone()[0]
+
+        # ------------------------------------------------------
+        # UPPER BUSHING: 3 PUNTOS
+        # ------------------------------------------------------
+
+        if upper_registrado:
+
+            for punto in range(1, 4):
+
+                medida_a = decimal_o_none(f"upper_a_{punto}")
+                medida_b = decimal_o_none(f"upper_b_{punto}")
+
+                # No insertar filas totalmente vacías.
+                if medida_a is None and medida_b is None:
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO chinalco_hp_head_bujes (
+                        head_id,
+                        tipo_buje,
+                        punto,
+                        medida_a,
+                        medida_b
+                    )
+                    VALUES (%s, 'UPPER', %s, %s, %s);
+                """, (
+                    head_id,
+                    punto,
+                    medida_a,
+                    medida_b
+                ))
+
+        # ------------------------------------------------------
+        # LOWER BUSHING: 8 PUNTOS
+        # ------------------------------------------------------
+
+        if lower_registrado:
+
+            for punto in range(1, 9):
+
+                medida_a = decimal_o_none(f"lower_a_{punto}")
+                medida_b = decimal_o_none(f"lower_b_{punto}")
+
+                if medida_a is None and medida_b is None:
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO chinalco_hp_head_bujes (
+                        head_id,
+                        tipo_buje,
+                        punto,
+                        medida_a,
+                        medida_b
+                    )
+                    VALUES (%s, 'LOWER', %s, %s, %s);
+                """, (
+                    head_id,
+                    punto,
+                    medida_a,
+                    medida_b
+                ))
+
+        # ------------------------------------------------------
+        # RANURAS SOCKET LINER: 8 PUNTOS
+        # ------------------------------------------------------
+
+        if ranuras_registradas:
+
+            for punto in range(1, 9):
+
+                medida_a = decimal_o_none(f"ranura_a_{punto}")
+                medida_b = decimal_o_none(f"ranura_b_{punto}")
+
+                if medida_a is None and medida_b is None:
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO chinalco_hp_head_ranuras (
+                        head_id,
+                        punto,
+                        medida_a,
+                        medida_b
+                    )
+                    VALUES (%s, %s, %s, %s);
+                """, (
+                    head_id,
+                    punto,
+                    medida_a,
+                    medida_b
+                ))
+
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=4,
+            registro_id=head_id,
+            equipo=equipo
+        )
+
+                
+        conn.commit()
+
+        flash(
+            f"Inspección de Socket y Main Frame #{head_id} "
+            "guardada correctamente.",
+            "success"
+        )
+
+    except (ValueError, psycopg2.Error) as error:
+
+        if conn:
+            conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
+
+        app.logger.exception(
+            "Error al guardar inspección de Socket y Main Frame"
+        )
+
+        flash(
+            f"No se pudo guardar la inspección: {error}",
+            "error"
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+    return redirect(
+        url_for("chinalco_chancadora") + "#form-socket"
+    )
+
+@app.route("/chinalco_chancadora/5/guardar", methods=["POST"])
+def guardar_chinalco_hp_excentrica():
+
+    conn = None
+    cursor = None
+
+    try:
+        fecha = texto_o_none("fecha")
+        equipo = texto_o_none("equipo")
+        supervisor = texto_o_none("supervisor")
+
+        if not fecha:
+            raise ValueError("La fecha es obligatoria.")
+
+        if equipo not in ("BR-01", "BR-02"):
+            raise ValueError("El equipo seleccionado no es válido.")
+
+        if not supervisor:
+            raise ValueError("El supervisor es obligatorio.")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO chinalco_hp_excentrica (
+                fecha,
+                equipo,
+                supervisor,
+                eje_central_estado,
+                eccentric_bushing_estado,
+                engranaje_corona_estado,
+                pinon_contraeje_estado,
+                lower_thrust_bearing_estado,
+                upper_thrust_bearing_estado,
+                observaciones
+            )
+            VALUES (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
+            RETURNING id;
+        """, (
+            fecha,
+            equipo,
+            supervisor,
+            texto_o_none("eje_central_estado"),
+            texto_o_none("eccentric_bushing_estado"),
+            texto_o_none("engranaje_corona_estado"),
+            texto_o_none("pinon_contraeje_estado"),
+            texto_o_none("lower_thrust_bearing_estado"),
+            texto_o_none("upper_thrust_bearing_estado"),
+            texto_o_none("observaciones")
+        ))
+
+        registro_id = cursor.fetchone()[0]
+
+        assets_subidos = subir_archivos_cloudinary(
+            cursor=cursor,
+            archivos=archivos,
+            etapa=5,
+            registro_id=registro_id,
+            equipo=equipo
+        )
+
+        conn.commit()
+
+        flash(
+            f"Inspección de excéntrica #{registro_id} "
+            "guardada correctamente.",
+            "success"
+        )
+
+    except (ValueError, psycopg2.Error) as error:
+
+        if conn:
+            conn.rollback()
+            eliminar_assets_cloudinary(assets_subidos)
+
+        app.logger.exception(
+            "Error al guardar inspección de excéntrica"
+        )
+
+        flash(
+            f"No se pudo guardar la inspección: {error}",
+            "error"
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
+
+    return redirect(
+        url_for("chinalco_chancadora") + "#form-excentrica"
+    )
+
 
 @app.route('/chinalco_altura', methods=['GET', 'POST'])
 def chinalco_altura():
@@ -136,6 +1053,9 @@ def chinalco_altura():
             flash('✅ Nueva campaña iniciada!')
 
         conn.close()
+
+
+
         return redirect(url_for('chinalco'))
 
     conn.close()
@@ -452,7 +1372,6 @@ def guardar_chinalco_faja():
 
 @app.route('/chinalco_tareo', methods=['GET'])
 def chinalco_tareo():
-
     import os
     import psycopg2
 
@@ -606,10 +1525,13 @@ def chinalco_tareo_guardar():
 def chinalco_tareo_reg():
     import psycopg2
     import os
+    import json
+    from datetime import date, timedelta
 
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     c = conn.cursor()
 
+    # Registros para tabla
     c.execute("""
         SELECT
             id,
@@ -621,18 +1543,121 @@ def chinalco_tareo_reg():
             tipo_mantenimiento,
             estatus,
             horas_hombre,
-            condicion_final
+            condicion_final,
+            cmms
         FROM chinalco_tareo
-        ORDER BY fecha DESC;
+        ORDER BY id DESC;
     """)
 
     registros = c.fetchall()
+
+    # Para Graf #1
+    c.execute("""
+        SELECT
+            TO_CHAR(fecha, 'YYYY-MM') as mes,
+            COUNT(*) as total
+        FROM chinalco_tareo
+        GROUP BY 1
+        ORDER BY 1
+    """)
+
+    ots_mes = c.fetchall()
+
+    meses = [r[0] for r in ots_mes]
+    totales_mes = [r[1] for r in ots_mes]
+
+    # Para Graf #2 
+    c.execute("""
+        SELECT
+            fecha,
+            COUNT(*) as total
+        FROM chinalco_tareo
+        WHERE fecha >= CURRENT_DATE - INTERVAL '30 days'
+        GROUP BY fecha
+        ORDER BY fecha
+    """)
+
+    ots_dia = c.fetchall()
+
+    #Calc
+    inicio = date.today() - timedelta(days=30)
+    fin = date.today()
+
+    dic_ots = {
+        r[0]: r[1]
+        for r in ots_dia
+    }
+
+    dias = []
+    totales_dia = []
+
+    actual = inicio
+
+    while actual <= fin:
+
+        dias.append(actual.strftime('%d-%m'))
+
+        totales_dia.append(
+            dic_ots.get(actual, 0)
+        )
+
+        actual += timedelta(days=1)
 
     conn.close()
 
     return render_template(
         'chinalco_tareo_reg.html',
-        registros=registros
+        registros=registros,
+
+        meses=json.dumps(meses),
+        totales_mes=json.dumps(totales_mes),
+
+        dias=json.dumps(dias),
+        totales_dia=json.dumps(totales_dia),
+
+        hoy=date.today().strftime('%d-%m')
+    )
+
+@app.route('/chinalco_reporte/cerrar/<int:id>', methods=['POST'])
+def chinalco_reporte_cerrar(id):
+    import psycopg2
+    import os
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        UPDATE chinalco_tareo
+        SET cmms = TRUE
+        WHERE id = %s
+          AND cmms = FALSE
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/chinalco_tareo_reg')
+
+@app.route('/chinalco_reporte/<int:id>', methods=['GET'])
+def chinalco_reporte(id):
+    import psycopg2
+    import os
+    
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT *
+        FROM chinalco_tareo
+        WHERE id = %s
+    """, (id,))
+
+    registro = c.fetchone()
+
+    conn.close()
+
+    return render_template(
+        'chinalco_reporte.html',
+        registro=registro
     )
 
 @app.route('/chinalco_checklist')
@@ -676,7 +1701,6 @@ def guardar_chinalco_checklist():
     guardar_DB(datos, tabla)
     flash('✅ Protocolo guardado!')
     return redirect(url_for('chinalco'))
-
 
 @app.route('/chinalco_head_assembly')
 def chinalco_head_assembly():

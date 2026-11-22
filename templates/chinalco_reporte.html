@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro {{ registro[0] }}</title>
+    <link rel="icon" type="image/x-icon" href="static\fotos\Logo (1).svg">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/chinalco_tareo_reg" class="btn-white">← Volver al inicio</a>
+            <p id="folio-header">Registro {{ registro[0] }}</p>
+        </div>
+        <div class="metso-logo">Metso</div>
+    </div>
+    <div class="container">
+
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="flash">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="ficha-reporte">
+            <div class="grid2">
+                <a href="{% if registro[0] > 1 %}/chinalco_reporte/{{ registro[0] - 1 }}{% else %}#{% endif %}"
+                    class="card btn-black {% if registro[0] == 1 %}disabled{% endif %}">
+                    ← Anterior
+                </a>
+
+                <a href="/chinalco_reporte/{{ registro[0] + 1 }}" class="card btn-black">
+                    Siguiente →
+                </a>
+            </div>
+
+            <div class="ficha-header">
+
+                <h1>Reporte Diario de Mantenimiento</h1>
+
+                <p>
+                    ID #{{ registro[0] }}
+                </p>
+
+            </div>
+
+            <div class="ficha-kpis">
+
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">Equipo</div>
+                    <div class="ficha-kpi-value">{{ registro[2] }}</div>
+                </div>
+
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">HH</div>
+                    <div class="ficha-kpi-value">{{ registro[14] }}</div>
+                </div>
+
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">Horas Trabajo</div>
+                    <div class="ficha-kpi-value">{{ registro[8] }}</div>
+                </div>
+
+                <div class="ficha-kpi">
+                    <div class="ficha-kpi-label">Avance</div>
+                    <div class="ficha-kpi-value">
+                        {{ registro[19] }}%
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="ficha-grid">
+
+                <div class="ficha-campo">
+                    <div class="ficha-label">Fecha</div>
+                    <div class="ficha-valor">{{ registro[1] }}</div>
+                </div>
+
+                <div class="ficha-campo">
+                    <div class="ficha-label">Supervisor</div>
+                    <div class="ficha-valor">{{ registro[15] }}</div>
+                </div>
+
+                <div class="ficha-campo">
+                    <div class="ficha-label">Inicio</div>
+                    <div class="ficha-valor">{{ registro[6] }}</div>
+                </div>
+
+                <div class="ficha-campo">
+                    <div class="ficha-label">Fin</div>
+                    <div class="ficha-valor">{{ registro[7] }}</div>
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Descripción de la actividad</h3>
+
+                <div class="ficha-texto">
+                    {{ registro[3] }}
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Tipo de mantenimiento</h3>
+
+                <div class="ficha-texto">
+                    {{ registro[17] }}
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Procedimiento detallado</h3>
+
+                <div class="ficha-texto">
+                    {{ registro[4] }}
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Recursos utilizados</h3>
+
+                <div class="ficha-texto">
+                    {{ registro[5] }}
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Personal ejecutor</h3>
+
+                <div class="personal-grid">
+
+                    {% for persona in registro[16] %}
+
+                    <div class="persona-card">
+                        {{ persona }}
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="ficha-bloque">
+
+                <h3>Estado del trabajo</h3>
+
+                <p>
+                    <strong>Estatus:</strong>
+
+                    {% if registro[18] == 'Finalizado' %}
+                    <span class="estado-badge estado-finalizado">
+                        {{ registro[18] }}
+                    </span>
+                    {% else %}
+                    <span class="estado-badge estado-proceso">
+                        {{ registro[18] }}
+                    </span>
+                    {% endif %}
+
+                </p>
+
+                <br>
+
+                <p>
+                    <strong>Condición final:</strong>
+
+                    <span class="estado-badge
+            {% if 'operativo' in registro[20]|lower %}
+                condicion-ok
+            {% else %}
+                condicion-no
+            {% endif %}
+            ">
+                        {{ registro[20] }}
+                    </span>
+                </p>
+
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

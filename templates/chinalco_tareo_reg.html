@@ -20,8 +20,25 @@
         </div>
         <div class="metso-logo">Metso</div>
     </div>
-    <div class="container" style="max-width: 1000px;">
+
+
+    <div class="container">
         <a href="/chinalco" class="btn-back">← Volver al inicio</a>
+
+        <div class="containergrf">
+
+            <div class="cardgrf">
+                <h3>OTs por mes</h3>
+                <div id="graficoMes" class="chart"></div>
+            </div>
+
+            <div class="cardgrf">
+                <h3>OTs últimos 30 días</h3>
+                <div id="graficoDia" class="chart"></div>
+            </div>
+
+        </div>
+
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -35,9 +52,7 @@
             <table id="tablaReportes" class="display">
 
                 <thead>
-
                     <tr>
-
                         <th>ID</th>
                         <th>Fecha</th>
                         <th>Equipo</th>
@@ -48,13 +63,11 @@
                         <th>Estatus</th>
                         <th>HH</th>
                         <th>Condición Final</th>
-
+                        <th>Acciones</th>
+                        <th>GuideTi?</th>
                     </tr>
-
                     <!-- FILTROS -->
-
                     <tr>
-
                         <th>ID</th>
                         <th>Fecha</th>
                         <th>Equipo</th>
@@ -65,51 +78,50 @@
                         <th>Estatus</th>
                         <th>HH</th>
                         <th>Condición Final</th>
-
+                        <th>######</th>
+                        <th>GuideTi?</th>
                     </tr>
-
                 </thead>
 
                 <tbody>
-
                     {% for r in registros %}
-
                     <tr>
-
                         <td>{{ r[0] }}</td>
-
                         <td>{{ r[1] }}</td>
-
                         <td>{{ r[2] }}</td>
-
                         <td>{{ r[3] }}</td>
-
                         <td>{{ r[4] }}</td>
-
                         <td>
                             {% if r[5] %}
                             {{ r[5]|join(', ') }}
                             {% endif %}
                         </td>
-
                         <td>{{ r[6] }}</td>
-
                         <td>{{ r[7] }}</td>
-
                         <td>{{ r[8] }}</td>
-
                         <td>{{ r[9] }}</td>
-
+                        <td>
+                            <a href="/chinalco_reporte/{{ r[0] }}" class="btn btn-primary">ver</a>
+                        </td>
+                        <td>
+                            {% if r[10] %}                            
+                            <input type="checkbox" disabled="" true="" checked="">
+                            {% else %}
+                            <form method="POST" action="/chinalco_reporte/cerrar/{{ r[0] }}"
+                                onsubmit="return confirm('Una vez cerrado no podrá reabrirse. ¿Continuar?');">
+                                <input type="checkbox" onchange="this.form.submit()">
+                            </form>
+                            {% endif %}
+                        </td>
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
 
             </table>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
     <script>
         const registros = {{ registros | tojson }};
         window.registros = registros;
@@ -157,6 +169,123 @@
         });
 
     </script>
+    <script>
+        window.data = {{ totales_mes | safe }};
+        var chartMes = echarts.init(
+            document.getElementById('graficoMes')
+        );
+        var optionMes = {
+
+            tooltip: {
+                trigger: 'axis'
+            },
+
+            xAxis: {
+                type: 'category',
+                data: {{ meses| safe }}
+            },
+
+        yAxis: {
+            type: 'value'
+        },
+
+        series: [{
+            type: 'bar',
+            data: {{ totales_mes| safe }},
+            itemStyle: {
+            color: '#1a3a5c'
+        }
+            }]
+        };
+
+        chartMes.setOption(optionMes);
+
+    </script>
+    <script>
+
+        const dias = {{ dias| safe }};
+        const valores = {{ totales_dia| safe }};
+        const hoy = "{{ hoy }}";
+
+        window.valores = valores;
+        window.dias = dias;
+
+        const datos = dias.map((dia, i) => {
+
+            return {
+
+                value: valores[i],
+
+                itemStyle: {
+                    color: dia === hoy
+                        ? '#dc3545'
+                        : '#1a3a5c'
+                }
+
+            };
+
+        });
+
+        var chartDia = echarts.init(
+            document.getElementById('graficoDia')
+        );
+
+        var optionDia = {
+
+            tooltip: {
+                trigger: 'axis'
+            },
+
+            xAxis: {
+                type: 'category',
+                data: dias,
+                axisLabel: {
+                    rotate: 45
+                }
+            },
+
+            yAxis: {
+                type: 'value'
+            },
+
+            series: [{
+                type: 'bar',
+                data: datos,
+
+                markLine: {
+                    silent: true,
+                    symbol: ['none', 'none'],
+                    lineStyle: {
+                        color: '#e67e22',
+                        width: 2,
+                        type: 'dashed'
+                    },
+                    label: {
+                        show: true,
+                        formatter: 'Hoy'
+                    },
+                    data: [
+                        { xAxis: hoy }
+                    ]
+                }
+            }],
+
+            dataZoom: [
+                {
+                    type: 'inside'
+                },
+                {
+                    type: 'slider',
+                    bottom: 15,
+                    height: 20
+                }
+            ]
+
+        };
+        chartDia.setOption(optionDia);
+
+    </script>
+
 </body>
 
 </html>

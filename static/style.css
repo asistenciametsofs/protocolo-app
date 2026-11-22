@@ -1,3 +1,579 @@
+/* =========================================
+   CARD DESPLEGABLE DE CHANCADORAS
+========================================= */
+
+.card-chancadoras {
+    position: relative;
+    overflow: visible;
+    margin: 0 auto 16px;
+    padding: 22px;
+    text-align: left;
+    border-top: 5px solid #1a3a5c;
+}
+
+
+/* Encabezado */
+
+.card-chancadoras-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 18px;
+}
+
+.card-chancadoras-header h2 {
+    margin: 0 0 4px;
+
+    color: #1a3a5c;
+    font-size: 18px;
+}
+
+.card-chancadoras-header p {
+    margin: 0;
+
+    color: #667380;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+
+/* Icono principal */
+
+.card-chancadoras-icono {
+    flex: 0 0 48px;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8f0fe;
+    border-radius: 11px;
+
+    font-size: 24px;
+}
+
+
+/* Contenedor desplegable */
+
+.card-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+
+/* Botón del menú */
+
+.card-chancadoras .navbar-dropdown-boton {
+    width: 100%;
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 11px 15px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: #1a3a5c;
+    color: white;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.card-chancadoras .navbar-dropdown-boton:hover {
+    background: #254f78;
+}
+
+.card-chancadoras .navbar-dropdown-boton:focus-visible {
+    outline: 3px solid rgba(26, 58, 92, 0.25);
+    outline-offset: 3px;
+}
+
+
+/* Flecha */
+
+.navbar-flecha {
+    font-size: 15px;
+
+    transition: transform 0.2s ease;
+}
+
+.card-dropdown.activo .navbar-flecha {
+    transform: rotate(180deg);
+}
+
+
+/* Menú dentro del card */
+
+.card-chancadoras .navbar-dropdown-menu {
+    position: absolute;
+
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+
+    z-index: 200;
+
+    width: 100%;
+
+    padding: 8px;
+
+    background: white;
+    border: 1px solid #dce3ea;
+    border-radius: 11px;
+
+    box-shadow:
+        0 12px 28px
+        rgba(0, 0, 0, 0.16);
+
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+}
+
+.card-dropdown.activo .navbar-dropdown-menu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+
+    pointer-events: auto;
+}
+
+
+/* Opciones */
+
+.card-chancadoras .navbar-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    padding: 11px;
+
+    color: #263442;
+    text-align: left;
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    transition:
+        background-color 0.16s ease,
+        color 0.16s ease;
+}
+
+.card-chancadoras .navbar-dropdown-menu a:hover,
+.card-chancadoras .navbar-dropdown-menu a:focus-visible {
+    background: #e8f0fe;
+    color: #1a3a5c;
+    outline: none;
+}
+
+.card-chancadoras .navbar-dropdown-menu a + a {
+    border-top: 1px solid #edf0f3;
+}
+
+
+/* Iconos de las opciones */
+
+.navbar-opcion-icono {
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f0f4ff;
+    border-radius: 8px;
+
+    font-size: 19px;
+}
+
+
+/* Texto */
+
+.navbar-opcion-texto {
+    min-width: 0;
+}
+
+.navbar-opcion-texto strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #1a3a5c;
+    font-size: 13px;
+}
+
+.navbar-opcion-texto small {
+    display: block;
+
+    color: #687582;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+
+/* Adaptación móvil */
+
+@media (max-width: 600px) {
+
+    .card-chancadoras {
+        max-width: none;
+        padding: 16px;
+    }
+
+    .card-chancadoras-header {
+        align-items: flex-start;
+    }
+
+    .card-chancadoras-icono {
+        flex-basis: 42px;
+
+        width: 42px;
+        height: 42px;
+
+        font-size: 21px;
+    }
+
+    .card-chancadoras-header h2 {
+        font-size: 16px;
+    }
+
+    .card-chancadoras .navbar-dropdown-menu {
+        position: static;
+
+        display: none;
+
+        margin-top: 8px;
+
+        transform: none;
+        box-shadow: none;
+    }
+
+    .card-dropdown.activo .navbar-dropdown-menu {
+        display: block;
+    }
+
+}
+
+
+
+
+
+
+/* =========================
+   CHANCADORA
+========================= */
+
+.evidencias-carga {
+    margin-top: 16px;
+    padding: 14px;
+    background: #f7f9fc;
+    border: 1px solid #dce3ea;
+    border-radius: 10px;
+}
+
+.input-evidencias {
+    display: block;
+    width: 100%;
+    margin-top: 7px;
+    padding: 10px;
+    border: 1px dashed #9aa8b7;
+    border-radius: 8px;
+    background: white;
+}
+
+.preview-evidencias {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(160px, 1fr)
+    );
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.preview-archivo {
+    position: relative;
+    min-width: 0;
+    padding: 8px;
+    background: white;
+    border: 1px solid #dce3ea;
+    border-radius: 9px;
+}
+
+.preview-archivo img,
+.preview-archivo video {
+    display: block;
+    width: 100%;
+    height: 130px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #eef1f4;
+}
+
+.preview-nombre {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #444;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.preview-tamano {
+    display: block;
+    margin-top: 3px;
+    font-size: 10px;
+    color: #777;
+}
+
+.preview-error {
+    color: #c62828;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.componente-card {
+
+    background:white;
+
+    border-radius:10px;
+
+    padding:15px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+
+}
+
+.componente-card h4 {
+
+    margin-bottom:10px;
+
+    color:#1a3a5c;
+
+}
+
+.componente-foto {
+
+    width:100%;
+
+    height:220px;
+
+    object-fit:contain;
+
+    background:#efefef;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    margin-bottom:10px;
+
+    border:2px solid #ddd;
+
+}
+
+/* =========================
+   FICHA DE REPORTE
+========================= */
+
+.ficha-reporte {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.ficha-header {
+    background: linear-gradient(135deg, #1a3a5c, #29598a);
+    color: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
+}
+
+.ficha-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.ficha-header p {
+    margin-top: 6px;
+    opacity: .9;
+}
+
+.ficha-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ficha-kpi {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.ficha-kpi-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.ficha-kpi-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1a3a5c;
+}
+
+.ficha-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.ficha-campo {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.ficha-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.ficha-valor {
+    font-size: 15px;
+    color: #222;
+}
+
+.ficha-bloque {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.ficha-bloque h3 {
+    color: #1a3a5c;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #e8f0fe;
+    padding-bottom: 8px;
+}
+
+.ficha-texto {
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-line;
+}
+
+.personal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+}
+
+.persona-card {
+    background: #f7f9fc;
+    border-left: 4px solid #1a3a5c;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.estado-badge {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.estado-finalizado {
+    background: #d4edda;
+    color: #155724;
+}
+
+.estado-proceso {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.condicion-ok {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.condicion-no {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.ficha-fotos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.ficha-fotos img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+    transition: .2s;
+}
+
+.ficha-fotos img:hover {
+    transform: scale(1.03);
+}
+
+@media(max-width:800px) {
+
+    .ficha-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ficha-header h1 {
+        font-size: 22px;
+    }
+
+}
 
 .proyeccion-calendario {
     margin-top: 30px;
@@ -14,7 +590,7 @@
     margin: 20px 0;
 }
 
-.calendario-controles > div {
+.calendario-controles>div {
     flex: 1 1 200px;
 }
 
@@ -47,7 +623,7 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #f0f4ff;
-    
+
 }
 
 .mes-calendario h3 {
@@ -356,6 +932,16 @@ body {
     margin-bottom: 12px;
 }
 
+.btn-white {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    color: #eee;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
 .seccion {
     background: white;
     border-radius: 12px;
@@ -549,9 +1135,19 @@ textarea:focus {
     background: #f0fff4;
 }
 
+.estado-medio {
+    border-color: #ffc107;
+    background: #fff8e1;
+}
+
 .estado-malo {
     border-color: #dc3545;
     background: #fff5f5;
+}
+
+.estado-deplorable {
+    border-color: #ff0000;
+    background: #ff000046;
 }
 
 .btn-foto {
